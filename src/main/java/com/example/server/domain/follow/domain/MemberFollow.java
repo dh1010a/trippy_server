@@ -13,7 +13,7 @@ public class MemberFollow {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "member_id")
+    @Column(name = "memberFollow_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
