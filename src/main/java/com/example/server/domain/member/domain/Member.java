@@ -9,6 +9,9 @@ package com.example.server.domain.member.domain;
 //import com.example.server.domain.post.domain.Like;
 //import com.example.server.domain.post.domain.Post;
 //import com.example.server.domain.ticket.domain.MemberTicket;
+import com.example.server.domain.member.model.ActiveState;
+import com.example.server.domain.member.model.Gender;
+import com.example.server.domain.member.model.Role;
 import com.example.server.global.common.BaseTimeEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -31,24 +34,23 @@ public class Member extends BaseTimeEntity {
 
     private String name;
 
+    private String password;
 
-//    private String password;
-//
-//    @Column(nullable = false, unique = true)
-//    private String nickName;
-//
-//    @Column(nullable = false, unique = true)
-//    private String email;
-//
-//    private String phone;
-//
-//    private String profileImageUrl;
-//
-//    private LocalDateTime birthDate;
-//
-//    @Column(nullable = false)
-//    @Enumerated(EnumType.STRING)
-//    private Gender gender;
+    @Column(nullable = false, unique = true)
+    private String nickName;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    private String phone;
+
+    private String profileImageUrl;
+
+    private LocalDateTime birthDate;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 //
 //    @OneToMany(mappedBy = "member")
 //    @JsonIgnore
@@ -81,12 +83,16 @@ public class Member extends BaseTimeEntity {
 //    @OneToOne
 //    @JoinColumn(name = "blog_id")
 //    private Blog blog;
-//
-//    @Enumerated(EnumType.STRING)
-//    private Role role;
-//
-//    @Enumerated(EnumType.STRING)
-//    private ActiveState activeState;
-//
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    @Enumerated(EnumType.STRING)
+    private ActiveState activeState;
+
+
+
+
+
 
 }

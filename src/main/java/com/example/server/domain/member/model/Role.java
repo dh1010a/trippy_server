@@ -23,4 +23,8 @@ public enum Role {
 	public String getKey() {
 		return key;
 	}
+
+	public Role fromName(String type) {
+		return Role.valueOf("ROLE_" + type.toUpperCase());
+	}
 }

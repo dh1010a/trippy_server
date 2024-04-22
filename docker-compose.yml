@@ -1,0 +1,43 @@
+version: "3"
+services:
+  database:
+    image: mysql:latest
+    container_name: trippy-mysql
+    restart: unless-stopped
+    ports:
+      - "3305:3306"
+    environment:
+      MYSQL_DATABASE: trippydb
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_ROOT_PASSWORD: trippyzzang1234
+      TZ: 'Asia/Seoul'
+    command: # 명령어 실행
+      - mysqld
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    networks:
+      - trippy-network
+    volumes:
+      - trippy-mysql-vol:/var/lib/postgresql/data
+
+  application:
+    container_name: spring-docker-compose
+    restart: on-failure
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3305/trippydb?rewriteBatchedInserts=true
+      SPRING_DATASOURCE_USERNAME: 'trippy'
+      SPRING_DATASOURCE_PASSWORD: 'trippyzzang1234'
+    depends_on:
+      - database
+    networks:
+      - trippy-network
+
+networks:
+  trippy-network:
+volumes:
+  trippy-mysql-vol:
