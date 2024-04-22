@@ -28,7 +28,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver  # MySQL 드라이버 클래스
     url: jdbc:mysql://localhost:3305/trippydb?rewriteBatchedInserts=true
-    username: trippy  # MySQL 접속 계정
+    username: root  # MySQL 접속 계정
     password: trippyzzang1234  # MySQL 접속 비밀번호
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect  # Hibernate MySQL Dialect 설정
