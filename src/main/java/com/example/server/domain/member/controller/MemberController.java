@@ -2,7 +2,11 @@ package com.example.server.domain.member.controller;
 
 
 import com.example.server.domain.member.domain.Member;
+import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.domain.member.service.MemberService;
+import com.example.server.global.apiPayload.code.status.ErrorStatus;
+import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
+import com.example.server.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +24,7 @@ import java.util.Optional;
 public class MemberController {
 
     private final MemberService memberService;
+    private final MemberRepository memberRepository;
 
     @GetMapping("{id}")
     public ResponseEntity getUser(@PathVariable Long id) {

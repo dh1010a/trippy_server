@@ -9,10 +9,12 @@ package com.example.server.domain.member.domain;
 //import com.example.server.domain.post.domain.Like;
 //import com.example.server.domain.post.domain.Post;
 //import com.example.server.domain.ticket.domain.MemberTicket;
+import com.example.server.domain.follow.domain.MemberFollow;
 import com.example.server.domain.member.model.ActiveState;
 import com.example.server.domain.member.model.Gender;
 import com.example.server.domain.member.model.Role;
 import com.example.server.global.common.BaseTimeEntity;
+import com.example.server.global.security.model.ProviderType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,14 +31,16 @@ public class Member extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "member_id")
-    private Long id;
+    @Column(name = "member_idx")
+    private Long idx;
+
+    private String memberId;
 
     private String name;
 
     private String password;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String nickName;
 
     @Column(nullable = false, unique = true)
@@ -48,9 +52,11 @@ public class Member extends BaseTimeEntity {
 
     private LocalDateTime birthDate;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Gender gender;
+
+    @Column(length = 1000)
+    private String refreshToken;
 //
 //    @OneToMany(mappedBy = "member")
 //    @JsonIgnore
@@ -68,9 +74,9 @@ public class Member extends BaseTimeEntity {
 //    @JsonIgnore
 //    private List<MemberBadge> memberBadges;
 //
-//    @OneToMany(mappedBy = "member")
-//    @JsonIgnore
-//    private List<MemberFollow> memberFollows;
+    @OneToMany(mappedBy = "member")
+    @JsonIgnore
+    private List<MemberFollow> memberFollows;
 //
 //    @OneToMany(mappedBy = "member")
 //    @JsonIgnore
@@ -89,6 +95,25 @@ public class Member extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     private ActiveState activeState;
+
+    @Enumerated(EnumType.STRING)
+    private ProviderType providerType;
+
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public void destroyRefreshToken() {
+        this.refreshToken = null;
+    }
+
+    public void setProviderType(ProviderType type) {
+        this.providerType = type;
+    }
+
+    public void updateProfileImgUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
 
 
 
