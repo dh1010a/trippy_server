@@ -2,6 +2,8 @@ package com.example.server.domain.member.controller;
 
 
 import com.example.server.domain.member.domain.Member;
+import com.example.server.domain.member.dto.MemberRequestDto;
+import com.example.server.domain.member.dto.MemberRequestDto.CreateMemberRequestDto;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.domain.member.service.MemberService;
 import com.example.server.global.apiPayload.ApiResponse;
@@ -11,10 +13,7 @@ import com.example.server.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
@@ -26,6 +25,11 @@ public class MemberController {
 
     private final MemberService memberService;
     private final MemberRepository memberRepository;
+
+    @PostMapping("/signup")
+    public ApiResponse<?> signUp(@RequestBody CreateMemberRequestDto createMemberRequestDto) {
+        return ApiResponse.onSuccess(memberService.signUp(createMemberRequestDto));
+    }
 
     @GetMapping("/myInfo")
     public String getMyInfo() {
