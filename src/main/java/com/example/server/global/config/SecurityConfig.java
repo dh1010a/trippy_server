@@ -1,13 +1,16 @@
 package com.example.server.global.config;
 
 import com.example.server.domain.member.repository.MemberRepository;
-import com.example.server.global.security.application.CustomOAuth2UserService;
-import com.example.server.global.security.application.CustomUserDetailsService;
-import com.example.server.global.security.application.JwtService;
-import com.example.server.global.security.filter.JsonUsernamePasswordAuthenticationFilter;
-import com.example.server.global.security.filter.JwtAuthenticationFilter;
-import com.example.server.global.security.handler.*;
-import com.example.server.global.security.repository.HttpCookieOAuthAuthorizationRequestRepository;
+import com.example.server.global.auth.oauth2.handler.OAuth2AuthenticationFailureHandler;
+import com.example.server.global.auth.oauth2.handler.OAuth2AuthenticationSuccessHandler;
+import com.example.server.global.auth.oauth2.handler.RestAuthenticationEntryPoint;
+import com.example.server.global.auth.oauth2.service.CustomOAuth2UserService;
+import com.example.server.global.auth.security.service.CustomUserDetailsService;
+import com.example.server.global.auth.security.service.JwtService;
+import com.example.server.global.auth.security.filter.JsonUsernamePasswordAuthenticationFilter;
+import com.example.server.global.auth.security.filter.JwtAuthenticationFilter;
+import com.example.server.global.auth.security.handler.*;
+import com.example.server.global.auth.security.repository.HttpCookieOAuthAuthorizationRequestRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

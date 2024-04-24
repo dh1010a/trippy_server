@@ -14,4 +14,13 @@ public class MemberResponseDto {
         private Boolean isSuccess;
     }
 
+    @Data
+    @Builder
+    public static class IsNewMemberResponseDto {
+        private Long idx;
+        private String memberId;
+        private String email;
+        private boolean isNewMember;
+    }
+
 }

@@ -14,13 +14,11 @@ import com.example.server.domain.member.model.ActiveState;
 import com.example.server.domain.member.model.Gender;
 import com.example.server.domain.member.model.Role;
 import com.example.server.global.common.BaseTimeEntity;
-import com.example.server.global.security.model.ProviderType;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.example.server.global.auth.security.model.ProviderType;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Getter

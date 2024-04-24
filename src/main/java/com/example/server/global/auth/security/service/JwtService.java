@@ -1,4 +1,4 @@
-package com.example.server.global.auth.security.application;
+package com.example.server.global.auth.security.service;
 
 import com.example.server.global.auth.security.domain.JwtToken;
 import jakarta.servlet.http.HttpServletRequest;

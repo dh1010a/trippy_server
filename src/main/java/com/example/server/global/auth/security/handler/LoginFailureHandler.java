@@ -1,4 +1,4 @@
-package com.example.server.global.security.handler;
+package com.example.server.global.auth.security.handler;
 
 import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;

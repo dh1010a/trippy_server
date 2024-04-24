@@ -2,23 +2,20 @@ package com.example.server.domain.member.service;
 
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.dto.MemberDtoConverter;
-import com.example.server.domain.member.dto.MemberRequestDto;
 import com.example.server.domain.member.dto.MemberRequestDto.CreateMemberRequestDto;
 import com.example.server.domain.member.dto.MemberResponseDto;
+import com.example.server.domain.member.dto.MemberResponseDto.IsNewMemberResponseDto;
 import com.example.server.domain.member.dto.MemberResponseDto.MemberTaskResultResponseDto;
 import com.example.server.domain.member.model.ActiveState;
 import com.example.server.domain.member.model.Gender;
 import com.example.server.domain.member.model.Role;
 import com.example.server.domain.member.repository.MemberRepository;
-import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
-import com.example.server.global.security.model.ProviderType;
+import com.example.server.global.auth.security.model.ProviderType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -48,6 +45,19 @@ public class MemberService {
         memberRepository.save(member);
         return MemberDtoConverter.convertToMemberTaskDto(member);
     }
+
+    public IsNewMemberResponseDto isNewMember(String memberId) {
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        boolean isNewMember = member.getRole() == Role.ROLE_GUEST;
+
+        return IsNewMemberResponseDto.builder()
+                .idx(member.getIdx())
+                .memberId(member.getMemberId())
+                .email(member.getEmail())
+                .isNewMember(isNewMember)
+                .build();
+    }
+
     public boolean isExistByEmail(String email) {
         return memberRepository.existsByEmail(email);
     }
@@ -59,5 +69,4 @@ public class MemberService {
     public boolean isExistByMemberId(String memberId) {
         return memberRepository.existsByMemberId(memberId);
     }
-
 }

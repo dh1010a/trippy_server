@@ -1,4 +1,4 @@
-package com.example.server.global.auth.security.handler;
+package com.example.server.global.auth.oauth2.handler;
 
 import com.example.server.global.auth.security.repository.HttpCookieOAuthAuthorizationRequestRepository;
 import com.example.server.global.util.CookieUtil;

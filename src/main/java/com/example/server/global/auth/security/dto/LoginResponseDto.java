@@ -1,4 +1,4 @@
-package com.example.server.global.dto;
+package com.example.server.global.auth.security.dto;
 
 import lombok.Builder;
 import lombok.Data;

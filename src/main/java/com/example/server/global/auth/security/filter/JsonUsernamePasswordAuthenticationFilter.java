@@ -1,4 +1,4 @@
-package com.example.server.global.security.filter;
+package com.example.server.global.auth.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;

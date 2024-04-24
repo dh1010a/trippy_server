@@ -1,4 +1,4 @@
-package com.example.server.global.security.domain;
+package com.example.server.global.auth.security.domain;
 
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.repository.MemberRepository;

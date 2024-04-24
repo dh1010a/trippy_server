@@ -1,13 +1,10 @@
-package com.example.server.global.security.repository;
+package com.example.server.global.auth.security.repository;
 
 import com.example.server.global.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
-import org.springframework.stereotype.Repository;
-import org.springframework.util.StringUtils;
 
 
 public class HttpCookieOAuthAuthorizationRequestRepository implements AuthorizationRequestRepository<OAuth2AuthorizationRequest> {

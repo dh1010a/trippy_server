@@ -1,6 +1,7 @@
 package com.example.server.domain.member.dto;
 
 import com.example.server.domain.member.domain.Member;
+import com.example.server.domain.member.dto.MemberResponseDto.IsNewMemberResponseDto;
 import com.example.server.domain.member.dto.MemberResponseDto.MemberTaskResultResponseDto;
 
 public class MemberDtoConverter {
@@ -14,4 +15,5 @@ public class MemberDtoConverter {
                 .build();
 
     }
+
 }

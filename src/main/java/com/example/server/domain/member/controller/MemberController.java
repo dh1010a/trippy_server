@@ -39,5 +39,11 @@ public class MemberController {
         return member.getMemberId();
     }
 
+    @GetMapping("/isNewMember")
+    public ApiResponse<?> isNewMember() {
+        String memberId = SecurityUtil.getLoginMemberId().orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        return ApiResponse.onSuccess(memberService.isNewMember(memberId));
+    }
+
 
 }

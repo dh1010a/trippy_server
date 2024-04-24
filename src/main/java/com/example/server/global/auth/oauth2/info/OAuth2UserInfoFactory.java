@@ -1,8 +1,8 @@
-package com.example.server.global.auth.security.info;
+package com.example.server.global.auth.oauth2.info;
 
-import com.example.server.global.auth.security.info.impl.GoogleOAuth2UserInfo;
-import com.example.server.global.auth.security.info.impl.KakaoOAuth2UserInfo;
-import com.example.server.global.auth.security.info.impl.NaverOAuth2UserInfo;
+import com.example.server.global.auth.oauth2.info.impl.GoogleOAuth2UserInfo;
+import com.example.server.global.auth.oauth2.info.impl.KakaoOAuth2UserInfo;
+import com.example.server.global.auth.oauth2.info.impl.NaverOAuth2UserInfo;
 import com.example.server.global.auth.security.model.ProviderType;
 
 import java.util.Map;

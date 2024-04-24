@@ -1,6 +1,4 @@
-package com.example.server.global.security.model;
-
-import lombok.Getter;
+package com.example.server.global.auth.security.model;
 
 public enum ProviderType {
     GOOGLE,

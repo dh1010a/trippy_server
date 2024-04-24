@@ -1,4 +1,4 @@
-package com.example.server.global.security.domain;
+package com.example.server.global.auth.security.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

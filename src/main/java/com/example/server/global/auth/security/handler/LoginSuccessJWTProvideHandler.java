@@ -1,10 +1,10 @@
-package com.example.server.global.security.handler;
+package com.example.server.global.auth.security.handler;
 
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.global.apiPayload.ApiResponse;
-import com.example.server.global.dto.LoginResponseDto.LoginDto;
-import com.example.server.global.security.application.JwtService;
-import com.example.server.global.security.domain.JwtToken;
+import com.example.server.global.auth.security.dto.LoginResponseDto.LoginDto;
+import com.example.server.global.auth.security.service.JwtService;
+import com.example.server.global.auth.security.domain.JwtToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

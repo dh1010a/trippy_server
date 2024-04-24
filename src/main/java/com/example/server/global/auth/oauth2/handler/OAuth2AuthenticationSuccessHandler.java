@@ -1,11 +1,11 @@
-package com.example.server.global.auth.security.handler;
+package com.example.server.global.auth.oauth2.handler;
 
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import com.example.server.global.config.AppProperties;
-import com.example.server.global.auth.security.application.JwtService;
+import com.example.server.global.auth.security.service.JwtService;
 import com.example.server.global.auth.security.domain.JwtToken;
 import com.example.server.global.auth.security.model.ProviderType;
 import com.example.server.global.auth.security.repository.HttpCookieOAuthAuthorizationRequestRepository;

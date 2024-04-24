@@ -1,11 +1,11 @@
-package com.example.server.global.security.filter;
+package com.example.server.global.auth.security.filter;
 
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
-import com.example.server.global.security.application.JwtService;
-import com.example.server.global.security.domain.CustomUserDetails;
+import com.example.server.global.auth.security.service.JwtService;
+import com.example.server.global.auth.security.domain.CustomUserDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

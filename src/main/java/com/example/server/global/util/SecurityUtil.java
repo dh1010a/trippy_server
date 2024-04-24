@@ -1,6 +1,6 @@
 package com.example.server.global.util;
 
-import com.example.server.global.security.domain.CustomUserDetails;
+import com.example.server.global.auth.security.domain.CustomUserDetails;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
