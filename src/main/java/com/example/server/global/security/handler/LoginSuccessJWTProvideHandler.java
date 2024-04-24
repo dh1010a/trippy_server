@@ -1,23 +1,12 @@
 package com.example.server.global.security.handler;
 
-import com.example.server.domain.member.domain.Member;
-import com.example.server.domain.member.model.Role;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.global.apiPayload.ApiResponse;
-import com.example.server.global.apiPayload.code.status.ErrorStatus;
-import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
-import com.example.server.global.config.AppProperties;
 import com.example.server.global.dto.LoginResponseDto.LoginDto;
 import com.example.server.global.security.application.JwtService;
 import com.example.server.global.security.domain.JwtToken;
-import com.example.server.global.security.info.OAuth2UserInfo;
-import com.example.server.global.security.info.OAuth2UserInfoFactory;
-import com.example.server.global.security.model.ProviderType;
-import com.example.server.global.security.repository.HttpCookieOAuthAuthorizationRequestRepository;
-import com.example.server.global.util.CookieUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

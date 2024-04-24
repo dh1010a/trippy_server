@@ -66,7 +66,7 @@ public class CustomUserDetails implements UserDetails, OAuth2User, OidcUser {
 
 	@Override
 	public String getUsername() {
-		return this.email;
+		return this.id;
 	}
 
 	public String getMemberId() {

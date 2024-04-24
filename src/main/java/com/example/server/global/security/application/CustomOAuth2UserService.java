@@ -1,10 +1,9 @@
 package com.example.server.global.security.application;
 
 import com.example.server.domain.member.domain.Member;
+import com.example.server.domain.member.model.ActiveState;
 import com.example.server.domain.member.model.Role;
 import com.example.server.domain.member.repository.MemberRepository;
-import com.example.server.global.apiPayload.code.status.ErrorStatus;
-import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import com.example.server.global.security.domain.CustomUserDetails;
 import com.example.server.global.security.info.OAuth2UserInfo;
 import com.example.server.global.security.info.OAuth2UserInfoFactory;
@@ -25,7 +24,6 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 @Slf4j
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
@@ -73,13 +71,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private Member createMember(OAuth2UserInfo userInfo, ProviderType providerType) {
         LocalDateTime now = LocalDateTime.now();
         Member member = Member.builder()
-                .memberId(userInfo.getId())
+                .memberId(userInfo.getId() + "")
                 .name(userInfo.getName())
                 .password(passwordEncoder.encode(SOCIAL_PASSWORD))
                 .email(userInfo.getEmail())
                 .profileImageUrl(userInfo.getImageUrl())
-                .role(Role.ROLE_GUEST)
+                .role(Role.ROLE_ADMIN)
                 .providerType(providerType)
+                .activeState(ActiveState.ACTIVE)
                 .build();
         memberRepository.saveAndFlush(member);
         log.info("member = " + member.getMemberId());

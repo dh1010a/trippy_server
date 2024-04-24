@@ -1,7 +1,6 @@
 package com.example.server.global.security.handler;
 
 import com.example.server.domain.member.domain.Member;
-import com.example.server.domain.member.model.Role;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
@@ -11,7 +10,6 @@ import com.example.server.global.security.domain.JwtToken;
 import com.example.server.global.security.model.ProviderType;
 import com.example.server.global.security.repository.HttpCookieOAuthAuthorizationRequestRepository;
 import com.example.server.global.util.CookieUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -42,8 +42,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final JwtService jwtService;
 
     private final MemberRepository memberRepository;
-
-    private ObjectMapper objectMapper = new ObjectMapper();
 
     private final HttpCookieOAuthAuthorizationRequestRepository authorizationRequestRepository;
 
@@ -79,7 +77,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String memberId = extractMemberId(authentication);
         log.info("memberID = " + memberId);
 
-        Member member = memberRepository.findByEmail(extractMemberId(authentication))
+        Member member = memberRepository.findByMemberId(extractMemberId(authentication))
                 .orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
 
         JwtToken jwtToken = jwtService.createJwtToken(authentication);
@@ -99,6 +97,10 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         log.info( "로그인에 성공합니다. memberId: {}" , memberId);
         log.info( "AccessToken 을 발급합니다. AccessToken: {}" ,jwtToken.getAccessToken());
         log.info( "RefreshToken 을 발급합니다. RefreshToken: {}" ,jwtToken.getRefreshToken());
+
+        SecurityContext context = SecurityContextHolder.createEmptyContext();//5
+        context.setAuthentication(authentication);
+        SecurityContextHolder.setContext(context);
 
         return UriComponentsBuilder.fromUriString(targetUrl)
                 .queryParam("accessToken", jwtToken.getAccessToken())

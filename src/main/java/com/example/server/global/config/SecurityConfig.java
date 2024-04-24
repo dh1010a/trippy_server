@@ -40,7 +40,6 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final ObjectMapper objectMapper;
-    private final CustomOAuth2UserService oAuth2UserService;
     private final CustomUserDetailsService userDetailsService;
     private final JwtService jwtService;
     private final MemberRepository memberRepository;
@@ -68,14 +67,13 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers( "/api/member/signup", "/", "/api/member/login", "/api/member/isDuplicated", "/api/email/send",
-                                "/auth/**", "/oauth2/**").permitAll()
+                        .requestMatchers( "/api/member/signup", "/", "/api/member/login", "/api/member/isDuplicated", "/api/email/send").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(httpSecurityExceptionHandlingConfigurer -> httpSecurityExceptionHandlingConfigurer
-//                        .authenticationEntryPoint(new RestAuthenticationEntryPoint())
+                        .authenticationEntryPoint(new RestAuthenticationEntryPoint())
                         .accessDeniedHandler(tokenAccessDeniedHandler))
                 .oauth2Login(oauth2Login -> oauth2Login
                         .authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint
@@ -84,7 +82,7 @@ public class SecurityConfig {
                         .redirectionEndpoint(redirectionEndpoint -> redirectionEndpoint
                                 .baseUri("/*/oauth2/code/*"))
                         .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint
-                                .userService(oAuth2UserService))
+                                .userService(customOAuth2UserService()))
                         .successHandler(oAuth2AuthenticationSuccessHandler())
                         .failureHandler(oAuth2AuthenticationFailureHandler()))
         ;
@@ -153,6 +151,11 @@ public class SecurityConfig {
     @Bean
     public HttpCookieOAuthAuthorizationRequestRepository httpCookieOAuthAuthorizationRequestRepository() {
         return new HttpCookieOAuthAuthorizationRequestRepository();
+    }
+
+    @Bean
+    public CustomOAuth2UserService customOAuth2UserService() {
+        return new CustomOAuth2UserService(memberRepository, passwordEncoder());
     }
 
     @Bean

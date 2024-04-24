@@ -9,7 +9,7 @@ package com.example.server.domain.member.domain;
 //import com.example.server.domain.post.domain.Like;
 //import com.example.server.domain.post.domain.Post;
 //import com.example.server.domain.ticket.domain.MemberTicket;
-import com.example.server.domain.follow.domain.MemberFollow;
+//import com.example.server.domain.follow.domain.MemberFollow;
 import com.example.server.domain.member.model.ActiveState;
 import com.example.server.domain.member.model.Gender;
 import com.example.server.domain.member.model.Role;
@@ -40,10 +40,9 @@ public class Member extends BaseTimeEntity {
 
     private String password;
 
-    @Column(unique = true)
     private String nickName;
 
-    @Column(nullable = false, unique = true)
+//    @Column(nullable = false, unique = true)
     private String email;
 
     private String phone;
@@ -73,10 +72,10 @@ public class Member extends BaseTimeEntity {
 //    @OneToMany(mappedBy = "member")
 //    @JsonIgnore
 //    private List<MemberBadge> memberBadges;
-//
-    @OneToMany(mappedBy = "member")
-    @JsonIgnore
-    private List<MemberFollow> memberFollows;
+////
+//    @OneToMany(mappedBy = "member")
+//    @JsonIgnore
+//    private List<MemberFollow> memberFollows;
 //
 //    @OneToMany(mappedBy = "member")
 //    @JsonIgnore
