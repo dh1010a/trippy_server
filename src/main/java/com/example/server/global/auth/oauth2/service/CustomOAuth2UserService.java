@@ -1,14 +1,13 @@
-package com.example.server.global.security.application;
+package com.example.server.global.auth.security.application;
 
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.model.ActiveState;
 import com.example.server.domain.member.model.Role;
 import com.example.server.domain.member.repository.MemberRepository;
-import com.example.server.global.security.domain.CustomUserDetails;
-import com.example.server.global.security.info.OAuth2UserInfo;
-import com.example.server.global.security.info.OAuth2UserInfoFactory;
-import com.example.server.global.security.model.ProviderType;
-import jakarta.transaction.Transactional;
+import com.example.server.global.auth.security.domain.CustomUserDetails;
+import com.example.server.global.auth.security.info.OAuth2UserInfo;
+import com.example.server.global.auth.security.info.OAuth2UserInfoFactory;
+import com.example.server.global.auth.security.model.ProviderType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;

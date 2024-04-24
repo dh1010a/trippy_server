@@ -1,6 +1,6 @@
-package com.example.server.global.security.info.impl;
+package com.example.server.global.auth.security.info.impl;
 
-import com.example.server.global.security.info.OAuth2UserInfo;
+import com.example.server.global.auth.security.info.OAuth2UserInfo;
 
 import java.util.Map;
 

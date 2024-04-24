@@ -1,4 +1,4 @@
-package com.example.server.global.security.info;
+package com.example.server.global.auth.security.info;
 
 import java.util.Map;
 

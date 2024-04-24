@@ -1,14 +1,14 @@
-package com.example.server.global.security.handler;
+package com.example.server.global.auth.security.handler;
 
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import com.example.server.global.config.AppProperties;
-import com.example.server.global.security.application.JwtService;
-import com.example.server.global.security.domain.JwtToken;
-import com.example.server.global.security.model.ProviderType;
-import com.example.server.global.security.repository.HttpCookieOAuthAuthorizationRequestRepository;
+import com.example.server.global.auth.security.application.JwtService;
+import com.example.server.global.auth.security.domain.JwtToken;
+import com.example.server.global.auth.security.model.ProviderType;
+import com.example.server.global.auth.security.repository.HttpCookieOAuthAuthorizationRequestRepository;
 import com.example.server.global.util.CookieUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -31,8 +31,8 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Optional;
 
-import static com.example.server.global.security.repository.HttpCookieOAuthAuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
-import static com.example.server.global.security.repository.HttpCookieOAuthAuthorizationRequestRepository.REFRESH_TOKEN;
+import static com.example.server.global.auth.security.repository.HttpCookieOAuthAuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
+import static com.example.server.global.auth.security.repository.HttpCookieOAuthAuthorizationRequestRepository.REFRESH_TOKEN;
 
 @Slf4j
 @RequiredArgsConstructor

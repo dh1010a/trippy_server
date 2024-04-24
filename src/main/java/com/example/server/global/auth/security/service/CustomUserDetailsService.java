@@ -1,8 +1,8 @@
-package com.example.server.global.security.application;
+package com.example.server.global.auth.security.application;
 
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.repository.MemberRepository;
-import com.example.server.global.security.domain.CustomUserDetails;
+import com.example.server.global.auth.security.domain.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

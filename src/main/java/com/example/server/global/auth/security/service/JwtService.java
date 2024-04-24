@@ -1,6 +1,6 @@
-package com.example.server.global.security.application;
+package com.example.server.global.auth.security.application;
 
-import com.example.server.global.security.domain.JwtToken;
+import com.example.server.global.auth.security.domain.JwtToken;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;

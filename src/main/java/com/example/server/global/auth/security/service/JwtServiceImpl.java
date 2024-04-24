@@ -1,12 +1,12 @@
-package com.example.server.global.security.application;
+package com.example.server.global.auth.security.application;
 
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
-import com.example.server.global.security.domain.CustomUserDetails;
-import com.example.server.global.security.domain.JwtToken;
-import com.example.server.global.security.domain.JwtTokenProvider;
+import com.example.server.global.auth.security.domain.JwtToken;
+import com.example.server.global.auth.security.domain.JwtTokenProvider;
+import com.example.server.global.auth.security.domain.CustomUserDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
