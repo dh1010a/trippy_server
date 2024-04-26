@@ -52,6 +52,7 @@ public class MemberService {
 
         return IsNewMemberResponseDto.builder()
                 .idx(member.getIdx())
+                .provider(member.getProviderType().toString())
                 .memberId(member.getMemberId())
                 .email(member.getEmail())
                 .isNewMember(isNewMember)

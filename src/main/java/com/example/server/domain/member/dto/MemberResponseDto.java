@@ -18,6 +18,7 @@ public class MemberResponseDto {
     @Builder
     public static class IsNewMemberResponseDto {
         private Long idx;
+        private String provider;
         private String memberId;
         private String email;
         private boolean isNewMember;

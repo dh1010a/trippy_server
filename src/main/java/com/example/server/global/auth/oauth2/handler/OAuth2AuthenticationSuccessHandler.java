@@ -1,6 +1,7 @@
 package com.example.server.global.auth.oauth2.handler;
 
 import com.example.server.domain.member.domain.Member;
+import com.example.server.domain.member.model.Role;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
@@ -8,7 +9,7 @@ import com.example.server.global.config.AppProperties;
 import com.example.server.global.auth.security.service.JwtService;
 import com.example.server.global.auth.security.domain.JwtToken;
 import com.example.server.global.auth.security.model.ProviderType;
-import com.example.server.global.auth.security.repository.HttpCookieOAuthAuthorizationRequestRepository;
+import com.example.server.global.auth.oauth2.repository.HttpCookieOAuthAuthorizationRequestRepository;
 import com.example.server.global.util.CookieUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -17,7 +18,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,11 +28,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Collection;
 import java.util.Optional;
 
-import static com.example.server.global.auth.security.repository.HttpCookieOAuthAuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
-import static com.example.server.global.auth.security.repository.HttpCookieOAuthAuthorizationRequestRepository.REFRESH_TOKEN;
+import static com.example.server.global.auth.oauth2.repository.HttpCookieOAuthAuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
+import static com.example.server.global.auth.oauth2.repository.HttpCookieOAuthAuthorizationRequestRepository.REFRESH_TOKEN;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -75,16 +74,19 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         OAuth2AuthenticationToken authToken = (OAuth2AuthenticationToken) authentication;
         ProviderType providerType = ProviderType.valueOf(authToken.getAuthorizedClientRegistrationId().toUpperCase());
         String memberId = extractMemberId(authentication);
-        log.info("memberID = " + memberId);
+        log.info("Success To Authorize. memberID : " + memberId);
 
         Member member = memberRepository.findByMemberId(extractMemberId(authentication))
                 .orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
 
+        // 기존에 가입하지 않은 신규 회원
+        if (member.getRole() == Role.ROLE_GUEST) {
+
+
+        }
+
         JwtToken jwtToken = jwtService.createJwtToken(authentication);
 
-
-
-        log.info("memberEmail = " + member.getEmail());
         member.updateRefreshToken(jwtToken.getRefreshToken());
         member.setProviderType(providerType);
 
@@ -126,19 +128,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     protected void clearAuthenticationAttributes(HttpServletRequest request, HttpServletResponse response) {
         super.clearAuthenticationAttributes(request);
         authorizationRequestRepository.removeAuthorizationRequestCookies(request, response);
-    }
-
-    private boolean hasAuthority(Collection<? extends GrantedAuthority> authorities, String authority) {
-        if (authorities == null) {
-            return false;
-        }
-
-        for (GrantedAuthority grantedAuthority : authorities) {
-            if (authority.equals(grantedAuthority.getAuthority())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private String extractMemberId(Authentication authentication) {

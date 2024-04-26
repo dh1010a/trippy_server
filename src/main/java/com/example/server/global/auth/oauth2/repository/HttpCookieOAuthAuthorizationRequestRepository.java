@@ -1,12 +1,13 @@
-package com.example.server.global.auth.security.repository;
+package com.example.server.global.auth.oauth2.repository;
 
 import com.example.server.global.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 
-
+@Slf4j
 public class HttpCookieOAuthAuthorizationRequestRepository implements AuthorizationRequestRepository<OAuth2AuthorizationRequest> {
 
     public final static String OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME = "oauth2_auth_request";
@@ -31,7 +32,8 @@ public class HttpCookieOAuthAuthorizationRequestRepository implements Authorizat
         }
 
         CookieUtil.addCookie(response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME, CookieUtil.serialize(authorizationRequest), cookieExpireSeconds);
-        String redirectUriAfterLogin = request.getParameter(REDIRECT_URI_PARAM_COOKIE_NAME);
+        String redirectUriAfterLogin = request.getParameter("auth");
+        log.info("token = " + redirectUriAfterLogin);
         if (redirectUriAfterLogin != null && !redirectUriAfterLogin.isEmpty()) {
             CookieUtil.addCookie(response, REDIRECT_URI_PARAM_COOKIE_NAME, redirectUriAfterLogin, cookieExpireSeconds);
         }

@@ -30,10 +30,10 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenProvider {
 
-	@Value("${jwt.access.expiration_minute}")
-	private long ACCESS_TOKEN_EXPIRE_MINUTE ;
-	@Value("${jwt.refresh.expiration_hour}")
-	private long REFRESH_TOKEN_EXPIRE_MINUTE;
+	@Value("${jwt.access.expiration_hour}")
+	private long ACCESS_TOKEN_EXPIRE_HOUR;
+	@Value("${jwt.refresh.expiration_date}")
+	private long REFRESH_TOKEN_EXPIRE_DATE;
 	@Value("${jwt.secret}")
 	private String secret;
 
@@ -61,7 +61,7 @@ public class JwtTokenProvider {
 
 	public String createRefreshToken() {
 		Date now = new Date();
-		Date refreshTokenExpiration = new Date(now.getTime() + REFRESH_TOKEN_EXPIRE_MINUTE * 60 * 60 * 1000);
+		Date refreshTokenExpiration = new Date(now.getTime() + REFRESH_TOKEN_EXPIRE_DATE * 24 * 60 * 60 * 1000);
 
 		return Jwts.builder()
 				.setIssuedAt(now)
@@ -77,7 +77,7 @@ public class JwtTokenProvider {
 
 		log.info(authorities);
 		Date now = new Date();
-		Date accessTokenExpiration = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_MINUTE * 60 * 1000);
+		Date accessTokenExpiration = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_HOUR * 60 * 60 * 1000);
 
 		CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
 

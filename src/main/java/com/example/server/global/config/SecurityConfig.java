@@ -10,9 +10,8 @@ import com.example.server.global.auth.security.service.JwtService;
 import com.example.server.global.auth.security.filter.JsonUsernamePasswordAuthenticationFilter;
 import com.example.server.global.auth.security.filter.JwtAuthenticationFilter;
 import com.example.server.global.auth.security.handler.*;
-import com.example.server.global.auth.security.repository.HttpCookieOAuthAuthorizationRequestRepository;
+import com.example.server.global.auth.oauth2.repository.HttpCookieOAuthAuthorizationRequestRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +32,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
@@ -81,7 +81,8 @@ public class SecurityConfig {
                 .oauth2Login(oauth2Login -> oauth2Login
                         .authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint
                                 .baseUri("/oauth2/authorize")
-                                .authorizationRequestRepository(httpCookieOAuthAuthorizationRequestRepository()))
+                                .authorizationRequestRepository(httpCookieOAuthAuthorizationRequestRepository())
+                                )
                         .redirectionEndpoint(redirectionEndpoint -> redirectionEndpoint
                                 .baseUri("/*/oauth2/code/*"))
                         .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint
@@ -163,19 +164,33 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfiguration() {
-        CorsConfigurationSource configurationSource = new CorsConfigurationSource() {
-            @Override
-            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-                CorsConfiguration corsConfiguration = new CorsConfiguration();
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
 
-                corsConfiguration.setAllowedHeaders(Arrays.asList(corsProperties.getAllowedHeaders().split(",")));
-                corsConfiguration.setAllowedMethods(Arrays.asList(corsProperties.getAllowedMethods().split(",")));
-                corsConfiguration.setAllowedOrigins(Arrays.asList(corsProperties.getAllowedOrigins().split(",")));
-                corsConfiguration.setAllowCredentials(true);
-                corsConfiguration.setMaxAge(corsConfiguration.getMaxAge());
-                return corsConfiguration;
-            }
-        };
-        return configurationSource;
+        corsConfiguration.setAllowedHeaders(Arrays.asList(corsProperties.getAllowedHeaders().split(",")));
+        corsConfiguration.setAllowedMethods(Arrays.asList(corsProperties.getAllowedMethods().split(",")));
+        corsConfiguration.setAllowedOrigins(Arrays.asList(corsProperties.getAllowedOrigins().split(",")));
+        corsConfiguration.setExposedHeaders(Arrays.asList("Authorization", "Authorization-refresh"));
+        corsConfiguration.setAllowCredentials(true);
+        corsConfiguration.setMaxAge(corsConfiguration.getMaxAge());
+
+        UrlBasedCorsConfigurationSource corsConfigSource = new UrlBasedCorsConfigurationSource();
+        corsConfigSource.registerCorsConfiguration("/**", corsConfiguration);
+        return corsConfigSource;
     }
+
+//    @Bean
+//    public CorsConfigurationSource corsConfiguration() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+//        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+//        configuration.setAllowedMethods(Arrays.asList("HEAD","POST","GET","DELETE","PUT", "OPTIONS"));
+//        configuration.setAllowedHeaders(Arrays.asList("X-Requested-With", "Content-Type", "Authorization", "X-XSRF-token", "Authorization-refresh"));
+//        configuration.setAllowCredentials(true);
+//        configuration.addAllowedOriginPattern("http://localhost:3000");
+//        configuration.setMaxAge(3600L);
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", configuration);
+//        return source;
+//    }
+
 }

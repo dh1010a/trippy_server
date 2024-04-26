@@ -1,6 +1,6 @@
 package com.example.server.global.auth.oauth2.handler;
 
-import com.example.server.global.auth.security.repository.HttpCookieOAuthAuthorizationRequestRepository;
+import com.example.server.global.auth.oauth2.repository.HttpCookieOAuthAuthorizationRequestRepository;
 import com.example.server.global.util.CookieUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -13,7 +13,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 
-import static com.example.server.global.auth.security.repository.HttpCookieOAuthAuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
+import static com.example.server.global.auth.oauth2.repository.HttpCookieOAuthAuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
 
 @RequiredArgsConstructor
 public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {

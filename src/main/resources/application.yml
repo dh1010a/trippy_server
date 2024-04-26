@@ -10,6 +10,16 @@ spring:
     username: sa  # H2 접속 시 입력할 username 정보 (원하는 것으로 입력)
     password: 1234 # H2 접속 시 입력할 password 정보 (원하는 것으로 입력)
 
+#  datasource:
+#    url: jdbc:oracle:thin:@ridetogetherdb_high?TNS_ADMIN=/home/ubuntu/scp/Wallet_RideTogetherDB
+#    username: admin
+#    password: Bdhor1EHGUS9910@
+#    driver-class-name: oracle.jdbc.OracleDriver
+#    data:
+#      web:
+#        pageable:
+#          default-page-size: 20  #페이징 할 때 기본값, 20개씩 조회
+
   jpa:
     show_sql: true
     hibernate:
