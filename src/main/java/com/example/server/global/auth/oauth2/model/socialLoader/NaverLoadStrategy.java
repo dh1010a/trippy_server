@@ -1,6 +1,8 @@
-package com.example.server.global.auth.oauth2.socialLoader;
+package com.example.server.global.auth.oauth2.model.socialLoader;
 
 import com.example.server.global.auth.oauth2.model.SocialType;
+import com.example.server.global.auth.oauth2.model.info.NaverOAuth2UserInfo;
+import com.example.server.global.auth.oauth2.model.info.OAuth2UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +13,7 @@ import java.util.Map;
 public class NaverLoadStrategy extends SocialLoadStrategy{
 
 
-    protected String sendRequestToSocialSite(HttpEntity request){
+    protected OAuth2UserInfo sendRequestToSocialSite(HttpEntity request){
         try {
             ResponseEntity<Map<String, Object>> response = restTemplate.exchange(SocialType.NAVER.getUserInfoUrl(),//
                     SocialType.NAVER.getMethod(),
@@ -19,8 +21,7 @@ public class NaverLoadStrategy extends SocialLoadStrategy{
                     RESPONSE_TYPE);
 
 
-            Map<String , Object> response2 = ( Map<String , Object>)response.getBody().get("response");
-            return response2.get("id").toString();
+            return new NaverOAuth2UserInfo(response.getBody());
 
 
         } catch (Exception e) {

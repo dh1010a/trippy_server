@@ -1,5 +1,6 @@
-package com.example.server.global.auth.oauth2.socialLoader;
+package com.example.server.global.auth.oauth2.model.socialLoader;
 
+import com.example.server.global.auth.oauth2.model.info.OAuth2UserInfo;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,7 +18,7 @@ public abstract class SocialLoadStrategy {
 
     protected final RestTemplate restTemplate = new RestTemplate();
 
-    public String getSocialPk(String accessToken) {
+    public OAuth2UserInfo getUserInfo(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
 
         setHeaders(accessToken, headers);
@@ -30,7 +31,7 @@ public abstract class SocialLoadStrategy {
         return sendRequestToSocialSite(request);//구체 클래스가 구현
     }
 
-    protected abstract String sendRequestToSocialSite(HttpEntity request);
+    protected abstract OAuth2UserInfo sendRequestToSocialSite(HttpEntity request);
 
 
 

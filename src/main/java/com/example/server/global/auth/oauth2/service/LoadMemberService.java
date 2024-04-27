@@ -1,13 +1,15 @@
 package com.example.server.global.auth.oauth2.service;
 
-import com.example.server.global.auth.oauth2.model.AccessTokenSocialTypeToken;
-import com.example.server.global.auth.oauth2.socialLoader.GoogleLoadStrategy;
-import com.example.server.global.auth.oauth2.socialLoader.KakaoLoadStrategy;
-import com.example.server.global.auth.oauth2.socialLoader.NaverLoadStrategy;
-import com.example.server.global.auth.oauth2.socialLoader.SocialLoadStrategy;
+import com.example.server.global.auth.oauth2.domain.AccessTokenSocialTypeToken;
+import com.example.server.global.auth.oauth2.model.info.OAuth2UserInfo;
+import com.example.server.global.auth.oauth2.model.socialLoader.GoogleLoadStrategy;
+import com.example.server.global.auth.oauth2.model.socialLoader.KakaoLoadStrategy;
+import com.example.server.global.auth.oauth2.model.socialLoader.NaverLoadStrategy;
+import com.example.server.global.auth.oauth2.model.socialLoader.SocialLoadStrategy;
 import com.example.server.global.auth.oauth2.model.SocialType;
 import com.example.server.global.auth.security.domain.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -16,6 +18,9 @@ import org.springframework.web.client.RestTemplate;
 public class LoadMemberService {
 
     private final RestTemplate restTemplate = new RestTemplate();
+    private final PasswordEncoder passwordEncoder;
+
+    private static final String OAUTH2_USER_PASSWORD = "PW";
 
 
     public CustomUserDetails getOAuth2UserDetails(AccessTokenSocialTypeToken authentication)  {
@@ -24,10 +29,12 @@ public class LoadMemberService {
 
         SocialLoadStrategy socialLoadStrategy = getSocialLoadStrategy(socialType);//SocialLoadStrategy 설정
 
-        String socialPk = socialLoadStrategy.getSocialPk(authentication.getAccessToken());//PK 가져오기
+        OAuth2UserInfo userInfo = socialLoadStrategy.getUserInfo(authentication.getAccessToken());//PK 가져오기
 
         return CustomUserDetails.builder() //PK와 SocialType을 통해 회원 생성
-                .id(socialPk)
+                .id(userInfo.getId())
+                .email(userInfo.getEmail())
+                .password(passwordEncoder.encode(OAUTH2_USER_PASSWORD))
                 .socialType(socialType)
                 .build();
     }

@@ -1,7 +1,7 @@
 package com.example.server.global.auth.oauth2.filter;
 
 import com.example.server.global.auth.oauth2.domain.AccessTokenAuthenticationProvider;
-import com.example.server.global.auth.oauth2.model.AccessTokenSocialTypeToken;
+import com.example.server.global.auth.oauth2.domain.AccessTokenSocialTypeToken;
 import com.example.server.global.auth.oauth2.model.SocialType;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

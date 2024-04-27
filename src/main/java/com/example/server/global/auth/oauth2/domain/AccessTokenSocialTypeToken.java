@@ -1,5 +1,6 @@
-package com.example.server.global.auth.oauth2.model;
+package com.example.server.global.auth.oauth2.domain;
 
+import com.example.server.global.auth.oauth2.model.SocialType;
 import lombok.Builder;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;

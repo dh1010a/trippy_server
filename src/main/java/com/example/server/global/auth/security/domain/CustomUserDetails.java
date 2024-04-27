@@ -36,6 +36,7 @@ public class CustomUserDetails implements UserDetails {
 				.id(member.getMemberId())
 				.email(member.getEmail())
 				.password(member.getPassword())
+				.socialType(member.getSocialType())
 				.authorities(AuthorityUtils.createAuthorityList(member.getRole().toString()))
 				.build();
 	}
@@ -63,7 +64,7 @@ public class CustomUserDetails implements UserDetails {
 		return this.id;
 	}
 
-	public String getMemberEmail() {
+	public String getEmail() {
 		return this.email;
 	}
 
