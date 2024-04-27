@@ -1,8 +1,9 @@
-package com.example.server.global.auth.oauth2;
+package com.example.server.global.auth.oauth2.domain;
 
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.model.Role;
 import com.example.server.domain.member.repository.MemberRepository;
+import com.example.server.global.auth.oauth2.model.AccessTokenSocialTypeToken;
 import com.example.server.global.auth.oauth2.service.LoadMemberService;
 import com.example.server.global.auth.security.domain.CustomUserDetails;
 import jakarta.transaction.Transactional;

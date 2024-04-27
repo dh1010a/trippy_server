@@ -1,10 +1,10 @@
 package com.example.server.global.auth.oauth2.service;
 
-import com.example.server.global.auth.oauth2.AccessTokenSocialTypeToken;
-import com.example.server.global.auth.oauth2.load.GoogleLoadStrategy;
-import com.example.server.global.auth.oauth2.load.KakaoLoadStrategy;
-import com.example.server.global.auth.oauth2.load.NaverLoadStrategy;
-import com.example.server.global.auth.oauth2.load.SocialLoadStrategy;
+import com.example.server.global.auth.oauth2.model.AccessTokenSocialTypeToken;
+import com.example.server.global.auth.oauth2.socialLoader.GoogleLoadStrategy;
+import com.example.server.global.auth.oauth2.socialLoader.KakaoLoadStrategy;
+import com.example.server.global.auth.oauth2.socialLoader.NaverLoadStrategy;
+import com.example.server.global.auth.oauth2.socialLoader.SocialLoadStrategy;
 import com.example.server.global.auth.oauth2.model.SocialType;
 import com.example.server.global.auth.security.domain.CustomUserDetails;
 import lombok.RequiredArgsConstructor;

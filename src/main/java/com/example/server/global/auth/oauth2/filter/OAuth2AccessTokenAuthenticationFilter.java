@@ -1,7 +1,7 @@
 package com.example.server.global.auth.oauth2.filter;
 
-import com.example.server.global.auth.oauth2.AccessTokenAuthenticationProvider;
-import com.example.server.global.auth.oauth2.AccessTokenSocialTypeToken;
+import com.example.server.global.auth.oauth2.domain.AccessTokenAuthenticationProvider;
+import com.example.server.global.auth.oauth2.model.AccessTokenSocialTypeToken;
 import com.example.server.global.auth.oauth2.model.SocialType;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -56,7 +56,7 @@ public class OAuth2AccessTokenAuthenticationFilter extends AbstractAuthenticatio
 
         SocialType socialType = extractSocialType(request);
 
-        String accessToken = request.getHeader(ACCESS_TOKEN_HEADER_NAME); //헤더의 AccessToken에 해당하는 값을 가져온다.
+        String accessToken = request.getHeader(ACCESS_TOKEN_HEADER_NAME);
         log.info("socialType = {}",socialType.getSocialName());
 
 
@@ -65,11 +65,10 @@ public class OAuth2AccessTokenAuthenticationFilter extends AbstractAuthenticatio
 
 
     private SocialType extractSocialType(HttpServletRequest request) {//요청을 처리하는 코드이다
-        return Arrays.stream(SocialType.values())//SocialType.values() -> GOOGLE, KAKAO, NAVER 가 있다.
+        return Arrays.stream(SocialType.values())
                 .filter(socialType ->
                         socialType.getSocialName()
                                 .equals(request.getRequestURI().substring(DEFAULT_OAUTH2_LOGIN_REQUEST_URL_PREFIX.length())))
-                //subString을 통해 문자열을 잘라주었다. 해당 코드를 실행하면 ~~~/kakao에서 kakao만 추출된다
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("잘못된 URL 주소입니다"));
     }

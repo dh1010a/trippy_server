@@ -1,7 +1,7 @@
 package com.example.server.global.config;
 
 import com.example.server.domain.member.repository.MemberRepository;
-import com.example.server.global.auth.oauth2.AccessTokenAuthenticationProvider;
+import com.example.server.global.auth.oauth2.domain.AccessTokenAuthenticationProvider;
 import com.example.server.global.auth.oauth2.filter.OAuth2AccessTokenAuthenticationFilter;
 import com.example.server.global.auth.security.service.CustomUserDetailsService;
 import com.example.server.global.auth.security.service.JwtService;

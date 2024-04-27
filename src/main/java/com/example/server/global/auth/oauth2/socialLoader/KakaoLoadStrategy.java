@@ -1,4 +1,4 @@
-package com.example.server.global.auth.oauth2.load;
+package com.example.server.global.auth.oauth2.socialLoader;
 
 import com.example.server.global.auth.oauth2.model.SocialType;
 import lombok.extern.slf4j.Slf4j;

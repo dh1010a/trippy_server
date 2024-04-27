@@ -1,4 +1,4 @@
-package com.example.server.global.auth.oauth2.load;
+package com.example.server.global.auth.oauth2.socialLoader;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
