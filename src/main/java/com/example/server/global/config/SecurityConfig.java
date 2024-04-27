@@ -1,16 +1,13 @@
 package com.example.server.global.config;
 
 import com.example.server.domain.member.repository.MemberRepository;
-import com.example.server.global.auth.oauth2.handler.OAuth2AuthenticationFailureHandler;
-import com.example.server.global.auth.oauth2.handler.OAuth2AuthenticationSuccessHandler;
-import com.example.server.global.auth.oauth2.handler.RestAuthenticationEntryPoint;
-import com.example.server.global.auth.oauth2.service.CustomOAuth2UserService;
+import com.example.server.global.auth.oauth2.AccessTokenAuthenticationProvider;
+import com.example.server.global.auth.oauth2.filter.OAuth2AccessTokenAuthenticationFilter;
 import com.example.server.global.auth.security.service.CustomUserDetailsService;
 import com.example.server.global.auth.security.service.JwtService;
 import com.example.server.global.auth.security.filter.JsonUsernamePasswordAuthenticationFilter;
 import com.example.server.global.auth.security.filter.JwtAuthenticationFilter;
 import com.example.server.global.auth.security.handler.*;
-import com.example.server.global.auth.oauth2.repository.HttpCookieOAuthAuthorizationRequestRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -46,9 +43,8 @@ public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
     private final JwtService jwtService;
     private final MemberRepository memberRepository;
-    private final AppProperties appProperties;
-    private final TokenAccessDeniedHandler tokenAccessDeniedHandler;
     private final CorsProperties corsProperties;
+    private final AccessTokenAuthenticationProvider provider;
 
     // 스프링 시큐리티 기능 비활성화
     @Bean
@@ -75,24 +71,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(httpSecurityExceptionHandlingConfigurer -> httpSecurityExceptionHandlingConfigurer
-                        .authenticationEntryPoint(new RestAuthenticationEntryPoint())
-                        .accessDeniedHandler(tokenAccessDeniedHandler))
-                .oauth2Login(oauth2Login -> oauth2Login
-                        .authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint
-                                .baseUri("/oauth2/authorize")
-                                .authorizationRequestRepository(httpCookieOAuthAuthorizationRequestRepository())
-                                )
-                        .redirectionEndpoint(redirectionEndpoint -> redirectionEndpoint
-                                .baseUri("/*/oauth2/code/*"))
-                        .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint
-                                .userService(customOAuth2UserService()))
-                        .successHandler(oAuth2AuthenticationSuccessHandler())
-                        .failureHandler(oAuth2AuthenticationFailureHandler()))
         ;
         http
                 .addFilterAfter(jsonUsernamePasswordLoginFilter(), LogoutFilter.class)
-                .addFilterBefore(jwtAuthenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(auth2AccessTokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -127,16 +110,7 @@ public class SecurityConfig {
         return new LoginFailureHandler();
     }
 
-    @Bean
-    public OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler() {
-        return new OAuth2AuthenticationSuccessHandler(jwtService, memberRepository,
-                httpCookieOAuthAuthorizationRequestRepository(), appProperties);
-    }
 
-    @Bean
-    public OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler() {
-        return new OAuth2AuthenticationFailureHandler(httpCookieOAuthAuthorizationRequestRepository());
-    }
 
     @Bean
     public JsonUsernamePasswordAuthenticationFilter jsonUsernamePasswordLoginFilter() throws Exception {
@@ -153,14 +127,10 @@ public class SecurityConfig {
     }
 
     @Bean
-    public HttpCookieOAuthAuthorizationRequestRepository httpCookieOAuthAuthorizationRequestRepository() {
-        return new HttpCookieOAuthAuthorizationRequestRepository();
+    OAuth2AccessTokenAuthenticationFilter auth2AccessTokenAuthenticationFilter() {
+        return new OAuth2AccessTokenAuthenticationFilter(provider, loginSuccessJWTProvideHandler(), loginFailureHandler());
     }
 
-    @Bean
-    public CustomOAuth2UserService customOAuth2UserService() {
-        return new CustomOAuth2UserService(memberRepository, passwordEncoder());
-    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

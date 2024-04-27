@@ -13,8 +13,8 @@ package com.example.server.domain.member.domain;
 import com.example.server.domain.member.model.ActiveState;
 import com.example.server.domain.member.model.Gender;
 import com.example.server.domain.member.model.Role;
+import com.example.server.global.auth.oauth2.model.SocialType;
 import com.example.server.global.common.BaseTimeEntity;
-import com.example.server.global.auth.security.model.ProviderType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -94,7 +94,7 @@ public class Member extends BaseTimeEntity {
     private ActiveState activeState;
 
     @Enumerated(EnumType.STRING)
-    private ProviderType providerType;
+    private SocialType socialType;
 
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
@@ -104,8 +104,8 @@ public class Member extends BaseTimeEntity {
         this.refreshToken = null;
     }
 
-    public void setProviderType(ProviderType type) {
-        this.providerType = type;
+    public void setSocialType(SocialType type) {
+        this.socialType = type;
     }
 
     public void updateProfileImgUrl(String profileImageUrl) {

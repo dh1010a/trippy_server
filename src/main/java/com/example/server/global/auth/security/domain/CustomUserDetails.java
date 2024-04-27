@@ -1,6 +1,7 @@
 package com.example.server.global.auth.security.domain;
 
 import com.example.server.domain.member.domain.Member;
+import com.example.server.global.auth.oauth2.model.SocialType;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.FetchType;
 import lombok.Builder;
@@ -18,11 +19,12 @@ import java.util.List;
 import java.util.Map;
 
 @Builder
-public class CustomUserDetails implements UserDetails, OAuth2User, OidcUser {
+public class CustomUserDetails implements UserDetails {
 
 	private String id;
 	private String email;
 	private String password;
+	private SocialType socialType;
 	private Collection<? extends GrantedAuthority> authorities;
 	private Map<String, Object> attributes;
 
@@ -38,25 +40,13 @@ public class CustomUserDetails implements UserDetails, OAuth2User, OidcUser {
 				.build();
 	}
 
-	public static CustomUserDetails create(Member member, Map<String, Object> attributes) {
-		CustomUserDetails customUserDetails = create(member);
-		customUserDetails.setAttributes(attributes);
-
-		return customUserDetails;
-	}
-
-	public void setAttributes(Map<String, Object> attributes) {
-		this.attributes = attributes;
-	}
-
-	@Override
-	public Map<String, Object> getAttributes() {
-		return attributes;
-	}
-
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return authorities;
+	}
+
+	public void updateAuthorities(Member member) {
+		this.authorities = AuthorityUtils.createAuthorityList(member.getRole().toString());
 	}
 
 	@Override
@@ -77,6 +67,9 @@ public class CustomUserDetails implements UserDetails, OAuth2User, OidcUser {
 		return this.email;
 	}
 
+	public SocialType getSocialType() {
+		return this.socialType;
+	}
 
 	@Override
 	public boolean isAccountNonExpired() {
@@ -96,25 +89,5 @@ public class CustomUserDetails implements UserDetails, OAuth2User, OidcUser {
 	@Override
 	public boolean isEnabled() {
 		return true;
-	}
-
-	@Override
-	public String getName() {
-		return String.valueOf(id);
-	}
-
-	@Override
-	public Map<String, Object> getClaims() {
-		return null;
-	}
-
-	@Override
-	public OidcUserInfo getUserInfo() {
-		return null;
-	}
-
-	@Override
-	public OidcIdToken getIdToken() {
-		return null;
 	}
 }

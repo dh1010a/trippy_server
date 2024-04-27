@@ -12,7 +12,6 @@ import com.example.server.domain.member.model.Role;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
-import com.example.server.global.auth.security.model.ProviderType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -39,7 +38,6 @@ public class MemberService {
                 .phone(requestDto.getPhone())
                 .gender(Gender.fromName(requestDto.getGender()))
                 .activeState(ActiveState.ACTIVE)
-                .providerType(ProviderType.LOCAL)
                 .role(Role.ROLE_MEMBER)
                 .build();
         memberRepository.save(member);
@@ -52,7 +50,6 @@ public class MemberService {
 
         return IsNewMemberResponseDto.builder()
                 .idx(member.getIdx())
-                .provider(member.getProviderType().toString())
                 .memberId(member.getMemberId())
                 .email(member.getEmail())
                 .isNewMember(isNewMember)
