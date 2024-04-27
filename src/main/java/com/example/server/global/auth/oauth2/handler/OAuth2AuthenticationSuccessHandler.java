@@ -3,14 +3,17 @@ package com.example.server.global.auth.oauth2.handler;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.model.Role;
 import com.example.server.domain.member.repository.MemberRepository;
+import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
+import com.example.server.global.auth.security.dto.LoginResponseDto;
 import com.example.server.global.config.AppProperties;
 import com.example.server.global.auth.security.service.JwtService;
 import com.example.server.global.auth.security.domain.JwtToken;
 import com.example.server.global.auth.security.model.ProviderType;
 import com.example.server.global.auth.oauth2.repository.HttpCookieOAuthAuthorizationRequestRepository;
 import com.example.server.global.util.CookieUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,22 +49,12 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private final AppProperties appProperties;
 
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     private static final int COOKIE_MAX_AGE = 3600; //1시간
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        String targetUrl = determineTargetUrl(request, response, authentication);
-
-        if (response.isCommitted()) {
-            logger.debug("Response has already been committed. Unable to redirect to " + targetUrl);
-            return;
-        }
-
-        clearAuthenticationAttributes(request, response);
-        getRedirectStrategy().sendRedirect(request, response, targetUrl);
-    }
-
-    protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         Optional<String> redirectUri = CookieUtil.getCookie(request, REDIRECT_URI_PARAM_COOKIE_NAME)
                 .map(Cookie::getValue);
 
@@ -70,6 +63,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         }
 
         String targetUrl = redirectUri.orElse(getDefaultTargetUrl());
+//        String targetUrl = redirectUri.orElse("http://localhost:3000/login");
+        log.info(request.getRequestURI());
 
         OAuth2AuthenticationToken authToken = (OAuth2AuthenticationToken) authentication;
         ProviderType providerType = ProviderType.valueOf(authToken.getAuthorizedClientRegistrationId().toUpperCase());
@@ -104,10 +99,83 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         context.setAuthentication(authentication);
         SecurityContextHolder.setContext(context);
 
-        return UriComponentsBuilder.fromUriString(targetUrl)
+        String finalTargetUrl =  UriComponentsBuilder.fromUriString(targetUrl)
                 .queryParam("accessToken", jwtToken.getAccessToken())
                 .build().toUriString();
+
+        if (response.isCommitted()) {
+            logger.debug("Response has already been committed. Unable to redirect to " + targetUrl);
+            return;
+        }
+
+        clearAuthenticationAttributes(request, response);
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("utf-8");
+
+
+        LoginResponseDto.LoginDto loginDto = LoginResponseDto.LoginDto.builder()
+                .memberId(memberId)
+                .accessToken(jwtToken.getAccessToken())
+                .refreshToken(jwtToken.getRefreshToken())
+                .build();
+
+        response.getWriter().write(objectMapper.writeValueAsString(
+                ApiResponse.onSuccess(loginDto)
+        ));
+//        getRedirectStrategy().sendRedirect(request, response, finalTargetUrl);
+
     }
+
+//    protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+//        Optional<String> redirectUri = CookieUtil.getCookie(request, REDIRECT_URI_PARAM_COOKIE_NAME)
+//                .map(Cookie::getValue);
+//
+//        if(redirectUri.isPresent() && !isAuthorizedRedirectUri(redirectUri.get())) {
+//            throw new IllegalArgumentException("Sorry! We've got an Unauthorized Redirect URI and can't proceed with the authentication");
+//        }
+//
+//        String targetUrl = redirectUri.orElse(getDefaultTargetUrl());
+////        String targetUrl = redirectUri.orElse("http://localhost:3000/login");
+//        log.info(request.getRequestURI());
+//
+//        OAuth2AuthenticationToken authToken = (OAuth2AuthenticationToken) authentication;
+//        ProviderType providerType = ProviderType.valueOf(authToken.getAuthorizedClientRegistrationId().toUpperCase());
+//        String memberId = extractMemberId(authentication);
+//        log.info("Success To Authorize. memberID : " + memberId);
+//
+//        Member member = memberRepository.findByMemberId(extractMemberId(authentication))
+//                .orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+//
+//        // 기존에 가입하지 않은 신규 회원
+//        if (member.getRole() == Role.ROLE_GUEST) {
+//
+//
+//        }
+//
+//        JwtToken jwtToken = jwtService.createJwtToken(authentication);
+//
+//        member.updateRefreshToken(jwtToken.getRefreshToken());
+//        member.setProviderType(providerType);
+//
+//
+//        CookieUtil.deleteCookie(request, response, REFRESH_TOKEN);
+//        CookieUtil.addCookie(response, REFRESH_TOKEN, jwtToken.getRefreshToken(), COOKIE_MAX_AGE);
+//
+//        jwtService.sendAccessAndRefreshToken(response, jwtToken);
+//
+//        log.info( "로그인에 성공합니다. memberId: {}" , memberId);
+//        log.info( "AccessToken 을 발급합니다. AccessToken: {}" ,jwtToken.getAccessToken());
+//        log.info( "RefreshToken 을 발급합니다. RefreshToken: {}" ,jwtToken.getRefreshToken());
+//
+//        SecurityContext context = SecurityContextHolder.createEmptyContext();//5
+//        context.setAuthentication(authentication);
+//        SecurityContextHolder.setContext(context);
+//
+//        return UriComponentsBuilder.fromUriString(targetUrl)
+//                .queryParam("accessToken", jwtToken.getAccessToken())
+//                .build().toUriString();
+//    }
 
     private boolean isAuthorizedRedirectUri(String uri) {
         URI clientRedirectUri = URI.create(uri);

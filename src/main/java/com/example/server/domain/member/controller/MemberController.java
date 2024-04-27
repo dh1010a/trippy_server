@@ -45,5 +45,10 @@ public class MemberController {
         return ApiResponse.onSuccess(memberService.isNewMember(memberId));
     }
 
+    @GetMapping("/oauth")
+    public String auth() {
+        return "forward:/oauth2/authorize/kakao";
+    }
+
 
 }

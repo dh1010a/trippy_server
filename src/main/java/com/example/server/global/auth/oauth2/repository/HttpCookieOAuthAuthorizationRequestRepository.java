@@ -32,8 +32,8 @@ public class HttpCookieOAuthAuthorizationRequestRepository implements Authorizat
         }
 
         CookieUtil.addCookie(response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME, CookieUtil.serialize(authorizationRequest), cookieExpireSeconds);
-        String redirectUriAfterLogin = request.getParameter("auth");
-        log.info("token = " + redirectUriAfterLogin);
+        String redirectUriAfterLogin = request.getParameter(REDIRECT_URI_PARAM_COOKIE_NAME);
+        log.info("redirectUriAfterLogin  = " + redirectUriAfterLogin);
         if (redirectUriAfterLogin != null && !redirectUriAfterLogin.isEmpty()) {
             CookieUtil.addCookie(response, REDIRECT_URI_PARAM_COOKIE_NAME, redirectUriAfterLogin, cookieExpireSeconds);
         }
