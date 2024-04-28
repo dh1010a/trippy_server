@@ -29,6 +29,8 @@ public class OAuth2AccessTokenAuthenticationFilter extends AbstractAuthenticatio
 
     private static final String ACCESS_TOKEN_HEADER_NAME = "Authorization";
 
+    private static final String ACCESS_TOKEN_PREFIX= "Bearer ";
+
 
 
 
@@ -56,7 +58,7 @@ public class OAuth2AccessTokenAuthenticationFilter extends AbstractAuthenticatio
 
         SocialType socialType = extractSocialType(request);
 
-        String accessToken = request.getHeader(ACCESS_TOKEN_HEADER_NAME);
+        String accessToken = request.getHeader(ACCESS_TOKEN_HEADER_NAME).substring(ACCESS_TOKEN_PREFIX.length()); // Bearer이 두번 붙게되어, 최초 한번은 제외 (POSTMAN으로 테스트 시)
         log.info("socialType = {}",socialType.getSocialName());
 
 
@@ -64,7 +66,8 @@ public class OAuth2AccessTokenAuthenticationFilter extends AbstractAuthenticatio
     }
 
 
-    private SocialType extractSocialType(HttpServletRequest request) {//요청을 처리하는 코드이다
+    private SocialType extractSocialType(HttpServletRequest request) {
+        log.info(request.getRequestURI().substring(DEFAULT_OAUTH2_LOGIN_REQUEST_URL_PREFIX.length()));
         return Arrays.stream(SocialType.values())
                 .filter(socialType ->
                         socialType.getSocialName()

@@ -16,6 +16,7 @@ public class KakaoLoadStrategy extends SocialLoadStrategy{
 
     protected OAuth2UserInfo sendRequestToSocialSite(HttpEntity request){
         try {
+            log.info(request.getHeaders().toString());
             ResponseEntity<Map<String, Object>> response = restTemplate.exchange(SocialType.KAKAO.getUserInfoUrl(),// -> /v2/user/me
                     SocialType.KAKAO.getMethod(),
                     request,
