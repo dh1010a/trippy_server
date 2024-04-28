@@ -27,8 +27,8 @@ public class NaverLoadStrategy extends SocialLoadStrategy{
 
 
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new ErrorHandler(ErrorStatus.NAVER_SOCIAL_LOGIN_FAIL);
+            log.error(ErrorStatus.NAVER_SOCIAL_LOGIN_FAIL.getMessage() ,e.getMessage() );
+            throw e;
         }
     }
 }

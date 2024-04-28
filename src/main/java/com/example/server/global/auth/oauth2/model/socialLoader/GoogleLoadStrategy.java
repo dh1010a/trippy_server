@@ -26,8 +26,8 @@ public class GoogleLoadStrategy extends SocialLoadStrategy{
             return new GoogleOAuth2UserInfo(response.getBody());
 
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new ErrorHandler(ErrorStatus.GOOGLE_SOCIAL_LOGIN_FAIL);
+            log.error(ErrorStatus.KAKAO_SOCIAL_LOGIN_FAIL.getMessage() ,e.getMessage() );
+            throw e;
         }
     }
 }

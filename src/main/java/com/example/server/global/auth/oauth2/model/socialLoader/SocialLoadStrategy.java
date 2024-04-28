@@ -36,7 +36,7 @@ public abstract class SocialLoadStrategy {
 
 
     public void setHeaders(String accessToken, HttpHeaders headers) {
-        headers.set("Authorization", "Bearer " + accessToken);
+        headers.set("Authorization", accessToken);
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
     }

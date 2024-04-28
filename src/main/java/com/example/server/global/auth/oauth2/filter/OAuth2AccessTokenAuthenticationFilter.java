@@ -1,8 +1,12 @@
 package com.example.server.global.auth.oauth2.filter;
 
+import com.example.server.global.apiPayload.ApiResponse;
+import com.example.server.global.apiPayload.code.status.ErrorStatus;
+import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import com.example.server.global.auth.oauth2.domain.AccessTokenAuthenticationProvider;
 import com.example.server.global.auth.oauth2.domain.AccessTokenSocialTypeToken;
 import com.example.server.global.auth.oauth2.model.SocialType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,11 +21,14 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 @Component
 @Slf4j
 public class OAuth2AccessTokenAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final String DEFAULT_OAUTH2_LOGIN_REQUEST_URL_PREFIX = "/api/member/login/oauth2/";
 
@@ -55,18 +62,26 @@ public class OAuth2AccessTokenAuthenticationFilter extends AbstractAuthenticatio
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
+        SocialType socialType = extractSocialType(request, response);
+        try {
 
-        SocialType socialType = extractSocialType(request);
+//          String accessToken = request.getHeader(ACCESS_TOKEN_HEADER_NAME).substring(ACCESS_TOKEN_PREFIX.length()); // Bearer이 두번 붙게되어, 최초 한번은 제외 (POSTMAN으로 테스트 시)
+            String accessToken = request.getHeader(ACCESS_TOKEN_HEADER_NAME); // Bearer이 두번 붙게되어, 최초 한번은 제외 (POSTMAN으로 테스트 시)
 
-        String accessToken = request.getHeader(ACCESS_TOKEN_HEADER_NAME).substring(ACCESS_TOKEN_PREFIX.length()); // Bearer이 두번 붙게되어, 최초 한번은 제외 (POSTMAN으로 테스트 시)
-        log.info("socialType = {}",socialType.getSocialName());
+            return this.getAuthenticationManager().authenticate(new AccessTokenSocialTypeToken(accessToken, socialType));
 
-
-        return this.getAuthenticationManager().authenticate(new AccessTokenSocialTypeToken(accessToken, socialType));
+        } catch (Exception e) {
+            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+            response.setStatus(ErrorStatus.SOCIAL_UNAUTHORIZED.getHttpStatus().value());
+            response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.onFailure(ErrorStatus.SOCIAL_UNAUTHORIZED.getCode(),
+                    socialType.getSocialName() + " " + ErrorStatus.SOCIAL_UNAUTHORIZED.getMessage(), e.getMessage())));
+            log.info("{} Authentication failed: " + e.getClass().toString() + " : " + e.getMessage(), socialType.getSocialName());
+            return null;
+        }
     }
 
 
-    private SocialType extractSocialType(HttpServletRequest request) {
+    private SocialType extractSocialType(HttpServletRequest request, HttpServletResponse response) {
         log.info(request.getRequestURI().substring(DEFAULT_OAUTH2_LOGIN_REQUEST_URL_PREFIX.length()));
         return Arrays.stream(SocialType.values())
                 .filter(socialType ->

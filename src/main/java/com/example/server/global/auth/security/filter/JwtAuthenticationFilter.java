@@ -44,9 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	 */
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-		log.info("URL입니다. URL = {}", request.getRequestURI());
 		if(request.getRequestURI().equals(NO_CHECK_URL) || request.getRequestURI().contains(NO_CHECK_URL_2)) {
-			log.info("JWt 필터 제외 URL입니다. URL = {}", request.getRequestURI());
 			filterChain.doFilter(request, response);
 			return;//안해주면 아래로 내려가서 계속 필터를 진행해버림
 		}
