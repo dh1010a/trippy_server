@@ -20,7 +20,7 @@ public class LoadMemberService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final PasswordEncoder passwordEncoder;
 
-    private static final String OAUTH2_USER_PASSWORD = "PW";
+    private static final String OAUTH2_USER_PASSWORD = "TRIPPY_OAUTH2_PW";
 
 
     public CustomUserDetails getOAuth2UserDetails(AccessTokenSocialTypeToken authentication)  {
@@ -35,6 +35,7 @@ public class LoadMemberService {
                 .id(userInfo.getId())
                 .email(userInfo.getEmail())
                 .password(passwordEncoder.encode(OAUTH2_USER_PASSWORD))
+                .name(userInfo.getName())
                 .socialType(socialType)
                 .build();
     }

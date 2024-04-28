@@ -24,6 +24,7 @@ public class CustomUserDetails implements UserDetails {
 	private String id;
 	private String email;
 	private String password;
+	private String name;
 	private SocialType socialType;
 	private Collection<? extends GrantedAuthority> authorities;
 	private Map<String, Object> attributes;
@@ -62,6 +63,10 @@ public class CustomUserDetails implements UserDetails {
 
 	public String getMemberId() {
 		return this.id;
+	}
+
+	public String getMemberName() {
+		return this.name;
 	}
 
 	public String getEmail() {

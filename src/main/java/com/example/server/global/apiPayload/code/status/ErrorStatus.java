@@ -23,6 +23,7 @@ public enum ErrorStatus implements BaseErrorCode {
     MEMBER_EMAIL_PASSWORD_NOT_MATCH(HttpStatus.UNAUTHORIZED, "MEMBER4002", "이메일 또는 비밀번호가 일치하지 않습니다."),
     MEMBER_EMAIL_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4003", "중복된 이메일입니다."),
     MEMBER_NICKNAME_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4004", "중복된 닉네임입니다."),
+    MEMBER_BLOGNAME_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4006", "중복된 블로그명입니다."),
     MEMBER_LOGIN_NOT_SUPPORT(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "MEMBER4015", "지원되지 않는 로그인 형식입니다."),
 
     //사진 응답
@@ -34,6 +35,11 @@ public enum ErrorStatus implements BaseErrorCode {
     REPORT_NOT_FOUND(HttpStatus.BAD_REQUEST, "REPORT4001", "신고내역이 존재하지 않습니다."),
     REPORT_TITLE_NULL(HttpStatus.BAD_REQUEST, "REPORT4002", "신고제목을 작성해주세요."),
     REPORT_CONTENT_NULL(HttpStatus.BAD_REQUEST, "REPORT4003", "신고내용을 작성해주세요."),
+
+    // 소셜 로그인 응답
+    KAKAO_SOCIAL_LOGIN_FAIL(HttpStatus.BAD_REQUEST, "SOCIAL4001", "KAKAO 소셜 정보를 불러오는데에 실패하였습니다."),
+    NAVER_SOCIAL_LOGIN_FAIL(HttpStatus.BAD_REQUEST, "SOCIAL4002", "NAVER 소셜 정보를 불러오는데에 실패하였습니다."),
+    GOOGLE_SOCIAL_LOGIN_FAIL(HttpStatus.BAD_REQUEST, "SOCIAL4003", "GOOGLE 소셜 정보를 불러오는데에 실패하였습니다."),
 
     //푸시알림 응답
     ALARM_SEND_FAIL(HttpStatus.BAD_REQUEST,"ALARM4001", "알림 보내기를 실패하였습니다.");

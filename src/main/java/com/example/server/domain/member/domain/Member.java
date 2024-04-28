@@ -18,6 +18,7 @@ import com.example.server.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -47,7 +48,7 @@ public class Member extends BaseTimeEntity {
 
     private String profileImageUrl;
 
-    private LocalDateTime birthDate;
+    private LocalDate birthDate;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;

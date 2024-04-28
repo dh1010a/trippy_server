@@ -1,5 +1,7 @@
 package com.example.server.global.auth.oauth2.model.socialLoader;
 
+import com.example.server.global.apiPayload.code.status.ErrorStatus;
+import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import com.example.server.global.auth.oauth2.model.SocialType;
 import com.example.server.global.auth.oauth2.model.info.GoogleOAuth2UserInfo;
 import com.example.server.global.auth.oauth2.model.info.OAuth2UserInfo;
@@ -24,8 +26,8 @@ public class GoogleLoadStrategy extends SocialLoadStrategy{
             return new GoogleOAuth2UserInfo(response.getBody());
 
         } catch (Exception e) {
-            log.error("AccessToken을 사용하여 GOOGLE 유저정보를 받아오던 중 예외가 발생했습니다 {}" ,e.getMessage() );
-            throw e;
+            e.printStackTrace();
+            throw new ErrorHandler(ErrorStatus.GOOGLE_SOCIAL_LOGIN_FAIL);
         }
     }
 }
