@@ -1,5 +1,6 @@
 package com.example.server.domain.member.service;
 
+import com.example.server.domain.blog.domain.Blog;
 import com.example.server.domain.follow.repository.MemberFollowRepository;
 import com.example.server.domain.follow.domain.MemberFollow;
 import com.example.server.domain.member.domain.Member;
@@ -38,6 +39,8 @@ public class MemberService {
 
     private static final String DEFAULT_BIRTHDATE = "1900-01-01";
 
+    private static final String DEFAULT_BLOG_SUFFIX = ".blog";
+
     public MemberTaskResultResponseDto signUp(CreateMemberRequestDto requestDto) {
         if (isExistByEmail(requestDto.getEmail())) {
             throw new ErrorHandler(ErrorStatus.MEMBER_EMAIL_ALREADY_EXIST);
@@ -60,6 +63,7 @@ public class MemberService {
                 .socialType(SocialType.LOCAL)
                 .build();
         memberRepository.save(member);
+        log.info("로컬 회원가입에 성공하였습니다. memberIdx = {}, memberId = {}, nickName = {}", member.getIdx(), member.getMemberId(), member.getNickName());
         return MemberDtoConverter.convertToMemberTaskDto(member);
     }
 

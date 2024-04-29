@@ -1,5 +1,6 @@
 package com.example.server.domain.member.dto;
 
+import com.example.server.domain.blog.domain.Blog;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.dto.MemberResponseDto.*;
 
@@ -31,7 +32,7 @@ public class MemberDtoConverter {
                 .profileImageUrl(member.getProfileImageUrl())
                 .birthDate(LocalDate.parse(member.getBirthDate().toString(), formatter).toString())
                 .gender(member.getGender().name())
-                .blogName(member.getBlog().getName())
+                .blogName(member.getBlog() == null ? null : member.getBlog().getName())
                 .activeStatus(member.getActiveState().name())
                 .socialType(member.getSocialType().getSocialName())
                 .build();
