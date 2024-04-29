@@ -15,32 +15,32 @@ public class MemberTests {
     @Autowired
     private MemberRepository memberRepository;
 
-    @Test // Member 객체 100개  생성
-    public void insertMembers(){
+//    @Test // Member 객체 100개  생성
+//    public void insertMembers(){
+//
+//        IntStream.rangeClosed(1,100).forEach(i -> {
+//
+//            Member member = Member.builder()
+//                    .email("user" + i + "@aaa.com")
+//                    .password("1111")
+//                    .name("USER" + i)
+//                    .build();
+//
+//            memberRepository.save(member);
+//        });
+//    }
 
-        IntStream.rangeClosed(1,100).forEach(i -> {
-
-            Member member = Member.builder()
-                    .email("user" + i + "@aaa.com")
-                    .password("1111")
-                    .name("USER" + i)
-                    .build();
-
-            memberRepository.save(member);
-        });
-    }
-
-    @Test
-    public void insertMember(){
-        IntStream.rangeClosed(1,100).forEach( i->{
-            Member member = Member.builder()
-                    .email("user" + i + "@aaa.com")
-                    .password("1111")
-                    .name("USER"+i)
-                    .nickName("USERNICK"+i)
-                    .gender(Gender.FEMALE)
-                    .build();
-            memberRepository.save(member);
-        });
-    }
+//    @Test
+//    public void insertMember(){
+//        IntStream.rangeClosed(1,100).forEach( i->{
+//            Member member = Member.builder()
+//                    .email("user" + i + "@aaa.com")
+//                    .password("1111")
+//                    .name("USER"+i)
+//                    .nickName("USERNICK"+i)
+//                    .gender(Gender.FEMALE)
+//                    .build();
+//            memberRepository.save(member);
+//        });
+//    }
 }

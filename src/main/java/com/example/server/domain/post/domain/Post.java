@@ -32,7 +32,7 @@ public class Post extends BaseTimeEntity {
     private String location;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_idx")
     private Member member;
 
     @OneToMany(mappedBy = "post")

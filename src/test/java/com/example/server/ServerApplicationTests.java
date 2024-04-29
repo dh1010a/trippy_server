@@ -13,9 +13,6 @@ import static org.assertj.core.api.FactoryBasedNavigableListAssert.assertThat;
 @SpringBootTest
 class ServerApplicationTests {
 
-    @Test
-    void contextLoads() {
-    }
 
 
 }
