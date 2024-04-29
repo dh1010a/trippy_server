@@ -1,10 +1,7 @@
 package com.example.server.domain.member.dto;
 
 import com.example.server.domain.member.domain.Member;
-import com.example.server.domain.member.dto.MemberResponseDto.IsNewMemberResponseDto;
-import com.example.server.domain.member.dto.MemberResponseDto.MemberFollowResponseDto;
-import com.example.server.domain.member.dto.MemberResponseDto.MemberInfoResponseDto;
-import com.example.server.domain.member.dto.MemberResponseDto.MemberTaskResultResponseDto;
+import com.example.server.domain.member.dto.MemberResponseDto.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -48,6 +45,15 @@ public class MemberDtoConverter {
                 .followingMemberIdx(followingMember.getIdx())
                 .followingMemberId(followingMember.getMemberId())
                 .followingMemberNickName(followingMember.getNickName())
+                .isSuccess(true)
+                .build();
+    }
+
+    public static FollowMemberInfoDto convertToFollowMemberInfoDto(Member member) {
+        return FollowMemberInfoDto.builder()
+                .idx(member.getIdx())
+                .memberId(member.getMemberId())
+                .nickName(member.getNickName())
                 .build();
     }
 }

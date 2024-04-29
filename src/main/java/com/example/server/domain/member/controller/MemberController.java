@@ -79,9 +79,23 @@ public class MemberController {
 
     }
 
+    @PostMapping("/follow")
     public ApiResponse<?> followMember(@RequestParam(value = "memberId", required = false) String followingMemberId) {
         String memberId = getLoginMemberId();
         return ApiResponse.onSuccess(memberService.followMember(memberId, followingMemberId));
+    }
+
+    @GetMapping("/follow")
+    public ApiResponse<?> getFollow(@RequestParam(value = "type") String type)  {
+        // 비활성화된 멤버는 조회 안되게 하는 로직 추가 구현 해야함
+        String memberId = getLoginMemberId();
+        if (type.equals("follower")) {
+            return ApiResponse.onSuccess(memberService.getFollowerList(memberId));
+        } else if (type.equals("following")) {
+            return ApiResponse.onSuccess(memberService.getFollowingList(memberId));
+        }
+
+        return ApiResponse.onSuccess(ErrorStatus._BAD_REQUEST);
     }
 
     private String getLoginMemberId() {
