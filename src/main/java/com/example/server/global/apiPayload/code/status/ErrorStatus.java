@@ -23,8 +23,10 @@ public enum ErrorStatus implements BaseErrorCode {
     MEMBER_EMAIL_PASSWORD_NOT_MATCH(HttpStatus.UNAUTHORIZED, "MEMBER4002", "이메일 또는 비밀번호가 일치하지 않습니다."),
     MEMBER_EMAIL_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4003", "중복된 이메일입니다."),
     MEMBER_NICKNAME_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4004", "중복된 닉네임입니다."),
-    MEMBER_BLOGNAME_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4006", "중복된 블로그명입니다."),
     MEMBER_LOGIN_NOT_SUPPORT(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "MEMBER4015", "지원되지 않는 로그인 형식입니다."),
+
+    // 블로그 응답
+    BLOG_NAME_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "BLOG4001", "중복된 블로그명입니다."),
 
     //사진 응답
     IMAGE_UPLOAD_FAIL(HttpStatus.BAD_REQUEST, "IMG4001", "사진 업로드에 실패하였습니다."),

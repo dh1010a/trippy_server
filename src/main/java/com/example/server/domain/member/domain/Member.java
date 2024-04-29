@@ -2,7 +2,8 @@ package com.example.server.domain.member.domain;
 
 //import com.example.server.domain.badge.domain.MemberBadge;
 //import com.example.server.domain.follow.domain.MemberFollow;
-//import com.example.server.domain.image.domain.Image;
+import com.example.server.domain.blog.domain.Blog;
+import com.example.server.domain.image.domain.Image;
 //import com.example.server.domain.member.model.ActiveState;
 //import com.example.server.domain.member.model.Gender;
 //import com.example.server.domain.member.model.Role;
@@ -19,7 +20,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -80,10 +80,10 @@ public class Member extends BaseTimeEntity {
 //    @JsonIgnore
 //    private List<MemberTicket> memberTickets;
 //
-//    @OneToOne
-//    @JoinColumn(name = "image_id")
-//    private Image profileImage;
-//
+    @OneToOne
+    @JoinColumn(name = "image_id")
+    private Image profileImage;
+
     @OneToOne
     @JoinColumn(name = "blog_id")
     private Blog blog;
@@ -107,6 +107,10 @@ public class Member extends BaseTimeEntity {
 
     public void setSocialType(SocialType type) {
         this.socialType = type;
+    }
+
+    public void setBlog(Blog blog) {
+        this.blog = blog;
     }
 
     public void updateProfileImgUrl(String profileImageUrl) {

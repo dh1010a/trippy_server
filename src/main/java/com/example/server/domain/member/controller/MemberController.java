@@ -1,6 +1,7 @@
 package com.example.server.domain.member.controller;
 
 
+import com.example.server.domain.blog.service.BlogService;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.dto.MemberRequestDto;
 import com.example.server.domain.member.dto.MemberRequestDto.CreateMemberRequestDto;
@@ -46,10 +47,9 @@ public class MemberController {
         return ApiResponse.onSuccess(memberService.isNewMember(memberId));
     }
 
-    @GetMapping("/api/member/isDuplicated")
+    @GetMapping("/isDuplicated")
     public ApiResponse<IsDuplicatedDto> isDuplicated(@RequestParam(value = "memberId", required = false) String memberId,
                                                      @RequestParam(value = "email", required = false) String email,
-                                                     @RequestParam(value = "blogName", required = false) String blogName,
                                                      @RequestParam(value = "nickName", required = false) String nickName) throws Exception {
         IsDuplicatedDto isDuplicatedDto;
         String ALREADY_EXIST_MESSAGE = "이미 가입된 내역이 존재합니다. 가입된 로그인 플랫폼 : ";
@@ -72,21 +72,13 @@ public class MemberController {
                     .message(memberService.isExistByNickName(nickName) ? ErrorStatus.MEMBER_NICKNAME_ALREADY_EXIST.getMessage()
                             : "사용 가능한 닉네임입니다.")
                     .build();
-        }
-        else if (blogName != null) {
-            isDuplicatedDto = IsDuplicatedDto.builder()
-                    .isDuplicated(memberService.isExistByBlogName(blogName))
-                    .message(memberService.isExistByBlogName(blogName)? ErrorStatus.MEMBER_BLOGNAME_ALREADY_EXIST.getMessage()
-                            : "사용 가능한 블로그명입니다.")
-                    .build();
-        }
-
-        else {
+        } else {
             throw new ErrorHandler(ErrorStatus._BAD_REQUEST);
         }
         return ApiResponse.onSuccess(isDuplicatedDto);
 
     }
+
 
 
 }
