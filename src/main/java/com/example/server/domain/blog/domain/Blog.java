@@ -1,6 +1,7 @@
-package com.example.server.domain.follow.domain;
+package com.example.server.domain.blog.domain;
 
 import com.example.server.domain.member.domain.Member;
+import com.example.server.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,16 +10,20 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MemberFollow {
+public class Blog extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "memberFollow_id")
+    @Column(name = "blog_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    private String name;
+
+    private String introduce;
+
+
+    @OneToOne
     @JoinColumn(name = "member_idx")
     private Member member;
 
-    private Long followingMemberIdx;
 }
