@@ -111,4 +111,8 @@ public class MemberService {
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
         return member.getSocialType().getSocialName();
     }
+
+    public boolean isExistByBlogName(String blogName) {
+        return memberRepository.existsByBlogName(blogName);
+    }
 }

@@ -52,31 +52,34 @@ public class MemberController {
                                                      @RequestParam(value = "blogName", required = false) String blogName,
                                                      @RequestParam(value = "nickName", required = false) String nickName) throws Exception {
         IsDuplicatedDto isDuplicatedDto;
+        String ALREADY_EXIST_MESSAGE = "이미 가입된 내역이 존재합니다. 가입된 로그인 플랫폼 : ";
+
         if (memberId != null) {
-            String message = "이미 가입된 내역이 존재합니다. 가입된 로그인 플랫폼 : " + memberService.getSocialTypeByEmail(email);
+            String message = ALREADY_EXIST_MESSAGE + memberService.getSocialTypeByEmail(email);
             isDuplicatedDto = IsDuplicatedDto.builder()
                     .isDuplicated(memberService.isExistByMemberId(memberId))
-                    .message(message)
+                    .message(memberService.isExistByMemberId(memberId)? message : "사용 가능한 아이디입니다.")
                     .build();
         } else if (email != null) {
-            String message = "이미 가입된 내역이 존재합니다. 가입된 로그인 플랫폼 : " + memberService.getSocialTypeByEmail(email);
+            String message = ALREADY_EXIST_MESSAGE + memberService.getSocialTypeByEmail(email);
             isDuplicatedDto = IsDuplicatedDto.builder()
                     .isDuplicated(memberService.isExistByEmail(email))
-                    .message(message)
+                    .message(memberService.isExistByEmail(email)? message : "사용 가능한 이메일입니다.")
                     .build();
         } else if (nickName != null) {
             isDuplicatedDto = IsDuplicatedDto.builder()
                     .isDuplicated(memberService.isExistByNickName(nickName))
-                    .message(ErrorStatus.MEMBER_NICKNAME_ALREADY_EXIST.getMessage())
+                    .message(memberService.isExistByNickName(nickName) ? ErrorStatus.MEMBER_NICKNAME_ALREADY_EXIST.getMessage()
+                            : "사용 가능한 닉네임입니다.")
                     .build();
         }
-        // 블로그 이름 중복 검사. 추후 구현 예정
-//        else if (blogName != null) {
-//            isDuplicatedDto = IsDuplicatedDto.builder()
-//                    .isDuplicated(memberService.isExistByBlogName(blogName))
-//                    .message(ErrorStatus.MEMBER_BLOGNAME_ALREADY_EXIST.getMessage())
-//                    .build();
-//        }
+        else if (blogName != null) {
+            isDuplicatedDto = IsDuplicatedDto.builder()
+                    .isDuplicated(memberService.isExistByBlogName(blogName))
+                    .message(memberService.isExistByBlogName(blogName)? ErrorStatus.MEMBER_BLOGNAME_ALREADY_EXIST.getMessage()
+                            : "사용 가능한 블로그명입니다.")
+                    .build();
+        }
 
         else {
             throw new ErrorHandler(ErrorStatus._BAD_REQUEST);
