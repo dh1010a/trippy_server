@@ -15,8 +15,8 @@ public class SwaggerConfig {
 	@Bean
 	public OpenAPI rideTogetherHYUAPI(){
 		Info info = new Info()
-				.title("RideTogether_HYU API")
-				.description("RideTogether_HYU API 명세서")
+				.title("Trippy-Server API")
+				.description("Trippy-Serve API 명세서")
 				.version("1.0.0");
 
 		String jwtSchemeName = "JWT TOKEN";
