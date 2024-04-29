@@ -3,6 +3,7 @@ package com.example.server.domain.member.domain;
 //import com.example.server.domain.badge.domain.MemberBadge;
 //import com.example.server.domain.follow.domain.MemberFollow;
 import com.example.server.domain.blog.domain.Blog;
+import com.example.server.domain.follow.domain.MemberFollow;
 import com.example.server.domain.image.domain.Image;
 //import com.example.server.domain.member.model.ActiveState;
 //import com.example.server.domain.member.model.Gender;
@@ -16,10 +17,12 @@ import com.example.server.domain.member.model.Gender;
 import com.example.server.domain.member.model.Role;
 import com.example.server.global.auth.oauth2.model.SocialType;
 import com.example.server.global.common.BaseTimeEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Getter
@@ -71,10 +74,10 @@ public class Member extends BaseTimeEntity {
 //    @OneToMany(mappedBy = "member")
 //    @JsonIgnore
 //    private List<MemberBadge> memberBadges;
-////
-//    @OneToMany(mappedBy = "member")
-//    @JsonIgnore
-//    private List<MemberFollow> memberFollows;
+
+    @OneToMany(mappedBy = "member")
+    @JsonIgnore
+    private List<MemberFollow> memberFollows;
 //
 //    @OneToMany(mappedBy = "member")
 //    @JsonIgnore
@@ -115,6 +118,10 @@ public class Member extends BaseTimeEntity {
 
     public void updateProfileImgUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public void updateMemberFollowing(MemberFollow memberFollow) {
+        this.memberFollows.add(memberFollow);
     }
 
 

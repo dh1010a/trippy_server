@@ -1,9 +1,12 @@
 package com.example.server.domain.member.service;
 
+import com.example.server.domain.follow.repository.MemberFollowRepository;
+import com.example.server.domain.follow.domain.MemberFollow;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.dto.MemberDtoConverter;
 import com.example.server.domain.member.dto.MemberRequestDto.CreateMemberRequestDto;
 import com.example.server.domain.member.dto.MemberResponseDto.IsNewMemberResponseDto;
+import com.example.server.domain.member.dto.MemberResponseDto.MemberFollowResponseDto;
 import com.example.server.domain.member.dto.MemberResponseDto.MemberInfoResponseDto;
 import com.example.server.domain.member.dto.MemberResponseDto.MemberTaskResultResponseDto;
 import com.example.server.domain.member.model.ActiveState;
@@ -29,6 +32,7 @@ import java.util.UUID;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MemberFollowRepository memberFollowRepository;
 
     private static final String DEFAULT_BIRTHDATE = "1900-01-01";
 
@@ -95,6 +99,27 @@ public class MemberService {
         return MemberDtoConverter.convertToInfoResponseDto(member);
     }
 
+    public MemberFollowResponseDto followMember(String memberId, String followingMemberId) {
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member followingMember = memberRepository.findByMemberId(followingMemberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_FOLLOWING_MEMBER_NOT_FOUND));
+
+        MemberFollow memberFollow = MemberFollow.builder()
+                .member(member)
+                .followingMemberIdx(followingMember.getIdx())
+                .build();
+
+        memberFollowRepository.save(memberFollow);
+
+        member.getMemberFollows().add(memberFollow);
+
+        return MemberDtoConverter.convertToFollowResponseDto(member, followingMember);
+    }
+
+    public String getSocialTypeByEmail(String email) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        return member.getSocialType().getSocialName();
+    }
+
     public boolean isExistByEmail(String email) {
         return memberRepository.existsByEmail(email);
     }
@@ -107,8 +132,4 @@ public class MemberService {
         return memberRepository.existsByMemberId(memberId);
     }
 
-    public String getSocialTypeByEmail(String email) {
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
-        return member.getSocialType().getSocialName();
-    }
 }

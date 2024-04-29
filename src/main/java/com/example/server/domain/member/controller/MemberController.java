@@ -37,13 +37,13 @@ public class MemberController {
 
     @GetMapping
     public ApiResponse<?> getMyInfo() {
-        String memberId = SecurityUtil.getLoginMemberId().orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        String memberId = getLoginMemberId();
         return ApiResponse.onSuccess(memberService.getMyInfo(memberId));
     }
 
     @GetMapping("/isNewMember")
     public ApiResponse<?> isNewMember() {
-        String memberId = SecurityUtil.getLoginMemberId().orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        String memberId = getLoginMemberId();
         return ApiResponse.onSuccess(memberService.isNewMember(memberId));
     }
 
@@ -77,6 +77,15 @@ public class MemberController {
         }
         return ApiResponse.onSuccess(isDuplicatedDto);
 
+    }
+
+    public ApiResponse<?> followMember(@RequestParam(value = "memberId", required = false) String followingMemberId) {
+        String memberId = getLoginMemberId();
+        return ApiResponse.onSuccess(memberService.followMember(memberId, followingMemberId));
+    }
+
+    private String getLoginMemberId() {
+        return SecurityUtil.getLoginMemberId().orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
     }
 
 

@@ -49,4 +49,17 @@ public class MemberResponseDto {
         private boolean isDuplicated;
     }
 
+    @Data
+    @Builder
+    public static class MemberFollowResponseDto {
+        private Long idx;
+        private String memberId;
+        private String nickName;
+        private Long followingMemberIdx;
+        private String followingMemberId;
+        private String followingMemberNickName;
+        private boolean isSuccess;
+
+    }
+
 }

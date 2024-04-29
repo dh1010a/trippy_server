@@ -2,6 +2,7 @@ package com.example.server.domain.member.dto;
 
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.dto.MemberResponseDto.IsNewMemberResponseDto;
+import com.example.server.domain.member.dto.MemberResponseDto.MemberFollowResponseDto;
 import com.example.server.domain.member.dto.MemberResponseDto.MemberInfoResponseDto;
 import com.example.server.domain.member.dto.MemberResponseDto.MemberTaskResultResponseDto;
 
@@ -33,9 +34,20 @@ public class MemberDtoConverter {
                 .profileImageUrl(member.getProfileImageUrl())
                 .birthDate(LocalDate.parse(member.getBirthDate().toString(), formatter).toString())
                 .gender(member.getGender().name())
-//                blogName(member.getBlogName())
+                .blogName(member.getBlog().getName())
                 .activeStatus(member.getActiveState().name())
                 .socialType(member.getSocialType().getSocialName())
+                .build();
+    }
+
+    public static MemberFollowResponseDto convertToFollowResponseDto(Member member, Member followingMember) {
+        return MemberFollowResponseDto.builder()
+                .idx(member.getIdx())
+                .memberId(member.getMemberId())
+                .nickName(member.getNickName())
+                .followingMemberIdx(followingMember.getIdx())
+                .followingMemberId(followingMember.getMemberId())
+                .followingMemberNickName(followingMember.getNickName())
                 .build();
     }
 }
