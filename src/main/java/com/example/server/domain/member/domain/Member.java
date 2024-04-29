@@ -84,9 +84,9 @@ public class Member extends BaseTimeEntity {
 //    @JoinColumn(name = "image_id")
 //    private Image profileImage;
 //
-//    @OneToOne
-//    @JoinColumn(name = "blog_id")
-//    private Blog blog;
+    @OneToOne
+    @JoinColumn(name = "blog_id")
+    private Blog blog;
 
     @Enumerated(EnumType.STRING)
     private Role role;
