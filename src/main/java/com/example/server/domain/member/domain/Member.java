@@ -124,6 +124,10 @@ public class Member extends BaseTimeEntity {
         this.memberFollows.add(memberFollow);
     }
 
+    public void updateNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
 
 
 

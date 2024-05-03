@@ -9,6 +9,7 @@ public class BlogRequestDto {
     @Data
     public static class CreateBlogRequestDto {
         private String name;
+        private String nickName;
         private String introduce;
     }
 }

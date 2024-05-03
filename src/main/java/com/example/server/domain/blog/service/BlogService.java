@@ -25,6 +25,8 @@ public class BlogService {
     public CreateBlogResponseDto createBlog(String memberId, CreateBlogRequestDto createBlogRequestDto) {
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
 
+        member.updateNickName(createBlogRequestDto.getNickName());
+
         if (isExistByBlogName(createBlogRequestDto.getName())) {
             throw new ErrorHandler(ErrorStatus.BLOG_NAME_ALREADY_EXIST);
         }

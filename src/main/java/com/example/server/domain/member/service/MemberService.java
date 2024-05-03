@@ -42,6 +42,7 @@ public class MemberService {
     private static final String DEFAULT_BLOG_SUFFIX = ".blog";
 
     public MemberTaskResultResponseDto signUp(CreateMemberRequestDto requestDto) {
+        String randomNickName = requestDto.getName().substring(1, 3) + UUID.randomUUID().toString().substring(0, 9);
         if (isExistByEmail(requestDto.getEmail())) {
             throw new ErrorHandler(ErrorStatus.MEMBER_EMAIL_ALREADY_EXIST);
         }
@@ -50,7 +51,7 @@ public class MemberService {
                 .memberId(requestDto.getMemberId())
                 .name(requestDto.getName())
                 .password(passwordEncoder.encode(requestDto.getPassword()))
-                .nickName(null)
+                .nickName(randomNickName)
                 .email(requestDto.getEmail())
                 .birthDate(LocalDate.parse(DEFAULT_BIRTHDATE, formatter))
                 .phone(requestDto.getPhone())
