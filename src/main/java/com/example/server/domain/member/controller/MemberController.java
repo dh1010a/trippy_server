@@ -55,8 +55,8 @@ public class MemberController {
         IsDuplicatedDto isDuplicatedDto;
         String ALREADY_EXIST_MESSAGE = "이미 가입된 내역이 존재합니다. 가입된 로그인 플랫폼 : ";
 
-        if (memberId != null) {
-            String message = ALREADY_EXIST_MESSAGE + memberService.getSocialTypeByEmail(email);
+        if (memberId != null ) {
+            String message = ALREADY_EXIST_MESSAGE + memberService.getSocialTypeByMemberId(email);
             isDuplicatedDto = IsDuplicatedDto.builder()
                     .isDuplicated(memberService.isExistByMemberId(memberId))
                     .message(memberService.isExistByMemberId(memberId)? message : "사용 가능한 아이디입니다.")

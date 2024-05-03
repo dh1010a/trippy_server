@@ -153,7 +153,18 @@ public class MemberService {
     }
 
     public String getSocialTypeByEmail(String email) {
+        if (!isExistByEmail(email)) {
+            return null;
+        }
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        return member.getSocialType().getSocialName();
+    }
+
+    public String getSocialTypeByMemberId(String memberId) {
+        if (!isExistByMemberId(memberId)) {
+            return null;
+        }
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
         return member.getSocialType().getSocialName();
     }
 
