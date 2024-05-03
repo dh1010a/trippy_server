@@ -12,7 +12,6 @@ public class MemberRequestDto {
             private String password;
             private String name;
             private String email;
-            private String nickName;
             private String phone;
             private String gender;
         }

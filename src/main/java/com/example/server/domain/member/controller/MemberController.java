@@ -32,7 +32,7 @@ public class MemberController {
 
     @PostMapping("/signup")
     public ApiResponse<?> signUp(@RequestBody CreateMemberRequestDto createMemberRequestDto) {
-        log.info("회원가입 요청 : memberId = {}, nickName = {}", createMemberRequestDto.getMemberId(), createMemberRequestDto.getNickName());
+        log.info("회원가입 요청 : memberId = {}", createMemberRequestDto.getMemberId());
         return ApiResponse.onSuccess(memberService.signUp(createMemberRequestDto));
     }
 

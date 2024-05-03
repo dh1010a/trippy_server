@@ -45,15 +45,12 @@ public class MemberService {
         if (isExistByEmail(requestDto.getEmail())) {
             throw new ErrorHandler(ErrorStatus.MEMBER_EMAIL_ALREADY_EXIST);
         }
-        if (isExistByNickName(requestDto.getNickName())) {
-            throw new ErrorHandler(ErrorStatus.MEMBER_NICKNAME_ALREADY_EXIST);
-        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         Member member = Member.builder()
                 .memberId(requestDto.getMemberId())
                 .name(requestDto.getName())
                 .password(passwordEncoder.encode(requestDto.getPassword()))
-                .nickName(requestDto.getNickName())
+                .nickName(null)
                 .email(requestDto.getEmail())
                 .birthDate(LocalDate.parse(DEFAULT_BIRTHDATE, formatter))
                 .phone(requestDto.getPhone())
