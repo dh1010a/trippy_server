@@ -1,8 +1,9 @@
 package com.example.server.domain.image.domain;
 
 import com.example.server.domain.member.domain.Member;
+//import com.example.server.domain.post.domain.Post;
+//import com.example.server.domain.ticket.domain.Ticket;
 import com.example.server.domain.post.domain.Post;
-import com.example.server.domain.ticket.domain.Ticket;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,13 +25,19 @@ public class Image {
     private Post post;
 
     @OneToOne
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "image_id")
+    private Image profileImage;
+
+    @OneToOne
+    @JoinColumn(name = "member_idx")
     private Member member;
 
 
     private String imgUrl;
 
-
+    public void setPost(Post post) {
+        this.post = post;
+    }
 
 
 }

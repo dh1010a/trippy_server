@@ -1,5 +1,6 @@
-package com.example.server.domain.member.domain;
+package com.example.server.domain.blog.domain;
 
+import com.example.server.domain.member.domain.Member;
 import com.example.server.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,8 +21,9 @@ public class Blog extends BaseTimeEntity {
 
     private String introduce;
 
+
     @OneToOne
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_idx")
     private Member member;
 
 }

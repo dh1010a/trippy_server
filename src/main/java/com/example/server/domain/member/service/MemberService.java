@@ -1,11 +1,12 @@
 package com.example.server.domain.member.service;
 
+import com.example.server.domain.follow.repository.MemberFollowRepository;
+import com.example.server.domain.follow.domain.MemberFollow;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.dto.MemberDtoConverter;
 import com.example.server.domain.member.dto.MemberRequestDto.CreateMemberRequestDto;
-import com.example.server.domain.member.dto.MemberResponseDto.IsNewMemberResponseDto;
-import com.example.server.domain.member.dto.MemberResponseDto.MemberInfoResponseDto;
-import com.example.server.domain.member.dto.MemberResponseDto.MemberTaskResultResponseDto;
+import com.example.server.domain.member.dto.MemberResponseDto;
+import com.example.server.domain.member.dto.MemberResponseDto.*;
 import com.example.server.domain.member.model.ActiveState;
 import com.example.server.domain.member.model.Gender;
 import com.example.server.domain.member.model.Role;
@@ -18,17 +19,22 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
 @Slf4j
+@Transactional
 public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MemberFollowRepository memberFollowRepository;
 
     private static final String DEFAULT_BIRTHDATE = "1900-01-01";
 
@@ -95,6 +101,61 @@ public class MemberService {
         return MemberDtoConverter.convertToInfoResponseDto(member);
     }
 
+    public MemberFollowResponseDto followMember(String memberId, String followingMemberId) {
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member followingMember = memberRepository.findByMemberId(followingMemberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_FOLLOWING_MEMBER_NOT_FOUND));
+
+        if (member.getIdx().equals(followingMember.getIdx())) {
+            throw new ErrorHandler(ErrorStatus.MEMBER_FOLLOWING_MYSELF);
+        }
+        if (memberFollowRepository.existsByMemberAndFollowingMemberIdx(member, followingMember.getIdx())) {
+            throw new ErrorHandler(ErrorStatus.MEMBER_FOLLOWING_MEMBER_ALREADY_EXIST);
+        }
+
+        MemberFollow memberFollow = MemberFollow.builder()
+                .member(member)
+                .followingMemberIdx(followingMember.getIdx())
+                .build();
+
+        memberFollowRepository.save(memberFollow);
+
+        member.updateMemberFollowing(memberFollow);
+
+        return MemberDtoConverter.convertToFollowResponseDto(member, followingMember);
+    }
+
+    public MemberFollowerResponseDto getFollowerList(String memberId) {
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        List<MemberFollow> memberFollows = memberFollowRepository.findByFollowingMemberIdx(member.getIdx());
+        List<FollowMemberInfoDto> followers = new ArrayList<>();
+
+        for (MemberFollow memberFollow : memberFollows) {
+            followers.add(MemberDtoConverter.convertToFollowMemberInfoDto(memberFollow.getMember()));
+        }
+        return MemberResponseDto.MemberFollowerResponseDto.builder()
+                .followers(followers)
+                .build();
+    }
+
+    public MemberFollowingResponseDto getFollowingList(String memberId) {
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        List<MemberFollow> memberFollows = member.getMemberFollows();
+        List<FollowMemberInfoDto> followings = new ArrayList<>();
+
+        for (MemberFollow memberFollow : memberFollows) {
+            memberRepository.findByIdx(memberFollow.getFollowingMemberIdx())
+                    .ifPresent(followingMember -> followings.add(MemberDtoConverter.convertToFollowMemberInfoDto(followingMember)));
+        }
+        return MemberResponseDto.MemberFollowingResponseDto.builder()
+                .followings(followings)
+                .build();
+    }
+
+    public String getSocialTypeByEmail(String email) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        return member.getSocialType().getSocialName();
+    }
+
     public boolean isExistByEmail(String email) {
         return memberRepository.existsByEmail(email);
     }
@@ -107,8 +168,4 @@ public class MemberService {
         return memberRepository.existsByMemberId(memberId);
     }
 
-    public String getSocialTypeByEmail(String email) {
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
-        return member.getSocialType().getSocialName();
-    }
 }

@@ -19,7 +19,7 @@ public class MemberBadge  extends BaseTimeEntity  {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_idx")
     private Member member;
 
     @ManyToOne

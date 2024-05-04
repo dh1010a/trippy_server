@@ -3,12 +3,14 @@ package com.example.server.domain.post.domain;
 import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.member.domain.BookMark;
 import com.example.server.domain.member.domain.Member;
+import com.example.server.domain.post.dto.PostRequestDto;
 import com.example.server.domain.post.model.PostType;
 import com.example.server.global.common.BaseTimeEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Builder
@@ -27,6 +29,7 @@ public class Post extends BaseTimeEntity {
 
     private String body;
 
+    @Enumerated(EnumType.STRING)
     private PostType postType;
 
     private String location;
@@ -44,12 +47,31 @@ public class Post extends BaseTimeEntity {
     private List<Like> likes;
 
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Image> images;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Tag> tag;
 
+    public void updatePost(PostRequestDto.UpdatePostRequestDto requestDto){
+        this.title = requestDto.getTitle();
+        this.body = requestDto.getBody();
+        this.postType = requestDto.getPostType();
+        this.location = requestDto.getLocation();
+
+
+    }
+
+    public void updateTags(List<Tag> newTags) {
+
+        this.tag = newTags;
+    }
+
+    public void updateImages(List<Image> newImages) {
+        this.images = newImages;
+    }
+
 }
+

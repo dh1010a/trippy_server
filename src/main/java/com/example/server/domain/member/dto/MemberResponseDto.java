@@ -3,6 +3,8 @@ package com.example.server.domain.member.dto;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 public class MemberResponseDto {
 
     @Data
@@ -47,6 +49,40 @@ public class MemberResponseDto {
     public static class IsDuplicatedDto {
         private String message;
         private boolean isDuplicated;
+    }
+
+    @Data
+    @Builder
+    public static class MemberFollowResponseDto {
+        private Long idx;
+        private String memberId;
+        private String nickName;
+        private Long followingMemberIdx;
+        private String followingMemberId;
+        private String followingMemberNickName;
+        private boolean isSuccess;
+
+    }
+
+    @Data
+    @Builder
+    public static class FollowMemberInfoDto {
+        private Long idx;
+        private String memberId;
+        private String nickName;
+//        private String profileImageUrl;
+    }
+
+    @Data
+    @Builder
+    public static class MemberFollowerResponseDto {
+        private List<FollowMemberInfoDto> followers;
+    }
+
+    @Data
+    @Builder
+    public static class MemberFollowingResponseDto {
+        private List<FollowMemberInfoDto> followings;
     }
 
 }

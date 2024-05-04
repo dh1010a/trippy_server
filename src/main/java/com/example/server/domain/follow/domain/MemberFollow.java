@@ -17,8 +17,8 @@ public class MemberFollow {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_idx")
     private Member member;
 
-    private String followingMemberId;
+    private Long followingMemberIdx;
 }

@@ -23,8 +23,13 @@ public enum ErrorStatus implements BaseErrorCode {
     MEMBER_EMAIL_PASSWORD_NOT_MATCH(HttpStatus.UNAUTHORIZED, "MEMBER4002", "이메일 또는 비밀번호가 일치하지 않습니다."),
     MEMBER_EMAIL_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4003", "중복된 이메일입니다."),
     MEMBER_NICKNAME_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4004", "중복된 닉네임입니다."),
-    MEMBER_BLOGNAME_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4006", "중복된 블로그명입니다."),
+    MEMBER_FOLLOWING_MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER4005", "팔로우하려는 유저가 존재하지 않습니다."),
+    MEMBER_FOLLOWING_MEMBER_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4006", "이미 팔로우한 유저입니다."),
+    MEMBER_FOLLOWING_MYSELF(HttpStatus.BAD_REQUEST, "MEMBER4007", "자기 자신을 팔로우할 수 없습니다."),
     MEMBER_LOGIN_NOT_SUPPORT(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "MEMBER4015", "지원되지 않는 로그인 형식입니다."),
+
+    // 블로그 응답
+    BLOG_NAME_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "BLOG4001", "중복된 블로그명입니다."),
 
     //사진 응답
     IMAGE_UPLOAD_FAIL(HttpStatus.BAD_REQUEST, "IMG4001", "사진 업로드에 실패하였습니다."),
@@ -41,6 +46,13 @@ public enum ErrorStatus implements BaseErrorCode {
     KAKAO_SOCIAL_LOGIN_FAIL(HttpStatus.BAD_REQUEST, "SOCIAL4002", "KAKAO 소셜 정보를 불러오는데에 실패하였습니다."),
     NAVER_SOCIAL_LOGIN_FAIL(HttpStatus.BAD_REQUEST, "SOCIAL4003", "NAVER 소셜 정보를 불러오는데에 실패하였습니다."),
     GOOGLE_SOCIAL_LOGIN_FAIL(HttpStatus.BAD_REQUEST, "SOCIAL4004", "GOOGLE 소셜 정보를 불러오는데에 실패하였습니다."),
+
+    // 게시물 응답
+    POST_NOT_FOUND(HttpStatus.BAD_REQUEST, "POST4001", "존재하지 않는 게시물입니다."),
+    NO_PERMISSION__FOR_POST(HttpStatus.BAD_REQUEST, "POST4002", "해당 게시물에 권한이 없는 유저입니다."),
+
+    // 댓글 응답
+    PARENT_COMMENT_AND_POST_NOT_FOUND(HttpStatus.BAD_REQUEST, "COMMENT4001", "존재하지 않는 댓글이거나 부모 댓글이 게시글과 일치하지 않습니다."),
 
     //푸시알림 응답
     ALARM_SEND_FAIL(HttpStatus.BAD_REQUEST,"ALARM4001", "알림 보내기를 실패하였습니다.");
