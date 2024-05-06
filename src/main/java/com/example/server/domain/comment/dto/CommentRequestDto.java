@@ -13,4 +13,12 @@ public class CommentRequestDto {
         private Long parentId;
         private String content;
     }
+
+    @Data
+    @Builder
+    public static class CommentUpdateRequest{
+        private Long commentId;
+        private String content;
+        private String memberId;
+    }
 }

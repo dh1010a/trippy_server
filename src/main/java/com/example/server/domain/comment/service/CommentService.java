@@ -51,7 +51,7 @@ public class CommentService {
         return CommentDtoConverter.convertToCommentBasicResponse(comment);
     }
 
-    // GET /api/comment
+    // GET /api/comment by postId
     public Map<Long, CommentResponseDto.CommentTreeDTO> getCommentTree(Long postId){
          List<Comment> comments = commentRepository.findByPostIdOrderByAsc(postId);
          return  CommentDtoConverter.convertToTreeDtoMap(comments);
@@ -63,6 +63,15 @@ public class CommentService {
                 .orElseThrow(() -> new ErrorHandler(ErrorStatus.COMMENT_NOT_FOUND));
         return converToCommentTreeDTO(comment);
 
+    }
+
+    // PATCH /api/comment/id
+    public CommentResponseDto.CommentTreeDTO updateComment(CommentRequestDto.CommentUpdateRequest requestDto){
+        Comment comment = commentRepository.findById(requestDto.getCommentId())
+                .orElseThrow(() -> new ErrorHandler(ErrorStatus.COMMENT_NOT_FOUND));
+        if(!((comment.getMember().getEmail()).equals(requestDto.getMemberId()))) throw new ErrorHandler(ErrorStatus.NO_PERMISSION__FOR_POST);
+        comment.updateContent(requestDto.getContent());
+        return  converToCommentTreeDTO(comment);
     }
 
     // DELETE /api/comment

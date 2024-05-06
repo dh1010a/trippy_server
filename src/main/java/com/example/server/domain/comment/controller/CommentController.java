@@ -37,11 +37,18 @@ public class CommentController {
         return ApiResponse.onSuccess(commentService.getCommentTree(postId));
     }
 
-
-
     @DeleteMapping("/{id}")
     public ApiResponse<?> deleteComment(@PathVariable("id") Long commentId) {
         return ApiResponse.onSuccess(commentService.deleteComment(commentId));
+    }
+
+    @PatchMapping("")
+    public ApiResponse<?> updateComment(@RequestBody CommentRequestDto.CommentUpdateRequest requestDto){
+        String memberId = getLoginMemberId();
+        requestDto.setMemberId(memberId);
+        return ApiResponse.onSuccess(commentService.updateComment(requestDto));
+
+
     }
 
     private String getLoginMemberId() {
