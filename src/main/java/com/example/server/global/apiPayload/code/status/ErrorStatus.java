@@ -50,6 +50,7 @@ public enum ErrorStatus implements BaseErrorCode {
     // 게시물 응답
     POST_NOT_FOUND(HttpStatus.BAD_REQUEST, "POST4001", "존재하지 않는 게시물입니다."),
     NO_PERMISSION__FOR_POST(HttpStatus.BAD_REQUEST, "POST4002", "해당 게시물에 권한이 없는 유저입니다."),
+    ALREADY_LIKED(HttpStatus.BAD_REQUEST, "POST4003", "이미 좋아요를 누른 게시물입니다."),
 
     // 댓글 응답
     PARENT_COMMENT_AND_POST_NOT_FOUND(HttpStatus.BAD_REQUEST, "COMMENT4001", "존재하지 않는 댓글이거나 부모 댓글이 게시글과 일치하지 않습니다."),
