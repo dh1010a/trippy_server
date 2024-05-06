@@ -1,5 +1,6 @@
 package com.example.server.domain.comment.domain;
 
+import com.example.server.domain.comment.model.CommentStatus;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.global.common.BaseTimeEntity;
@@ -33,6 +34,10 @@ public class Comment extends BaseTimeEntity {
 
     private String content;
 
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "status")
+    private CommentStatus status = CommentStatus.ALIVE;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private Comment parent;
@@ -43,6 +48,10 @@ public class Comment extends BaseTimeEntity {
 
     public void updateParent(Comment parentComment){
         this.parent = parentComment;
+    }
+
+    public void updateStatus(CommentStatus status){
+        this.status = status;
     }
 
 

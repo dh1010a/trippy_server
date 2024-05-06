@@ -53,6 +53,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 댓글 응답
     PARENT_COMMENT_AND_POST_NOT_FOUND(HttpStatus.BAD_REQUEST, "COMMENT4001", "존재하지 않는 댓글이거나 부모 댓글이 게시글과 일치하지 않습니다."),
+    COMMENT_NOT_FOUND(HttpStatus.BAD_REQUEST, "COMMENT4002", "존재하지 않는 댓글입니다."),
 
     //푸시알림 응답
     ALARM_SEND_FAIL(HttpStatus.BAD_REQUEST,"ALARM4001", "알림 보내기를 실패하였습니다.");

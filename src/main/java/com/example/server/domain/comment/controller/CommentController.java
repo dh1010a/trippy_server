@@ -6,6 +6,7 @@ import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import com.example.server.global.util.SecurityUtil;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -26,10 +27,22 @@ public class CommentController {
         return ApiResponse.onSuccess(commentService.uploadComment(commentBasicRequest));
     }
 
-//    @GetMapping("")
-//    public ApiResponse<?> getCommentF(@PathVariable("id") Long postId) {
-//
-//    }
+    @GetMapping("/{id}")
+    public ApiResponse<?> getCommentByCommentId(@PathVariable("id") Long commentId) {
+        return ApiResponse.onSuccess(commentService.getCommentById(commentId));
+    }
+
+    @GetMapping("")
+    public ApiResponse<?> getCommentByPostId(@RequestParam("postId") Long postId) {
+        return ApiResponse.onSuccess(commentService.getCommentTree(postId));
+    }
+
+
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<?> deleteComment(@PathVariable("id") Long commentId) {
+        return ApiResponse.onSuccess(commentService.deleteComment(commentId));
+    }
 
     private String getLoginMemberId() {
         return SecurityUtil.getLoginMemberId().orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
