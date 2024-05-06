@@ -15,8 +15,16 @@ public class CommentResponseDto {
         private Long postId;
         private Long memberId;
         // 부모 댓글 id
-        private CommentBasicResponse parentComment;
+        private ParentAndChildCommentResDto parentComment;
         // 자식 댓글들
-        private List<CommentBasicResponse> childComments;
+        private List<ParentAndChildCommentResDto> childComments;
+    }
+
+    @Data
+    @Builder
+    public static class ParentAndChildCommentResDto {
+        private Long id;
+        private String content;
+        private Long memberId;
     }
 }

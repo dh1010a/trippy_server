@@ -8,16 +8,16 @@ import java.util.List;
 public class CommentDtoConverter {
 
     public static CommentResponseDto.CommentBasicResponse convertToCommentBasicResponse(Comment comment){
-        CommentResponseDto.CommentBasicResponse parentResponse = null;
+        CommentResponseDto.ParentAndChildCommentResDto parentResponse = null;
         if(comment.getParent()!=null) {
-            parentResponse = convertToCommentBasicResponse(comment.getParent());
+            parentResponse = convertToParentAndChildCommentRes(comment.getParent());
         }
 
         // 대댓글 entity -> basic Response
-        List<CommentResponseDto.CommentBasicResponse> childCommentResponses = new ArrayList<>();
+        List<CommentResponseDto.ParentAndChildCommentResDto> childCommentResponses = new ArrayList<>();
         if(comment.getChildComments() != null) {
             for (Comment childComment : comment.getChildComments()) {
-                CommentResponseDto.CommentBasicResponse childCommentResponse = convertToCommentBasicResponse(childComment);
+                CommentResponseDto.ParentAndChildCommentResDto childCommentResponse = convertToParentAndChildCommentRes(childComment);
                 childCommentResponses.add(childCommentResponse);
             }
         }
@@ -25,9 +25,19 @@ public class CommentDtoConverter {
         return CommentResponseDto.CommentBasicResponse.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
+                .postId(comment.getPost().getId())
                 .memberId(comment.getMember().getIdx())
                 .parentComment(parentResponse)
                 .childComments(childCommentResponses).build();
+
+    }
+
+    public static CommentResponseDto.ParentAndChildCommentResDto convertToParentAndChildCommentRes(Comment comment){
+        return CommentResponseDto.ParentAndChildCommentResDto.builder()
+                .content(comment.getContent())
+                .id(comment.getId())
+                .memberId(comment.getMember().getIdx())
+                .build();
 
     }
 }
