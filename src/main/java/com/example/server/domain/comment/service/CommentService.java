@@ -5,6 +5,7 @@ import com.example.server.domain.comment.dto.CommentDtoConverter;
 import com.example.server.domain.comment.dto.CommentRequestDto;
 import com.example.server.domain.comment.dto.CommentResponseDto;
 import com.example.server.domain.comment.model.CommentStatus;
+import com.example.server.domain.comment.model.DeleteStatus;
 import com.example.server.domain.comment.repository.CommentRepository;
 import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.member.domain.Member;
@@ -75,18 +76,19 @@ public class CommentService {
     }
 
     // DELETE /api/comment
-    public Long deleteComment(Long commentId){
+    public DeleteStatus deleteComment(Long commentId){
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ErrorHandler(ErrorStatus.COMMENT_NOT_FOUND));
 
         // 자식 댓글이 있으면
         if(!comment.getChildComments().isEmpty()){
             comment.updateStatus(CommentStatus.DEAD);
+            return DeleteStatus.DEAD;
         }
         else {
             commentRepository.delete(getDeletableAncestorComment(comment));
+            return DeleteStatus.DELETE;
         }
-        return commentId;
     }
 
     public Comment getDeletableAncestorComment(Comment comment) {

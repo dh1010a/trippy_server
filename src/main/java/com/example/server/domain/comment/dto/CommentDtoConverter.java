@@ -30,7 +30,7 @@ public class CommentDtoConverter {
                 .id(comment.getId())
                 .content(comment.getContent())
                 .postId(comment.getPost().getId())
-                .memberId(comment.getMember().getIdx())
+                .memberId(comment.getMember().getMemberId())
                     .status(comment.getStatus())
                 .parentComment(parentResponse)
                 .childComments(childCommentResponses).build();
