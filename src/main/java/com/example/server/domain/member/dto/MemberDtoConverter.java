@@ -1,6 +1,5 @@
 package com.example.server.domain.member.dto;
 
-import com.example.server.domain.blog.domain.Blog;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.dto.MemberResponseDto.*;
 
@@ -15,7 +14,6 @@ public class MemberDtoConverter {
                 .idx(member.getIdx())
                 .email(member.getEmail())
                 .nickName(member.getNickName())
-                .isSuccess(true)
                 .build();
 
     }
@@ -25,14 +23,9 @@ public class MemberDtoConverter {
         return MemberInfoResponseDto.builder()
                 .idx(member.getIdx())
                 .memberId(member.getMemberId())
-                .name(member.getName())
                 .nickName(member.getNickName())
                 .email(member.getEmail())
-                .phone(member.getPhone())
                 .profileImageUrl(member.getProfileImageUrl())
-                .birthDate(LocalDate.parse(member.getBirthDate().toString(), formatter).toString())
-                .gender(member.getGender().name())
-                .blogName(member.getBlog() == null ? null : member.getBlog().getName())
                 .activeStatus(member.getActiveState().name())
                 .socialType(member.getSocialType().getSocialName())
                 .build();

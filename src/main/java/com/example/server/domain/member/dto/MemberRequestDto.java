@@ -5,14 +5,20 @@ import lombok.Data;
 
 public class MemberRequestDto {
 
-        @Builder
-        @Data
-        public static class CreateMemberRequestDto {
-            private String memberId;
-            private String password;
-            private String name;
-            private String email;
-            private String phone;
-            private String gender;
-        }
+    @Builder
+    @Data
+    public static class CreateMemberRequestDto {
+        private String memberId;
+        private String password;
+        private String name;
+        private String email;
+    }
+
+    @Builder
+    @Data
+    public static class CommonCreateMemberRequestDto {
+        private String nickName;
+        private String blogName;
+        private String blogIntroduce;
+    }
 }

@@ -1,9 +1,9 @@
 package com.example.server.domain.member.controller;
 
 
-import com.example.server.domain.blog.service.BlogService;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.dto.MemberRequestDto;
+import com.example.server.domain.member.dto.MemberRequestDto.CommonCreateMemberRequestDto;
 import com.example.server.domain.member.dto.MemberRequestDto.CreateMemberRequestDto;
 import com.example.server.domain.member.dto.MemberResponseDto;
 import com.example.server.domain.member.repository.MemberRepository;
@@ -35,6 +35,13 @@ public class MemberController {
         log.info("회원가입 요청 : memberId = {}", createMemberRequestDto.getMemberId());
         return ApiResponse.onSuccess(memberService.signUp(createMemberRequestDto));
     }
+
+    @PostMapping("/signup/common")
+    public ApiResponse<?> commonSignUp(@RequestBody CommonCreateMemberRequestDto commonCreateMemberRequestDto) {
+        String loginMemberId = getLoginMemberId();
+        return ApiResponse.onSuccess(memberService.commonSignUp(commonCreateMemberRequestDto, loginMemberId));
+    }
+
 
     @GetMapping
     public ApiResponse<?> getMyInfo() {
