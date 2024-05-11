@@ -3,6 +3,7 @@ package com.example.server.domain.image.domain;
 import com.example.server.domain.member.domain.Member;
 //import com.example.server.domain.post.domain.Post;
 //import com.example.server.domain.ticket.domain.Ticket;
+import com.example.server.domain.post.domain.Post;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,9 +20,9 @@ public class Image {
     @Column(name = "image_id")
     private Long id;
 
-//    @ManyToOne
-//    @JoinColumn(name = "post_id")
-//    private Post post;
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    private Post post;
 
     @OneToOne
     @JoinColumn(name = "image_id")
@@ -34,7 +35,9 @@ public class Image {
 
     private String imgUrl;
 
-
+    public void setPost(Post post) {
+        this.post = post;
+    }
 
 
 }

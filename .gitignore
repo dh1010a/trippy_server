@@ -38,3 +38,4 @@ out/
 
 /resources/
 *.yml
+docker-compose.yml
