@@ -2,7 +2,6 @@ package com.example.server.domain.member.domain;
 
 //import com.example.server.domain.badge.domain.MemberBadge;
 //import com.example.server.domain.follow.domain.MemberFollow;
-import com.example.server.domain.blog.domain.Blog;
 import com.example.server.domain.follow.domain.MemberFollow;
 import com.example.server.domain.image.domain.Image;
 //import com.example.server.domain.member.model.ActiveState;
@@ -38,8 +37,6 @@ public class Member extends BaseTimeEntity {
 
     private String memberId;
 
-    private String name;
-
     private String password;
 
     private String nickName;
@@ -47,14 +44,13 @@ public class Member extends BaseTimeEntity {
 //    @Column(nullable = false, unique = true)
     private String email;
 
-    private String phone;
-
     private String profileImageUrl;
 
-    private LocalDate birthDate;
+    private String blogName;
 
-    @Enumerated(EnumType.STRING)
-    private Gender gender;
+    private String blogTitleImgUrl;
+
+    private String blogIntroduce;
 
     @Column(length = 1000)
     private String refreshToken;
@@ -87,10 +83,6 @@ public class Member extends BaseTimeEntity {
     @JoinColumn(name = "image_id")
     private Image profileImage;
 
-    @OneToOne
-    @JoinColumn(name = "blog_id")
-    private Blog blog;
-
     @Enumerated(EnumType.STRING)
     private Role role;
 
@@ -112,16 +104,32 @@ public class Member extends BaseTimeEntity {
         this.socialType = type;
     }
 
-    public void setBlog(Blog blog) {
-        this.blog = blog;
-    }
-
     public void updateProfileImgUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
     }
 
     public void updateMemberFollowing(MemberFollow memberFollow) {
         this.memberFollows.add(memberFollow);
+    }
+
+    public void updateNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
+    public void updateBlogName(String blogName) {
+        this.blogName = blogName;
+    }
+
+    public void updateBlogTitleImgUrl(String blogTitleImgUrl) {
+        this.blogTitleImgUrl = blogTitleImgUrl;
+    }
+
+    public void updateProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
+
+    public void updateBlogIntroduce(String blogIntroduce) {
+        this.blogIntroduce = blogIntroduce;
     }
 
 

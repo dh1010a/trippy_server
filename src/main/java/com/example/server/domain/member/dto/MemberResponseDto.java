@@ -13,7 +13,6 @@ public class MemberResponseDto {
         private Long idx;
         private String email;
         private String nickName;
-        private Boolean isSuccess;
     }
 
     @Data
@@ -31,14 +30,11 @@ public class MemberResponseDto {
     public static class MemberInfoResponseDto{
         private Long idx;
         private String memberId;
-        private String name;
         private String nickName;
         private String email;
-        private String phone;
         private String profileImageUrl;
-        private String birthDate;
-        private String gender;
         private String blogName;
+        private String blogTitleImgUrl;
         private String activeStatus;
         private String socialType;
 
