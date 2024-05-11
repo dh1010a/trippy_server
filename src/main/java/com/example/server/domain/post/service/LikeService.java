@@ -14,7 +14,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 import static com.example.server.domain.post.dto.LikeDtoConverter.convertToLikeBasicDto;
+import static com.example.server.domain.post.dto.LikeDtoConverter.convertToLikeBasicListDto;
 
 @Service
 @Transactional
@@ -25,6 +28,7 @@ public class LikeService {
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
 
+    // POST /api/like/{postId}
     public LikeResponseDto.LikeBasicResponseDto likeToPost(Long postId, String memberId) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND)); Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
         if(isLiked(postId, memberId)) throw new ErrorHandler(ErrorStatus.ALREADY_LIKED);
@@ -34,18 +38,42 @@ public class LikeService {
                     .member(member)
                     .build();
             likeRepository.save(like);
-            Integer likeCount = likeRepository.countByPostId(postId);
+            Integer likeCount = getLikeCount(postId);
             return convertToLikeBasicDto(like,likeCount);
         }
 
     }
 
+    // GET /api/like/{postId}
+    public LikeResponseDto.LikeListBasicResponseDto PostLikeList(Long postId) {
+        List<Like> likes = likeRepository.findAllByPostId(postId);
+        return convertToLikeBasicListDto(likes,getLikeCount(postId),postId);
+    }
+
+
+    // GET /api/like/isLiked
     public Boolean isLiked(Long postId, String memberId) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND)); Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
         if(likeRepository.findByPostIdAndMemberIdx(post.getId(),member.getIdx()).isPresent()){
             return true;
         }
         else return false;
+    }
+
+    // DELETE /api/like/{postId}
+    public Boolean deletePostLike(Long postId, String memberId) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND)); Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+
+        if(isLiked(postId, memberId)) {
+            Like like =likeRepository.findByPostIdAndMemberIdx(postId,member.getIdx()).get();
+            likeRepository.delete(like);
+            return true;
+        }
+        else throw new ErrorHandler(ErrorStatus.POST_NOT_LIKED);
+    }
+
+    public Integer getLikeCount(Long postId) {
+        return likeRepository.countByPostId(postId);
     }
 
 }

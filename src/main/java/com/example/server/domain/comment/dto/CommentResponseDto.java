@@ -14,7 +14,7 @@ public class CommentResponseDto {
         private Long id;
         private String content;
         private Long postId;
-        private Long memberId;
+        private String memberId;
         private CommentStatus status;
         // 부모 댓글 id
         private ParentAndChildCommentResDto parentComment;

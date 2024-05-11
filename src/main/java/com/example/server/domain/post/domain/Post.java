@@ -42,7 +42,7 @@ public class Post extends BaseTimeEntity {
     @JsonIgnore
     private List<BookMark> bookMarks;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Like> likes;
 

@@ -23,10 +23,21 @@ public class LikeController {
         return ApiResponse.onSuccess(likeService.likeToPost(postId,memberId));
     }
 
+    @GetMapping("/{id}")
+    public ApiResponse<?>  PostLikeList(@PathVariable("id") Long postId){
+        return ApiResponse.onSuccess(likeService.PostLikeList(postId));
+    }
+
     @GetMapping("/isLiked/{id}")
     public ApiResponse<?>  isLiked(@PathVariable("id") Long postId){
         String memberId = getLoginMemberId();
         return ApiResponse.onSuccess(likeService.isLiked(postId,memberId));
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<?>  deletePostLike(@PathVariable("id") Long postId){
+        String memberId = getLoginMemberId();
+        return ApiResponse.onSuccess(likeService.deletePostLike(postId,memberId));
     }
 
     private String getLoginMemberId() {

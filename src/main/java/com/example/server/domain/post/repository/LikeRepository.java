@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface LikeRepository extends JpaRepository<Like,Long> {
@@ -13,4 +14,6 @@ public interface LikeRepository extends JpaRepository<Like,Long> {
     Integer countByPostId(@Param("postId") Long postId);
 
     Optional<Like> findByPostIdAndMemberIdx(Long postId, Long memberIdx);
+
+    List<Like> findAllByPostId(Long postId);
 }

@@ -47,8 +47,6 @@ public class CommentController {
         String memberId = getLoginMemberId();
         requestDto.setMemberId(memberId);
         return ApiResponse.onSuccess(commentService.updateComment(requestDto));
-
-
     }
 
     private String getLoginMemberId() {
