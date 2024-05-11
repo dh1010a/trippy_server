@@ -1,9 +1,9 @@
 package com.example.server.domain.member.controller;
 
 
-import com.example.server.domain.blog.service.BlogService;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.dto.MemberRequestDto;
+import com.example.server.domain.member.dto.MemberRequestDto.CommonCreateMemberRequestDto;
 import com.example.server.domain.member.dto.MemberRequestDto.CreateMemberRequestDto;
 import com.example.server.domain.member.dto.MemberResponseDto;
 import com.example.server.domain.member.repository.MemberRepository;
@@ -32,8 +32,16 @@ public class MemberController {
 
     @PostMapping("/signup")
     public ApiResponse<?> signUp(@RequestBody CreateMemberRequestDto createMemberRequestDto) {
+        log.info("회원가입 요청 : memberId = {}", createMemberRequestDto.getMemberId());
         return ApiResponse.onSuccess(memberService.signUp(createMemberRequestDto));
     }
+
+    @PostMapping("/signup/common")
+    public ApiResponse<?> commonSignUp(@RequestBody CommonCreateMemberRequestDto commonCreateMemberRequestDto) {
+        String loginMemberId = getLoginMemberId();
+        return ApiResponse.onSuccess(memberService.commonSignUp(commonCreateMemberRequestDto, loginMemberId));
+    }
+
 
     @GetMapping
     public ApiResponse<?> getMyInfo() {
@@ -50,12 +58,13 @@ public class MemberController {
     @GetMapping("/isDuplicated")
     public ApiResponse<IsDuplicatedDto> isDuplicated(@RequestParam(value = "memberId", required = false) String memberId,
                                                      @RequestParam(value = "email", required = false) String email,
-                                                     @RequestParam(value = "nickName", required = false) String nickName) throws Exception {
+                                                     @RequestParam(value = "nickName", required = false) String nickName,
+                                                     @RequestParam(value = "blogName", required = false) String blogName) throws Exception {
         IsDuplicatedDto isDuplicatedDto;
         String ALREADY_EXIST_MESSAGE = "이미 가입된 내역이 존재합니다. 가입된 로그인 플랫폼 : ";
 
-        if (memberId != null) {
-            String message = ALREADY_EXIST_MESSAGE + memberService.getSocialTypeByEmail(email);
+        if (memberId != null ) {
+            String message = ALREADY_EXIST_MESSAGE + memberService.getSocialTypeByMemberId(email);
             isDuplicatedDto = IsDuplicatedDto.builder()
                     .isDuplicated(memberService.isExistByMemberId(memberId))
                     .message(memberService.isExistByMemberId(memberId)? message : "사용 가능한 아이디입니다.")
@@ -71,6 +80,12 @@ public class MemberController {
                     .isDuplicated(memberService.isExistByNickName(nickName))
                     .message(memberService.isExistByNickName(nickName) ? ErrorStatus.MEMBER_NICKNAME_ALREADY_EXIST.getMessage()
                             : "사용 가능한 닉네임입니다.")
+                    .build();
+        } else if (blogName != null) {
+            isDuplicatedDto = IsDuplicatedDto.builder()
+                    .isDuplicated(memberService.isExistByBlogName(blogName))
+                    .message(memberService.isExistByBlogName(blogName) ? ErrorStatus.MEMBER_BLOG_NAME_ALREADY_EXIST.getMessage()
+                            : "사용 가능한 블로그 이름입니다.")
                     .build();
         } else {
             throw new ErrorHandler(ErrorStatus._BAD_REQUEST);

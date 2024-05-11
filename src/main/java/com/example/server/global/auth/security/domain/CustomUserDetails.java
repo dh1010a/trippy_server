@@ -30,6 +30,7 @@ public class CustomUserDetails implements UserDetails {
 	private Map<String, Object> attributes;
 
 	@ElementCollection(fetch = FetchType.EAGER)
+	@Builder.Default
 	private List<String> roles = new ArrayList<>();
 
 	public static CustomUserDetails create(Member member) {

@@ -26,10 +26,8 @@ public enum ErrorStatus implements BaseErrorCode {
     MEMBER_FOLLOWING_MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER4005", "팔로우하려는 유저가 존재하지 않습니다."),
     MEMBER_FOLLOWING_MEMBER_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4006", "이미 팔로우한 유저입니다."),
     MEMBER_FOLLOWING_MYSELF(HttpStatus.BAD_REQUEST, "MEMBER4007", "자기 자신을 팔로우할 수 없습니다."),
+    MEMBER_BLOG_NAME_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4008", "중복된 블로그명입니다."),
     MEMBER_LOGIN_NOT_SUPPORT(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "MEMBER4015", "지원되지 않는 로그인 형식입니다."),
-
-    // 블로그 응답
-    BLOG_NAME_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "BLOG4001", "중복된 블로그명입니다."),
 
     //사진 응답
     IMAGE_UPLOAD_FAIL(HttpStatus.BAD_REQUEST, "IMG4001", "사진 업로드에 실패하였습니다."),

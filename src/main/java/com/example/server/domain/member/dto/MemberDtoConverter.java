@@ -14,7 +14,6 @@ public class MemberDtoConverter {
                 .idx(member.getIdx())
                 .email(member.getEmail())
                 .nickName(member.getNickName())
-                .isSuccess(true)
                 .build();
 
     }
@@ -24,14 +23,9 @@ public class MemberDtoConverter {
         return MemberInfoResponseDto.builder()
                 .idx(member.getIdx())
                 .memberId(member.getMemberId())
-                .name(member.getName())
                 .nickName(member.getNickName())
                 .email(member.getEmail())
-                .phone(member.getPhone())
                 .profileImageUrl(member.getProfileImageUrl())
-                .birthDate(LocalDate.parse(member.getBirthDate().toString(), formatter).toString())
-                .gender(member.getGender().name())
-                .blogName(member.getBlog().getName())
                 .activeStatus(member.getActiveState().name())
                 .socialType(member.getSocialType().getSocialName())
                 .build();
