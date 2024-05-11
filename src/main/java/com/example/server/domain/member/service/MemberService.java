@@ -4,7 +4,6 @@ import com.example.server.domain.follow.repository.MemberFollowRepository;
 import com.example.server.domain.follow.domain.MemberFollow;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.dto.MemberDtoConverter;
-import com.example.server.domain.member.dto.MemberRequestDto;
 import com.example.server.domain.member.dto.MemberRequestDto.CommonCreateMemberRequestDto;
 import com.example.server.domain.member.dto.MemberRequestDto.CreateMemberRequestDto;
 import com.example.server.domain.member.dto.MemberResponseDto;
@@ -40,14 +39,13 @@ public class MemberService {
     private static final String DEFAULT_BLOG_SUFFIX = ".blog";
 
     public MemberTaskResultResponseDto signUp(CreateMemberRequestDto requestDto) {
-        String randomNickName = requestDto.getName().substring(1, 3) + UUID.randomUUID().toString().substring(0, 9);
+        String randomNickName = requestDto.getEmail() + UUID.randomUUID().toString().substring(0, 9);
         if (isExistByEmail(requestDto.getEmail())) {
             throw new ErrorHandler(ErrorStatus.MEMBER_EMAIL_ALREADY_EXIST);
         }
 //        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         Member member = Member.builder()
                 .memberId(requestDto.getMemberId())
-                .name(requestDto.getName())
                 .password(passwordEncoder.encode(requestDto.getPassword()))
                 .nickName(randomNickName)
                 .email(requestDto.getEmail())
@@ -65,7 +63,6 @@ public class MemberService {
 //        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         Member member = Member.builder()
                 .memberId(oAuth2User.getMemberId())
-                .name(oAuth2User.getMemberName())
                 .password(oAuth2User.getPassword())
                 .nickName(randomNickName)
                 .email(oAuth2User.getEmail())

@@ -10,7 +10,6 @@ public class MemberRequestDto {
     public static class CreateMemberRequestDto {
         private String memberId;
         private String password;
-        private String name;
         private String email;
     }
 
