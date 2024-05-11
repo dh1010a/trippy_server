@@ -183,4 +183,8 @@ public class MemberService {
         return memberRepository.existsByMemberId(memberId);
     }
 
+    public boolean isExistByBlogName(String blogName) {
+        return memberRepository.existsByBlogName(blogName);
+    }
+
 }

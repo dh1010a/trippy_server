@@ -58,7 +58,8 @@ public class MemberController {
     @GetMapping("/isDuplicated")
     public ApiResponse<IsDuplicatedDto> isDuplicated(@RequestParam(value = "memberId", required = false) String memberId,
                                                      @RequestParam(value = "email", required = false) String email,
-                                                     @RequestParam(value = "nickName", required = false) String nickName) throws Exception {
+                                                     @RequestParam(value = "nickName", required = false) String nickName,
+                                                     @RequestParam(value = "blogName", required = false) String blogName) throws Exception {
         IsDuplicatedDto isDuplicatedDto;
         String ALREADY_EXIST_MESSAGE = "이미 가입된 내역이 존재합니다. 가입된 로그인 플랫폼 : ";
 
@@ -79,6 +80,12 @@ public class MemberController {
                     .isDuplicated(memberService.isExistByNickName(nickName))
                     .message(memberService.isExistByNickName(nickName) ? ErrorStatus.MEMBER_NICKNAME_ALREADY_EXIST.getMessage()
                             : "사용 가능한 닉네임입니다.")
+                    .build();
+        } else if (blogName != null) {
+            isDuplicatedDto = IsDuplicatedDto.builder()
+                    .isDuplicated(memberService.isExistByBlogName(blogName))
+                    .message(memberService.isExistByBlogName(blogName) ? ErrorStatus.MEMBER_BLOG_NAME_ALREADY_EXIST.getMessage()
+                            : "사용 가능한 블로그 이름입니다.")
                     .build();
         } else {
             throw new ErrorHandler(ErrorStatus._BAD_REQUEST);
