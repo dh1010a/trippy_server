@@ -120,7 +120,7 @@ public class MemberService {
 
         memberFollowRepository.save(memberFollow);
 
-        member.updateMemberFollowing(memberFollow);
+//        member.updateMemberFollowing(memberFollow);
 
         return MemberDtoConverter.convertToFollowResponseDto(member, followingMember);
     }
