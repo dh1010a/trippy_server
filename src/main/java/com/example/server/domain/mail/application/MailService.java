@@ -34,7 +34,7 @@ public class MailService {
 
     //mail을 어디서 보내는지, 어디로 보내는지 , 인증 번호를 html 형식으로 어떻게 보내는지 작성합니다.
     public CheckMailResponseDto sendEmail(String email) {
-        int authNumber = makeRandomNumber();
+        String authNumber = makeRandomNumber();
         String toMail = email;
         String title = authNumber + "은(는) 회원님의 Trippy 이메일 인증번호 입니다."; // 이메일 제목
         String content =
@@ -45,7 +45,7 @@ public class MailService {
                         "인증번호를 정확히 입력해주세요."; //이메일 내용 삽입
         send(username, toMail, title, content);
         log.info("요청한 {} 주소로 이메일 전송이 완료되었습니다.", toMail);
-        redisUtil.setDataExpire(Integer.toString(authNumber),toMail,60*5L);
+        redisUtil.setDataExpire(authNumber,toMail,60*5L);
         return MailDtoConverter.convertCheckMailResultToDto(true);
     }
 
@@ -60,14 +60,14 @@ public class MailService {
     }
 
     //임의의 6자리 양수를 반환합니다.
-    private int makeRandomNumber() {
+    private String makeRandomNumber() {
         Random r = new Random();
-        String randomNumber = "";
+        StringBuilder randomNumber = new StringBuilder();
         for(int i = 0; i < CODE_LENGTH; i++) {
-            randomNumber += Integer.toString(r.nextInt(10));
+            randomNumber.append(r.nextInt(10));
         }
 
-        return Integer.parseInt(randomNumber);
+        return randomNumber.toString();
     }
 
     //이메일을 전송합니다.
