@@ -155,15 +155,15 @@ public class MemberService {
                 .build();
     }
 
-    public MemberTaskSuccessResponseDto deleteFollower(String memberId, String followingMemberId) {
+    public MemberTaskSuccessResponseDto deleteFollower(String memberId, String followerMemberId) {
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
-        Member followingMember = memberRepository.findByMemberId(followingMemberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_FOLLOW_MEMBER_NOT_EXIST));
+        Member followerMember = memberRepository.findByMemberId(followerMemberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_FOLLOW_MEMBER_NOT_EXIST));
 
-        if (!memberFollowRepository.existsByMemberAndFollowingMemberIdx(followingMember, member.getIdx())) {
+        if (!memberFollowRepository.existsByMemberAndFollowingMemberIdx(followerMember, member.getIdx())) {
             throw new ErrorHandler(ErrorStatus.MEMBER_FOLLOW_MEMBER_NOT_EXIST);
         }
 
-        memberFollowRepository.deleteByMemberAndFollowingMemberIdx(followingMember, member.getIdx());
+        memberFollowRepository.deleteByMemberAndFollowingMemberIdx(followerMember, member.getIdx());
 
         return MemberTaskSuccessResponseDto.builder()
                 .isSuccess(true)

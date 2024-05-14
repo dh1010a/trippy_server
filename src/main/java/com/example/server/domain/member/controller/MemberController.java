@@ -63,6 +63,8 @@ public class MemberController {
         IsDuplicatedDto isDuplicatedDto;
         String ALREADY_EXIST_MESSAGE = "이미 가입된 내역이 존재합니다. 가입된 로그인 플랫폼 : ";
 
+        log.info("중복 조회 요청. memberId = {}, email = {}, nickName = {}, blogName = {}", memberId, email, nickName, blogName);
+
         if (memberId != null ) {
             String message = ALREADY_EXIST_MESSAGE + memberService.getSocialTypeByMemberId(email);
             isDuplicatedDto = IsDuplicatedDto.builder()
@@ -116,13 +118,13 @@ public class MemberController {
 
     @DeleteMapping("/follow")
     public ApiResponse<?> deleteFollow(@RequestParam(value = "type") String type,
-                                      @RequestParam(value = "followingMemberId") String followingMemberId) {
+                                      @RequestParam(value = "targetMemberId") String targetMemberId) {
         String memberId = getLoginMemberId();
         if (type.equals("follower")) {
-            return ApiResponse.onSuccess(memberService.deleteFollower(memberId, followingMemberId));
+            return ApiResponse.onSuccess(memberService.deleteFollower(memberId, targetMemberId));
         }
         else if (type.equals("following")) {
-            return ApiResponse.onSuccess(memberService.unFollow(memberId, followingMemberId));
+            return ApiResponse.onSuccess(memberService.unFollow(memberId, targetMemberId));
         }
         return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(), ErrorStatus._BAD_REQUEST.getMessage(),
                 "type 형식이 잘못되었습니다.");
