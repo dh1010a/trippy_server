@@ -2,8 +2,10 @@ package com.example.server.domain.member.service;
 
 import com.example.server.domain.follow.repository.MemberFollowRepository;
 import com.example.server.domain.follow.domain.MemberFollow;
+import com.example.server.domain.mail.application.MailService;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.dto.MemberDtoConverter;
+import com.example.server.domain.member.dto.MemberRequestDto;
 import com.example.server.domain.member.dto.MemberRequestDto.CommonCreateMemberRequestDto;
 import com.example.server.domain.member.dto.MemberRequestDto.CreateMemberRequestDto;
 import com.example.server.domain.member.dto.MemberResponseDto;
@@ -35,6 +37,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final MemberFollowRepository memberFollowRepository;
+    private final MailService mailService;
 
     private static final String DEFAULT_BLOG_SUFFIX = ".blog";
 
@@ -150,6 +153,21 @@ public class MemberService {
         return MemberResponseDto.MemberFollowingResponseDto.builder()
                 .followings(followings)
                 .build();
+    }
+
+    public MemberTaskSuccessResponseDto changePassword(MemberRequestDto.ChangePasswordRequestDto requestDto, String code) {
+        log.info("비밀번호 변경 요청이 들어왔습니다. email = {}", requestDto.getEmail());
+        Member member = memberRepository.findByEmail(requestDto.getEmail())
+                .orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        if (mailService.checkEmail(requestDto.getEmail(), code).isSuccess()) {
+            member.updatePassword(passwordEncoder.encode(requestDto.getNewPassword()));
+        } else {
+            throw new ErrorHandler(ErrorStatus._FORBIDDEN);
+        }
+        return MemberTaskSuccessResponseDto.builder()
+                .isSuccess(true)
+                .build();
+
     }
 
     public String getSocialTypeByEmail(String email) {

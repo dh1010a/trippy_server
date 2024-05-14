@@ -67,7 +67,7 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers( "/api/member/signup", "/", "/api/member/login", "/api/member/isDuplicated", "/api/member/oauth").permitAll()
-                        .requestMatchers( "/api/email/send", "/", "/api/email/confirm").permitAll()
+                        .requestMatchers( "/api/email/send", "/api/member/password", "/api/email/confirm").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session

@@ -131,6 +131,15 @@ public class Member extends BaseTimeEntity {
     public void updateBlogIntroduce(String blogIntroduce) {
         this.blogIntroduce = blogIntroduce;
     }
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
+    public void updateInfo(String nickName, String blogName, String blogIntroduce) {
+        this.nickName = nickName;
+        this.blogName = blogName;
+        this.blogIntroduce = blogIntroduce;
+    }
 
 
 

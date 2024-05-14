@@ -20,4 +20,11 @@ public class MemberRequestDto {
         private String blogName;
         private String blogIntroduce;
     }
+
+    @Builder
+    @Data
+    public static class ChangePasswordRequestDto {
+        private String email;
+        private String newPassword;
+    }
 }

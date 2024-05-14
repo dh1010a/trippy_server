@@ -113,6 +113,13 @@ public class MemberController {
         return ApiResponse.onSuccess(ErrorStatus._BAD_REQUEST);
     }
 
+    @PatchMapping("/password")
+    public ApiResponse<?> changePassword(@RequestBody MemberRequestDto.ChangePasswordRequestDto requestDto,
+                                         @RequestParam(value = "code") String code) {
+        return ApiResponse.onSuccess(memberService.changePassword(requestDto, code));
+    }
+
+
     private String getLoginMemberId() {
         return SecurityUtil.getLoginMemberId().orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
     }

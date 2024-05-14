@@ -81,4 +81,10 @@ public class MemberResponseDto {
         private List<FollowMemberInfoDto> followings;
     }
 
+    @Data
+    @Builder
+    public static class MemberTaskSuccessResponseDto {
+        private boolean isSuccess;
+    }
+
 }
