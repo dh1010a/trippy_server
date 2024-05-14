@@ -161,6 +161,7 @@ public class MemberService {
                 .orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
         if (mailService.checkEmail(requestDto.getEmail(), code).isSuccess()) {
             member.updatePassword(passwordEncoder.encode(requestDto.getNewPassword()));
+            mailService.finishCheckEmail(code);
         } else {
             throw new ErrorHandler(ErrorStatus._FORBIDDEN);
         }

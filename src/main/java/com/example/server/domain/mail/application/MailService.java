@@ -59,6 +59,10 @@ public class MailService {
         return MailDtoConverter.convertCheckMailResultToDto(true);
     }
 
+    public void finishCheckEmail(String authNumber) {
+        redisUtil.deleteData(authNumber);
+    }
+
     //임의의 6자리 양수를 반환합니다.
     private String makeRandomNumber() {
         Random r = new Random();
