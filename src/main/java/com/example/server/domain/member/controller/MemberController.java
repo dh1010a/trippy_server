@@ -56,7 +56,7 @@ public class MemberController {
     }
 
     @GetMapping("/isDuplicated")
-    public ApiResponse<IsDuplicatedDto> isDuplicated(@RequestParam(value = "memberId", required = false) String memberId,
+    public ApiResponse<?> isDuplicated(@RequestParam(value = "memberId", required = false) String memberId,
                                                      @RequestParam(value = "email", required = false) String email,
                                                      @RequestParam(value = "nickName", required = false) String nickName,
                                                      @RequestParam(value = "blogName", required = false) String blogName) throws Exception {
@@ -88,7 +88,8 @@ public class MemberController {
                             : "사용 가능한 블로그 이름입니다.")
                     .build();
         } else {
-            throw new ErrorHandler(ErrorStatus._BAD_REQUEST);
+            return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(), ErrorStatus._BAD_REQUEST.getMessage(),
+                    "요청 파라미터가 잘못되었습니다.");
         }
         return ApiResponse.onSuccess(isDuplicatedDto);
 
@@ -111,6 +112,20 @@ public class MemberController {
         }
 
         return ApiResponse.onSuccess(ErrorStatus._BAD_REQUEST);
+    }
+
+    @DeleteMapping("/follow")
+    public ApiResponse<?> deleteFollow(@RequestParam(value = "type") String type,
+                                      @RequestParam(value = "followingMemberId") String followingMemberId) {
+        String memberId = getLoginMemberId();
+        if (type.equals("follower")) {
+            return ApiResponse.onSuccess(memberService.deleteFollower(memberId, followingMemberId));
+        }
+        else if (type.equals("following")) {
+            return ApiResponse.onSuccess(memberService.unFollow(memberId, followingMemberId));
+        }
+        return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(), ErrorStatus._BAD_REQUEST.getMessage(),
+                "type 형식이 잘못되었습니다.");
     }
 
     @PatchMapping("/password")

@@ -155,6 +155,36 @@ public class MemberService {
                 .build();
     }
 
+    public MemberTaskSuccessResponseDto deleteFollower(String memberId, String followingMemberId) {
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member followingMember = memberRepository.findByMemberId(followingMemberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_FOLLOW_MEMBER_NOT_EXIST));
+
+        if (!memberFollowRepository.existsByMemberAndFollowingMemberIdx(followingMember, member.getIdx())) {
+            throw new ErrorHandler(ErrorStatus.MEMBER_FOLLOW_MEMBER_NOT_EXIST);
+        }
+
+        memberFollowRepository.deleteByMemberAndFollowingMemberIdx(followingMember, member.getIdx());
+
+        return MemberTaskSuccessResponseDto.builder()
+                .isSuccess(true)
+                .build();
+    }
+
+    public MemberTaskSuccessResponseDto unFollow(String memberId, String followingMemberId) {
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member followingMember = memberRepository.findByMemberId(followingMemberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_FOLLOW_MEMBER_NOT_EXIST));
+
+        if (!memberFollowRepository.existsByMemberAndFollowingMemberIdx(member, followingMember.getIdx())) {
+            throw new ErrorHandler(ErrorStatus.MEMBER_FOLLOW_MEMBER_NOT_EXIST);
+        }
+
+        memberFollowRepository.deleteByMemberAndFollowingMemberIdx(member, followingMember.getIdx());
+
+        return MemberTaskSuccessResponseDto.builder()
+                .isSuccess(true)
+                .build();
+    }
+
     public MemberTaskSuccessResponseDto changePassword(MemberRequestDto.ChangePasswordRequestDto requestDto, String code) {
         log.info("비밀번호 변경 요청이 들어왔습니다. email = {}", requestDto.getEmail());
         Member member = memberRepository.findByEmail(requestDto.getEmail())
