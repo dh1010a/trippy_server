@@ -39,6 +39,7 @@ public class MemberController {
     @PostMapping("/signup/common")
     public ApiResponse<?> commonSignUp(@RequestBody CommonCreateMemberRequestDto commonCreateMemberRequestDto) {
         String loginMemberId = getLoginMemberId();
+        log.info("공통 회원가입 요청 : memberId = {}", loginMemberId);
         return ApiResponse.onSuccess(memberService.commonSignUp(commonCreateMemberRequestDto, loginMemberId));
     }
 
@@ -46,6 +47,7 @@ public class MemberController {
     @GetMapping
     public ApiResponse<?> getMyInfo() {
         String memberId = getLoginMemberId();
+        log.info("내 정보 조회 요청 : memberId = {}", memberId);
         return ApiResponse.onSuccess(memberService.getMyInfo(memberId));
     }
 
@@ -100,6 +102,7 @@ public class MemberController {
     @PostMapping("/follow")
     public ApiResponse<?> followMember(@RequestParam(value = "memberId", required = false) String followingMemberId) {
         String memberId = getLoginMemberId();
+        log.info("팔로우 요청 : memberId = {}, followingMemberId = {}", memberId, followingMemberId);
         return ApiResponse.onSuccess(memberService.followMember(memberId, followingMemberId));
     }
 
@@ -107,6 +110,7 @@ public class MemberController {
     public ApiResponse<?> getFollow(@RequestParam(value = "type") String type)  {
         // 비활성화된 멤버는 조회 안되게 하는 로직 추가 구현 해야함
         String memberId = getLoginMemberId();
+        log.info("팔로우 조회 요청 : memberId = {}, type = {}", memberId, type);
         if (type.equals("follower")) {
             return ApiResponse.onSuccess(memberService.getFollowerList(memberId));
         } else if (type.equals("following")) {
@@ -133,6 +137,7 @@ public class MemberController {
     @PatchMapping("/password")
     public ApiResponse<?> changePassword(@RequestBody MemberRequestDto.ChangePasswordRequestDto requestDto,
                                          @RequestParam(value = "code") String code) {
+        log.info("비밀번호 변경 요청 : memberId = {}", requestDto.getEmail());
         return ApiResponse.onSuccess(memberService.changePassword(requestDto, code));
     }
 
