@@ -1,7 +1,6 @@
 package com.example.server.domain.member.dto;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
@@ -30,9 +29,11 @@ public class MemberRequestDto {
         private String newPassword;
     }
 
-    @Builder
-    @Data
+    @ToString
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class UpdateInterestedTypesRequestDto {
-        List<String> koreanInterestedTypes;
+        private String name;
+        private List<String> koreanInterestedTypes;
     }
 }

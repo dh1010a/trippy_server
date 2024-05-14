@@ -96,6 +96,7 @@ public class Member extends BaseTimeEntity {
 
     @ElementCollection
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private List<InterestedType> interestedTypes = new ArrayList<>();
 
     public void updateRefreshToken(String refreshToken) {

@@ -43,7 +43,7 @@ public enum InterestedType {
 
     public static InterestedType fromKoreanName(String title) {
         for (InterestedType value : values()) {
-            if (value.title.equals(title)) {
+            if (value.getTitle().equals(title)) {
                 return value;
             }
         }
