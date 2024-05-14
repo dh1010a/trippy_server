@@ -3,6 +3,8 @@ package com.example.server.domain.member.dto;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 public class MemberRequestDto {
 
     @Builder
@@ -26,5 +28,11 @@ public class MemberRequestDto {
     public static class ChangePasswordRequestDto {
         private String email;
         private String newPassword;
+    }
+
+    @Builder
+    @Data
+    public static class UpdateInterestedTypesRequestDto {
+        List<String> koreanInterestedTypes;
     }
 }

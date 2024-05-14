@@ -44,6 +44,7 @@ public class MemberController {
     }
 
 
+
     @GetMapping
     public ApiResponse<?> getMyInfo() {
         String memberId = getLoginMemberId();
@@ -139,6 +140,13 @@ public class MemberController {
                                          @RequestParam(value = "code") String code) {
         log.info("비밀번호 변경 요청 : memberId = {}", requestDto.getEmail());
         return ApiResponse.onSuccess(memberService.changePassword(requestDto, code));
+    }
+
+    @PostMapping("/interest")
+    public ApiResponse<?> updateInterestedTypes(@RequestBody MemberRequestDto.UpdateInterestedTypesRequestDto requestDto) {
+        String memberId = getLoginMemberId();
+        log.info("관심사 변경 요청 : memberId = {}", memberId);
+        return ApiResponse.onSuccess(memberService.updateInterestedTypes(memberId, requestDto));
     }
 
 

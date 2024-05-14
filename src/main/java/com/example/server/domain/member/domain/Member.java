@@ -13,6 +13,7 @@ import com.example.server.domain.image.domain.Image;
 //import com.example.server.domain.follow.domain.MemberFollow;
 import com.example.server.domain.member.model.ActiveState;
 import com.example.server.domain.member.model.Gender;
+import com.example.server.domain.member.model.InterestedType;
 import com.example.server.domain.member.model.Role;
 import com.example.server.global.auth.oauth2.model.SocialType;
 import com.example.server.global.common.BaseTimeEntity;
@@ -21,6 +22,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -92,6 +94,10 @@ public class Member extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private SocialType socialType;
 
+    @ElementCollection
+    @Enumerated(EnumType.STRING)
+    private List<InterestedType> interestedTypes = new ArrayList<>();
+
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }
@@ -140,6 +146,12 @@ public class Member extends BaseTimeEntity {
         this.blogName = blogName;
         this.blogIntroduce = blogIntroduce;
     }
+
+    public void updateInterestedTypes(List<InterestedType> interestedTypes) {
+        this.interestedTypes = interestedTypes;
+    }
+
+
 
 
 

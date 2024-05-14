@@ -1,5 +1,6 @@
 package com.example.server.global.auth.security.handler;
 
+import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.auth.security.dto.LoginResponseDto.LoginDto;
@@ -36,6 +37,9 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
 										Authentication authentication) throws IOException, ServletException {
 		String memberId = extractMemberId(authentication);
 		JwtToken jwtToken = jwtService.createJwtToken(authentication);
+
+		Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+		member.updateRefreshToken(jwtToken.getRefreshToken());
 
 		jwtService.sendAccessAndRefreshToken(response, jwtToken);
 		log.info( "로그인에 성공합니다. memberId: {}" , memberId);

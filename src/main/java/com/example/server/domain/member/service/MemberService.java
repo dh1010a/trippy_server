@@ -11,6 +11,7 @@ import com.example.server.domain.member.dto.MemberRequestDto.CreateMemberRequest
 import com.example.server.domain.member.dto.MemberResponseDto;
 import com.example.server.domain.member.dto.MemberResponseDto.*;
 import com.example.server.domain.member.model.ActiveState;
+import com.example.server.domain.member.model.InterestedType;
 import com.example.server.domain.member.model.Role;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
@@ -83,7 +84,7 @@ public class MemberService {
         member.updateNickName(requestDto.getNickName());
         member.updateBlogName(requestDto.getBlogName());
         member.updateBlogIntroduce(requestDto.getBlogIntroduce());
-        log.info("공통 회원가입이 완료되었습니다. memberId = {}, nickName = {}, blogName = {}", member.getMemberId(), member.getNickName(), member.getBlogName());
+        log.info("공통 회원가입이 완료되었습니다. memberId = {}, nickName = {}, blogName = {}, blogIntroduce = {}", member.getMemberId(), member.getNickName(), member.getBlogName(), member.getBlogIntroduce());
         return MemberDtoConverter.convertToMemberTaskDto(member);
 
     }
@@ -199,6 +200,21 @@ public class MemberService {
                 .isSuccess(true)
                 .build();
 
+    }
+
+    public MemberTaskSuccessResponseDto updateInterestedTypes(String memberId, MemberRequestDto.UpdateInterestedTypesRequestDto requestDto) {
+
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        List<InterestedType> interestedTypes = new ArrayList<>();
+        for (String x : requestDto.getKoreanInterestedTypes()) {
+            interestedTypes.add(InterestedType.fromKoreanName(x));
+            log.info("관심사 변경 : memberId = {}, interestedType = {}", memberId, x);
+        }
+        member.updateInterestedTypes(interestedTypes);
+
+        return MemberTaskSuccessResponseDto.builder()
+                .isSuccess(true)
+                .build();
     }
 
     public String getSocialTypeByEmail(String email) {
