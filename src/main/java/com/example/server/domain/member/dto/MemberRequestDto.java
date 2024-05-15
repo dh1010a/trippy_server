@@ -33,7 +33,6 @@ public class MemberRequestDto {
     @Getter
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class UpdateInterestedTypesRequestDto {
-        private String name;
         private List<String> koreanInterestedTypes;
     }
 }

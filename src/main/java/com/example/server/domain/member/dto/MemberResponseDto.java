@@ -35,7 +35,9 @@ public class MemberResponseDto {
         private String profileImageUrl;
         private String blogName;
         private String blogTitleImgUrl;
+        private String blogIntroduce;
         private String activeStatus;
+        private String role;
         private String socialType;
 
     }

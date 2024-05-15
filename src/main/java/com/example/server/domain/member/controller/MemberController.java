@@ -146,7 +146,6 @@ public class MemberController {
     public ApiResponse<?> updateInterestedTypes(@RequestBody MemberRequestDto.UpdateInterestedTypesRequestDto requestDto) {
         String memberId = getLoginMemberId();
         log.info("관심사 변경 요청 : memberId = {}", memberId);
-        log.info("dd = {}", requestDto.getName());
         return ApiResponse.onSuccess(memberService.updateInterestedTypes(memberId, requestDto));
     }
 
