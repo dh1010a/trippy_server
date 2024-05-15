@@ -89,4 +89,10 @@ public class MemberResponseDto {
         private boolean isSuccess;
     }
 
+    @Data
+    @Builder
+    public static class EmailResponseDto {
+        private String email;
+    }
+
 }

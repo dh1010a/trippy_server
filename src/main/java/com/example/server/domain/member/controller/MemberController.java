@@ -149,6 +149,11 @@ public class MemberController {
         return ApiResponse.onSuccess(memberService.updateInterestedTypes(memberId, requestDto));
     }
 
+    @GetMapping("/find")
+    public ApiResponse<?> findEmailByNickName(@RequestParam(value = "nickName") String nickName) {
+        log.info("이메일 찾기 요청 : nickName = {}", nickName);
+        return ApiResponse.onSuccess(memberService.findEmailByNickName(nickName));
+    }
 
     private String getLoginMemberId() {
         return SecurityUtil.getLoginMemberId().orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));

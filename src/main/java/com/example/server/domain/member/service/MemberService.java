@@ -217,6 +217,13 @@ public class MemberService {
                 .build();
     }
 
+    public EmailResponseDto findEmailByNickName(String nickName) {
+        Member member = memberRepository.findByNickName(nickName).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        return EmailResponseDto.builder()
+                .email(member.getEmail())
+                .build();
+    }
+
     public String getSocialTypeByEmail(String email) {
         if (!isExistByEmail(email)) {
             return null;
