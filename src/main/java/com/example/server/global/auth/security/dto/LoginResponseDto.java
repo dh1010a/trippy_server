@@ -13,4 +13,11 @@ public class LoginResponseDto {
 		public String refreshToken;
 	}
 
+	@Data
+	@Builder
+	public static class ReIssueAccessTokenDto {
+		public String memberId;
+		public String accessToken;
+	}
+
 }

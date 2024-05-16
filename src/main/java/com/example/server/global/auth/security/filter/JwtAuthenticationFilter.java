@@ -54,7 +54,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				.filter(jwtService::isTokenValid)
 				.orElse(null); //2
 
-
 		if(refreshToken != null){
 			checkRefreshTokenAndReIssueAccessToken(response, refreshToken);//3
 			return;
@@ -93,6 +92,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshToken){
 		memberRepository.findByRefreshToken(refreshToken)
 				.ifPresent(member -> jwtService.sendAccessToken(response,
-						jwtService.reIssueAccessToken(member.getMemberId(), member.getPassword())));
+						jwtService.reIssueAccessToken(member.getMemberId())));
+
 	}
 }
