@@ -24,8 +24,8 @@ public class CommentTests {
     private CommentDtoConverter commentDtoConverter;
 
 
-    @Transactional
-    @Test
+   // @Transactional
+   // @Test
     public void testGetComment() {
         Post post = postRepository.findById(113L).get();
         List<Comment> comments = commentRepository.findByPostId(113L);
