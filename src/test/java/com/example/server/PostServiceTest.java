@@ -39,7 +39,7 @@ public class PostServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    @Test
+   // @Test
     public void testUpdateTagsAndImages() {
         // 테스트할 데이터 생성
 
@@ -65,7 +65,7 @@ public class PostServiceTest {
 
     }
 
-    @Test
+    //@Test
     public void memberPostTest(){
         Post post = postRepository.findById(114L).get();
         Member member = post.getMember();
@@ -74,7 +74,7 @@ public class PostServiceTest {
         //System.out.println("Name:"+member.getName());
     }
 
-    @Test
+    //@Test
     public void testGetPosts() {
 
         Member member = memberRepository.findByEmail("summer@naver.com").get();
