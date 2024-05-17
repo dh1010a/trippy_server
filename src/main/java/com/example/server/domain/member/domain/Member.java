@@ -14,6 +14,7 @@ import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.member.model.ActiveState;
 import com.example.server.domain.member.model.Gender;
 import com.example.server.domain.member.model.Role;
+import com.example.server.domain.post.domain.Post;
 import com.example.server.global.auth.oauth2.model.SocialType;
 import com.example.server.global.common.BaseTimeEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -54,10 +55,10 @@ public class Member extends BaseTimeEntity {
 
     @Column(length = 1000)
     private String refreshToken;
-//
-//    @OneToMany(mappedBy = "member")
-//    @JsonIgnore
-//    private List<Post> posts;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Post> posts;
 //
 //    @OneToMany(mappedBy = "member")
 //    @JsonIgnore

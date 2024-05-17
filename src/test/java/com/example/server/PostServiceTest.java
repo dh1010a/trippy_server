@@ -7,6 +7,8 @@ import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.domain.post.domain.Tag;
+import com.example.server.domain.post.dto.PostRequestDto;
+import com.example.server.domain.post.model.PostType;
 import com.example.server.domain.post.repository.PostRepository;
 import com.example.server.domain.post.repository.TagRepository;
 import com.example.server.domain.post.service.PostService;
@@ -69,7 +71,33 @@ public class PostServiceTest {
         Member member = post.getMember();
         System.out.println("Email:"+member.getEmail());
         System.out.println("Idx:"+member.getIdx());
-        System.out.println("Name:"+member.getName());
+        //System.out.println("Name:"+member.getName());
     }
+
+    @Test
+    public void testGetPosts() {
+
+        Member member = memberRepository.findByEmail("summer@naver.com").get();
+        List<String> newTagNames = Arrays.asList("tag1", "tag2");
+        List<String> newImageUrls = Arrays.asList("url1", "url2");
+
+        PostRequestDto.UploadPostRequestDto uploadPostRequestDto = PostRequestDto.UploadPostRequestDto.builder()
+                .title("test")
+                .postType(PostType.POST)
+                .body("양방향 test게시물입니다.")
+                .location("24.12342,12.12344")
+                .images(newImageUrls)
+                .tags(newTagNames)
+                .memberId(member.getMemberId())
+                .build();
+    postService.uploadPost(uploadPostRequestDto);
+        List<Post> posts = member.getPosts();
+        for (Post post : posts) {
+            System.out.println("title : " + post.getTitle());
+            System.out.println("body : " + post.getBody());
+        }
+
+    }
+
 
 }
