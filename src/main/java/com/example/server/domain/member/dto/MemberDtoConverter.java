@@ -26,6 +26,10 @@ public class MemberDtoConverter {
                 .nickName(member.getNickName())
                 .email(member.getEmail())
                 .profileImageUrl(member.getProfileImageUrl())
+                .blogName(member.getBlogName())
+                .blogIntroduce(member.getBlogIntroduce())
+                .blogTitleImgUrl(member.getBlogTitleImgUrl())
+                .role(member.getRole().getTitle())
                 .activeStatus(member.getActiveState().name())
                 .socialType(member.getSocialType().getSocialName())
                 .build();

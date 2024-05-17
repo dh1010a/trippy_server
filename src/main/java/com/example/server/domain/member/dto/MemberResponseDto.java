@@ -35,7 +35,9 @@ public class MemberResponseDto {
         private String profileImageUrl;
         private String blogName;
         private String blogTitleImgUrl;
+        private String blogIntroduce;
         private String activeStatus;
+        private String role;
         private String socialType;
 
     }
@@ -79,6 +81,24 @@ public class MemberResponseDto {
     @Builder
     public static class MemberFollowingResponseDto {
         private List<FollowMemberInfoDto> followings;
+    }
+
+    @Data
+    @Builder
+    public static class MemberTaskSuccessResponseDto {
+        private boolean isSuccess;
+    }
+
+    @Data
+    @Builder
+    public static class EmailResponseDto {
+        private String email;
+    }
+
+    @Data
+    @Builder
+    public static class BookMarkResponseDto {
+        private List<Long> bookMarkList;
     }
 
 }

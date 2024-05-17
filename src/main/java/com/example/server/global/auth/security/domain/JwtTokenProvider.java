@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -38,7 +39,10 @@ public class JwtTokenProvider {
 	private String secret;
 
 	private static final String MEMBER_ID_CLAIM = "memberId";
+	private static final String REFRESH_TOKEN_CLAIM = "RefreshToken";
+	private static final String ACCESS_TOKEN_CLAIM = "AccessToken";
 	private final MemberRepository memberRepository;
+
 
 	private Key key;
 
@@ -64,6 +68,7 @@ public class JwtTokenProvider {
 		Date refreshTokenExpiration = new Date(now.getTime() + REFRESH_TOKEN_EXPIRE_DATE * 24 * 60 * 60 * 1000);
 
 		return Jwts.builder()
+				.setSubject(REFRESH_TOKEN_CLAIM)
 				.setIssuedAt(now)
 				.setExpiration(refreshTokenExpiration)
 				.signWith(key, SignatureAlgorithm.HS512)
@@ -75,16 +80,36 @@ public class JwtTokenProvider {
 				.map(GrantedAuthority::getAuthority)
 				.collect(Collectors.joining(","));
 
-		log.info(authorities);
 		Date now = new Date();
 		Date accessTokenExpiration = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_HOUR * 60 * 60 * 1000);
 
 		CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
 
 		return Jwts.builder()
-				.setSubject(authentication.getName())
+				.setSubject(ACCESS_TOKEN_CLAIM)
 				.claim("auth", authorities)
 				.claim(MEMBER_ID_CLAIM, user.getMemberId())
+				.setIssuedAt(now)
+				.setExpiration(accessTokenExpiration)
+				.signWith(key, SignatureAlgorithm.HS512)
+				.compact();
+	}
+
+	public String reIssueAccessToken(String memberId) {
+		Date now = new Date();
+		Date accessTokenExpiration = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_HOUR * 60 * 60 * 1000);
+
+		Member member = memberRepository.findByMemberId(memberId)
+				.orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+
+		String authorities = AuthorityUtils.createAuthorityList(member.getRole().toString())
+				.stream().map(GrantedAuthority::getAuthority)
+				.collect(Collectors.joining(","));
+
+		return Jwts.builder()
+				.setSubject(ACCESS_TOKEN_CLAIM)
+				.claim("auth", authorities)
+				.claim(MEMBER_ID_CLAIM, memberId)
 				.setIssuedAt(now)
 				.setExpiration(accessTokenExpiration)
 				.signWith(key, SignatureAlgorithm.HS512)

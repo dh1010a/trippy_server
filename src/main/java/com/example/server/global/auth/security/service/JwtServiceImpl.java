@@ -2,11 +2,13 @@ package com.example.server.global.auth.security.service;
 
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.repository.MemberRepository;
+import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import com.example.server.global.auth.security.domain.JwtToken;
 import com.example.server.global.auth.security.domain.JwtTokenProvider;
 import com.example.server.global.auth.security.domain.CustomUserDetails;
+import com.example.server.global.auth.security.dto.LoginResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,6 +23,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Transactional
@@ -63,10 +66,8 @@ public class JwtServiceImpl implements JwtService {
 	}
 
 	@Override
-	public String reIssueAccessToken(String memberId, String password) {
-		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(memberId, password);
-		Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-		return jwtTokenProvider.createAccessToken(authentication);
+	public String reIssueAccessToken(String memberId) {
+		return jwtTokenProvider.reIssueAccessToken(memberId);
 	}
 
 	@Override
@@ -102,9 +103,27 @@ public class JwtServiceImpl implements JwtService {
 	}
 
 	@Override
-	public void sendAccessToken(HttpServletResponse response, String accessToken) {
+	public void sendAccessToken(HttpServletResponse response, String accessToken)  {
 		response.setStatus(HttpServletResponse.SC_OK);
+		response.setContentType("application/json");
+		response.setCharacterEncoding("utf-8");
 
+		String memberId = extractMemberId(accessToken).orElse(null);
+
+		LoginResponseDto.ReIssueAccessTokenDto loginDto = LoginResponseDto.ReIssueAccessTokenDto.builder()
+				.memberId(memberId)
+				.accessToken(accessToken)
+				.build();
+
+		log.info("AccessToken을 재발급 합니다. memberId: {}, AccessToken = {}", memberId, accessToken);
+
+		try {
+			response.getWriter().write(objectMapper.writeValueAsString(
+					ApiResponse.onSuccess(loginDto)
+			));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		setAccessTokenHeader(response, accessToken);
 	}
 

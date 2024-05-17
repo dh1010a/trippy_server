@@ -13,6 +13,7 @@ import com.example.server.domain.image.domain.Image;
 //import com.example.server.domain.follow.domain.MemberFollow;
 import com.example.server.domain.member.model.ActiveState;
 import com.example.server.domain.member.model.Gender;
+import com.example.server.domain.member.model.InterestedType;
 import com.example.server.domain.member.model.Role;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.global.auth.oauth2.model.SocialType;
@@ -22,6 +23,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -59,11 +61,11 @@ public class Member extends BaseTimeEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Post> posts;
-//
-//    @OneToMany(mappedBy = "member")
-//    @JsonIgnore
-//    private List<BookMark> bookMarks;
-//
+
+    @OneToMany(mappedBy = "member")
+    @JsonIgnore
+    private List<BookMark> bookMarks;
+
 //    @OneToMany(mappedBy = "member")
 //    @JsonIgnore
 //    private List<Like> likes;
@@ -92,6 +94,11 @@ public class Member extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     private SocialType socialType;
+
+    @ElementCollection
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private List<InterestedType> interestedTypes = new ArrayList<>();
 
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
@@ -132,6 +139,21 @@ public class Member extends BaseTimeEntity {
     public void updateBlogIntroduce(String blogIntroduce) {
         this.blogIntroduce = blogIntroduce;
     }
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
+    public void updateInfo(String nickName, String blogName, String blogIntroduce) {
+        this.nickName = nickName;
+        this.blogName = blogName;
+        this.blogIntroduce = blogIntroduce;
+    }
+
+    public void updateInterestedTypes(List<InterestedType> interestedTypes) {
+        this.interestedTypes = interestedTypes;
+    }
+
+
 
 
 

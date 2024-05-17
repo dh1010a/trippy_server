@@ -39,13 +39,16 @@ public class MemberController {
     @PostMapping("/signup/common")
     public ApiResponse<?> commonSignUp(@RequestBody CommonCreateMemberRequestDto commonCreateMemberRequestDto) {
         String loginMemberId = getLoginMemberId();
+        log.info("공통 회원가입 요청 : memberId = {}", loginMemberId);
         return ApiResponse.onSuccess(memberService.commonSignUp(commonCreateMemberRequestDto, loginMemberId));
     }
+
 
 
     @GetMapping
     public ApiResponse<?> getMyInfo() {
         String memberId = getLoginMemberId();
+        log.info("내 정보 조회 요청 : memberId = {}", memberId);
         return ApiResponse.onSuccess(memberService.getMyInfo(memberId));
     }
 
@@ -56,12 +59,14 @@ public class MemberController {
     }
 
     @GetMapping("/isDuplicated")
-    public ApiResponse<IsDuplicatedDto> isDuplicated(@RequestParam(value = "memberId", required = false) String memberId,
+    public ApiResponse<?> isDuplicated(@RequestParam(value = "memberId", required = false) String memberId,
                                                      @RequestParam(value = "email", required = false) String email,
                                                      @RequestParam(value = "nickName", required = false) String nickName,
                                                      @RequestParam(value = "blogName", required = false) String blogName) throws Exception {
         IsDuplicatedDto isDuplicatedDto;
         String ALREADY_EXIST_MESSAGE = "이미 가입된 내역이 존재합니다. 가입된 로그인 플랫폼 : ";
+
+        log.info("중복 조회 요청. memberId = {}, email = {}, nickName = {}, blogName = {}", memberId, email, nickName, blogName);
 
         if (memberId != null ) {
             String message = ALREADY_EXIST_MESSAGE + memberService.getSocialTypeByMemberId(email);
@@ -88,7 +93,8 @@ public class MemberController {
                             : "사용 가능한 블로그 이름입니다.")
                     .build();
         } else {
-            throw new ErrorHandler(ErrorStatus._BAD_REQUEST);
+            return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(), ErrorStatus._BAD_REQUEST.getMessage(),
+                    "요청 파라미터가 잘못되었습니다.");
         }
         return ApiResponse.onSuccess(isDuplicatedDto);
 
@@ -97,6 +103,7 @@ public class MemberController {
     @PostMapping("/follow")
     public ApiResponse<?> followMember(@RequestParam(value = "memberId", required = false) String followingMemberId) {
         String memberId = getLoginMemberId();
+        log.info("팔로우 요청 : memberId = {}, followingMemberId = {}", memberId, followingMemberId);
         return ApiResponse.onSuccess(memberService.followMember(memberId, followingMemberId));
     }
 
@@ -104,6 +111,7 @@ public class MemberController {
     public ApiResponse<?> getFollow(@RequestParam(value = "type") String type)  {
         // 비활성화된 멤버는 조회 안되게 하는 로직 추가 구현 해야함
         String memberId = getLoginMemberId();
+        log.info("팔로우 조회 요청 : memberId = {}, type = {}", memberId, type);
         if (type.equals("follower")) {
             return ApiResponse.onSuccess(memberService.getFollowerList(memberId));
         } else if (type.equals("following")) {
@@ -113,8 +121,58 @@ public class MemberController {
         return ApiResponse.onSuccess(ErrorStatus._BAD_REQUEST);
     }
 
+    @DeleteMapping("/follow")
+    public ApiResponse<?> deleteFollow(@RequestParam(value = "type") String type,
+                                      @RequestParam(value = "targetMemberId") String targetMemberId) {
+        String memberId = getLoginMemberId();
+        if (type.equals("follower")) {
+            return ApiResponse.onSuccess(memberService.deleteFollower(memberId, targetMemberId));
+        }
+        else if (type.equals("following")) {
+            return ApiResponse.onSuccess(memberService.unFollow(memberId, targetMemberId));
+        }
+        return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(), ErrorStatus._BAD_REQUEST.getMessage(),
+                "type 형식이 잘못되었습니다.");
+    }
+
+    @PatchMapping("/password")
+    public ApiResponse<?> changePassword(@RequestBody MemberRequestDto.ChangePasswordRequestDto requestDto,
+                                         @RequestParam(value = "code") String code) {
+        log.info("비밀번호 변경 요청 : memberId = {}", requestDto.getEmail());
+        return ApiResponse.onSuccess(memberService.changePassword(requestDto, code));
+    }
+
+    @PostMapping("/interest")
+    public ApiResponse<?> updateInterestedTypes(@RequestBody MemberRequestDto.UpdateInterestedTypesRequestDto requestDto) {
+        String memberId = getLoginMemberId();
+        log.info("관심사 변경 요청 : memberId = {}", memberId);
+        return ApiResponse.onSuccess(memberService.updateInterestedTypes(memberId, requestDto));
+    }
+
+    @GetMapping("/find")
+    public ApiResponse<?> findEmailByNickName(@RequestParam(value = "nickName") String nickName) {
+        log.info("이메일 찾기 요청 : nickName = {}", nickName);
+        return ApiResponse.onSuccess(memberService.findEmailByNickName(nickName));
+    }
+
+    @GetMapping("/bookmark")
+    public ApiResponse<?> getBookmarkList() {
+        String memberId = getLoginMemberId();
+        log.info("북마크 조회 요청 : memberId = {}", memberId);
+        return ApiResponse.onSuccess(memberService.getBookmarkList(memberId));
+    }
+
+
     private String getLoginMemberId() {
         return SecurityUtil.getLoginMemberId().orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+    }
+
+    // 개발 단계에서만 사용하는 API
+    @DeleteMapping("/delete")
+    public ApiResponse<?> deleteMember(@RequestParam(value = "memberId") String memberId) {
+        log.info("회원 탈퇴 요청 : memberId = {}", memberId);
+        return ApiResponse.onSuccess( memberService.deleteByMemberId(memberId));
+
     }
 
 

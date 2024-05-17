@@ -54,7 +54,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				.filter(jwtService::isTokenValid)
 				.orElse(null); //2
 
-
 		if(refreshToken != null){
 			checkRefreshTokenAndReIssueAccessToken(response, refreshToken);//3
 			return;
@@ -70,9 +69,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			filterChain.doFilter(request, response);
 		} catch (NullPointerException e) {
 			response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-			response.setStatus(ErrorStatus.MEMBER_EMAIL_PASSWORD_NOT_MATCH.getHttpStatus().value());
-			response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.onFailure(ErrorStatus.MEMBER_EMAIL_PASSWORD_NOT_MATCH.getCode(),
-					ErrorStatus.MEMBER_EMAIL_PASSWORD_NOT_MATCH.getMessage(), e.getMessage())));
+			response.setStatus(ErrorStatus.MEMBER_AUTHORIZATION_NOT_VALID.getHttpStatus().value());
+			response.setContentType("application/json");
+			response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.onFailure(ErrorStatus.MEMBER_AUTHORIZATION_NOT_VALID.getCode(),
+					ErrorStatus.MEMBER_AUTHORIZATION_NOT_VALID.getMessage(), e.getMessage())));
 			log.info("Authentication failed: " + e.getClass().toString() + " : " + e.getMessage());
 		}
 	}
@@ -92,6 +92,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshToken){
 		memberRepository.findByRefreshToken(refreshToken)
 				.ifPresent(member -> jwtService.sendAccessToken(response,
-						jwtService.reIssueAccessToken(member.getMemberId(), member.getPassword())));
+						jwtService.reIssueAccessToken(member.getMemberId())));
+
 	}
 }

@@ -2,13 +2,17 @@ package com.example.server.domain.member.service;
 
 import com.example.server.domain.follow.repository.MemberFollowRepository;
 import com.example.server.domain.follow.domain.MemberFollow;
+import com.example.server.domain.mail.application.MailService;
+import com.example.server.domain.member.domain.BookMark;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.dto.MemberDtoConverter;
+import com.example.server.domain.member.dto.MemberRequestDto;
 import com.example.server.domain.member.dto.MemberRequestDto.CommonCreateMemberRequestDto;
 import com.example.server.domain.member.dto.MemberRequestDto.CreateMemberRequestDto;
 import com.example.server.domain.member.dto.MemberResponseDto;
 import com.example.server.domain.member.dto.MemberResponseDto.*;
 import com.example.server.domain.member.model.ActiveState;
+import com.example.server.domain.member.model.InterestedType;
 import com.example.server.domain.member.model.Role;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
@@ -35,6 +39,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final MemberFollowRepository memberFollowRepository;
+    private final MailService mailService;
 
     private static final String DEFAULT_BLOG_SUFFIX = ".blog";
 
@@ -80,7 +85,7 @@ public class MemberService {
         member.updateNickName(requestDto.getNickName());
         member.updateBlogName(requestDto.getBlogName());
         member.updateBlogIntroduce(requestDto.getBlogIntroduce());
-        log.info("공통 회원가입이 완료되었습니다. memberId = {}, nickName = {}, blogName = {}", member.getMemberId(), member.getNickName(), member.getBlogName());
+        log.info("공통 회원가입이 완료되었습니다. memberId = {}, nickName = {}, blogName = {}, blogIntroduce = {}", member.getMemberId(), member.getNickName(), member.getBlogName(), member.getBlogIntroduce());
         return MemberDtoConverter.convertToMemberTaskDto(member);
 
     }
@@ -120,7 +125,7 @@ public class MemberService {
 
         memberFollowRepository.save(memberFollow);
 
-        member.updateMemberFollowing(memberFollow);
+//        member.updateMemberFollowing(memberFollow);
 
         return MemberDtoConverter.convertToFollowResponseDto(member, followingMember);
     }
@@ -152,6 +157,74 @@ public class MemberService {
                 .build();
     }
 
+    public MemberTaskSuccessResponseDto deleteFollower(String memberId, String followerMemberId) {
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member followerMember = memberRepository.findByMemberId(followerMemberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_FOLLOW_MEMBER_NOT_EXIST));
+
+        if (!memberFollowRepository.existsByMemberAndFollowingMemberIdx(followerMember, member.getIdx())) {
+            throw new ErrorHandler(ErrorStatus.MEMBER_FOLLOW_MEMBER_NOT_EXIST);
+        }
+
+        memberFollowRepository.deleteByMemberAndFollowingMemberIdx(followerMember, member.getIdx());
+
+        return MemberTaskSuccessResponseDto.builder()
+                .isSuccess(true)
+                .build();
+    }
+
+    public MemberTaskSuccessResponseDto unFollow(String memberId, String followingMemberId) {
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member followingMember = memberRepository.findByMemberId(followingMemberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_FOLLOW_MEMBER_NOT_EXIST));
+
+        if (!memberFollowRepository.existsByMemberAndFollowingMemberIdx(member, followingMember.getIdx())) {
+            throw new ErrorHandler(ErrorStatus.MEMBER_FOLLOW_MEMBER_NOT_EXIST);
+        }
+
+        memberFollowRepository.deleteByMemberAndFollowingMemberIdx(member, followingMember.getIdx());
+
+        return MemberTaskSuccessResponseDto.builder()
+                .isSuccess(true)
+                .build();
+    }
+
+    public MemberTaskSuccessResponseDto changePassword(MemberRequestDto.ChangePasswordRequestDto requestDto, String code) {
+        log.info("비밀번호 변경 요청이 들어왔습니다. email = {}", requestDto.getEmail());
+        Member member = memberRepository.findByEmail(requestDto.getEmail())
+                .orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        if (mailService.checkEmail(requestDto.getEmail(), code).isSuccess()) {
+            member.updatePassword(passwordEncoder.encode(requestDto.getNewPassword()));
+            mailService.finishCheckEmail(code);
+        } else {
+            throw new ErrorHandler(ErrorStatus._FORBIDDEN);
+        }
+        return MemberTaskSuccessResponseDto.builder()
+                .isSuccess(true)
+                .build();
+
+    }
+
+    public MemberTaskSuccessResponseDto updateInterestedTypes(String memberId, MemberRequestDto.UpdateInterestedTypesRequestDto requestDto) {
+
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        List<InterestedType> interestedTypes = new ArrayList<>();
+        for (String x : requestDto.getKoreanInterestedTypes()) {
+            interestedTypes.add(InterestedType.fromKoreanName(x));
+            log.info("관심사 변경 : memberId = {}, interestedType = {}", memberId, x);
+        }
+        member.updateInterestedTypes(interestedTypes);
+
+        return MemberTaskSuccessResponseDto.builder()
+                .isSuccess(true)
+                .build();
+    }
+
+    public EmailResponseDto findEmailByNickName(String nickName) {
+        Member member = memberRepository.findByNickName(nickName).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        return EmailResponseDto.builder()
+                .email(member.getEmail())
+                .build();
+    }
+
     public String getSocialTypeByEmail(String email) {
         if (!isExistByEmail(email)) {
             return null;
@@ -166,6 +239,19 @@ public class MemberService {
         }
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
         return member.getSocialType().getSocialName();
+    }
+
+    public BookMarkResponseDto getBookmarkList(String memberId) {
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        List<Long> bookmarkList = new ArrayList<>();
+        if (!member.getBookMarks().isEmpty()) {
+            for (BookMark x : member.getBookMarks()) {
+                bookmarkList.add(x.getId());
+            }
+        }
+        return BookMarkResponseDto.builder()
+                .bookMarkList(bookmarkList)
+                .build();
     }
 
     public boolean isExistByEmail(String email) {
@@ -184,4 +270,11 @@ public class MemberService {
         return memberRepository.existsByBlogName(blogName);
     }
 
+    public String deleteByMemberId(String memberId) {
+        if (!memberRepository.existsByMemberId(memberId)) {
+            return "그런 회원 없어요 씌파!";
+        }
+        memberRepository.deleteByMemberId(memberId);
+        return "삭제 완료";
+    }
 }

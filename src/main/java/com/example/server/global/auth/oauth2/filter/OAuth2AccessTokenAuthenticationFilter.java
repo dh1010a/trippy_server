@@ -72,6 +72,7 @@ public class OAuth2AccessTokenAuthenticationFilter extends AbstractAuthenticatio
 
         } catch (Exception e) {
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+            response.setContentType("application/json");
             response.setStatus(ErrorStatus.SOCIAL_UNAUTHORIZED.getHttpStatus().value());
             response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.onFailure(ErrorStatus.SOCIAL_UNAUTHORIZED.getCode(),
                     socialType.getSocialName() + " " + ErrorStatus.SOCIAL_UNAUTHORIZED.getMessage(), e.getMessage())));
