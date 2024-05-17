@@ -3,6 +3,7 @@ package com.example.server.domain.member.service;
 import com.example.server.domain.follow.repository.MemberFollowRepository;
 import com.example.server.domain.follow.domain.MemberFollow;
 import com.example.server.domain.mail.application.MailService;
+import com.example.server.domain.member.domain.BookMark;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.dto.MemberDtoConverter;
 import com.example.server.domain.member.dto.MemberRequestDto;
@@ -240,6 +241,19 @@ public class MemberService {
         return member.getSocialType().getSocialName();
     }
 
+    public BookMarkResponseDto getBookmarkList(String memberId) {
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        List<Long> bookmarkList = new ArrayList<>();
+        if (!member.getBookMarks().isEmpty()) {
+            for (BookMark x : member.getBookMarks()) {
+                bookmarkList.add(x.getId());
+            }
+        }
+        return BookMarkResponseDto.builder()
+                .bookMarkList(bookmarkList)
+                .build();
+    }
+
     public boolean isExistByEmail(String email) {
         return memberRepository.existsByEmail(email);
     }
@@ -256,4 +270,11 @@ public class MemberService {
         return memberRepository.existsByBlogName(blogName);
     }
 
+    public String deleteByMemberId(String memberId) {
+        if (!memberRepository.existsByMemberId(memberId)) {
+            return "그런 회원 없어요 씌파!";
+        }
+        memberRepository.deleteByMemberId(memberId);
+        return "삭제 완료";
+    }
 }

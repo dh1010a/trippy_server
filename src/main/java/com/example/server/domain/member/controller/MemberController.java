@@ -155,8 +155,24 @@ public class MemberController {
         return ApiResponse.onSuccess(memberService.findEmailByNickName(nickName));
     }
 
+    @GetMapping("/bookmark")
+    public ApiResponse<?> getBookmarkList() {
+        String memberId = getLoginMemberId();
+        log.info("북마크 조회 요청 : memberId = {}", memberId);
+        return ApiResponse.onSuccess(memberService.getBookmarkList(memberId));
+    }
+
+
     private String getLoginMemberId() {
         return SecurityUtil.getLoginMemberId().orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+    }
+
+    // 개발 단계에서만 사용하는 API
+    @DeleteMapping("/delete")
+    public ApiResponse<?> deleteMember(@RequestParam(value = "memberId") String memberId) {
+        log.info("회원 탈퇴 요청 : memberId = {}", memberId);
+        return ApiResponse.onSuccess( memberService.deleteByMemberId(memberId));
+
     }
 
 

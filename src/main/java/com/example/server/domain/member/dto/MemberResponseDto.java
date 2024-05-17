@@ -95,4 +95,10 @@ public class MemberResponseDto {
         private String email;
     }
 
+    @Data
+    @Builder
+    public static class BookMarkResponseDto {
+        private List<Long> bookMarkList;
+    }
+
 }

@@ -60,11 +60,11 @@ public class Member extends BaseTimeEntity {
 //    @OneToMany(mappedBy = "member")
 //    @JsonIgnore
 //    private List<Post> posts;
-//
-//    @OneToMany(mappedBy = "member")
-//    @JsonIgnore
-//    private List<BookMark> bookMarks;
-//
+
+    @OneToMany(mappedBy = "member")
+    @JsonIgnore
+    private List<BookMark> bookMarks;
+
 //    @OneToMany(mappedBy = "member")
 //    @JsonIgnore
 //    private List<Like> likes;
