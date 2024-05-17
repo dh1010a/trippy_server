@@ -76,7 +76,6 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{secrets.USERNAME}}
           key: ${{ secrets.KEY }}
-          password: ${{ secrets.PASSWORD }}
           script: |
             sudo docker rm $(sudo docker ps -a)
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
