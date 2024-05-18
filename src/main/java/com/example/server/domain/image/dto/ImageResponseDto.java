@@ -15,7 +15,6 @@ public class ImageResponseDto {
     public static class ImageBasicResponseDto{
         private Long id;
         private Long postId;
-        private Long memberId;
         private String imgUrl;
     }
 }
