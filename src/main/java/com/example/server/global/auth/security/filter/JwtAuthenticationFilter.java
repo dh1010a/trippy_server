@@ -64,6 +64,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 		try {
+//			if (request.getHeader("Authorization") == null) {
+//				response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+//				response.setStatus(ErrorStatus.MEMBER_AUTHORIZATION_NOT_VALID.getHttpStatus().value());
+//				response.setContentType("application/json");
+//				response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.onFailure(ErrorStatus.MEMBER_ACCESS_TOKEN_NOT_EXIST.getCode(),
+//						ErrorStatus.MEMBER_ACCESS_TOKEN_NOT_EXIST.getMessage(),null)));
+//				log.info("Authentication failed: " + ErrorStatus.MEMBER_ACCESS_TOKEN_NOT_EXIST.getMessage());
+//				return;
+//			}
 			jwtService.extractAccessToken(request).filter(jwtService::isTokenValid).flatMap(jwtService::extractMemberId)
 					.flatMap(memberRepository::findByMemberId).ifPresent(this::saveAuthentication);
 			filterChain.doFilter(request, response);
