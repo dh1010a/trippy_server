@@ -1,11 +1,11 @@
 package com.example.server.domain.member.controller;
 
 
-import com.example.server.domain.member.domain.Member;
+import com.example.server.domain.image.dto.ImageResponseDto.UpdateImageResponseDto;
+import com.example.server.domain.image.service.ImageService;
 import com.example.server.domain.member.dto.MemberRequestDto;
 import com.example.server.domain.member.dto.MemberRequestDto.CommonCreateMemberRequestDto;
 import com.example.server.domain.member.dto.MemberRequestDto.CreateMemberRequestDto;
-import com.example.server.domain.member.dto.MemberResponseDto;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.domain.member.service.MemberService;
 import com.example.server.global.apiPayload.ApiResponse;
@@ -14,10 +14,8 @@ import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import com.example.server.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
+import org.springframework.web.multipart.MultipartFile;
 
 import static com.example.server.domain.member.dto.MemberResponseDto.*;
 
@@ -29,6 +27,7 @@ public class MemberController {
 
     private final MemberService memberService;
     private final MemberRepository memberRepository;
+    private final ImageService imageService;
 
     @PostMapping("/signup")
     public ApiResponse<?> signUp(@RequestBody CreateMemberRequestDto createMemberRequestDto) {
@@ -162,17 +161,21 @@ public class MemberController {
         return ApiResponse.onSuccess(memberService.getBookmarkList(memberId));
     }
 
+    @PostMapping(value = "/image/{type}")
+    public ApiResponse<?> uploadImage(@RequestPart(value="image", required = true) MultipartFile image,
+                                                        @PathVariable("type") String type) throws Exception{
+        String memberId = getLoginMemberId();
+        UpdateImageResponseDto responseDto = type.equals("profile") ? imageService.uploadProfileImg(image, memberId) : imageService.uploadBlogImg(image, memberId);
+
+//		File convertFile = new File(System.getProperty("user.home") + "/rideTogetherDummy/" + image.getOriginalFilename());
+//		imageService.removeNewFile(convertFile);
+        return ApiResponse.onSuccess(responseDto);
+
+    }
+
 
     private String getLoginMemberId() {
         return SecurityUtil.getLoginMemberId().orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
-    }
-
-    // 개발 단계에서만 사용하는 API
-    @DeleteMapping("/delete")
-    public ApiResponse<?> deleteMember(@RequestParam(value = "memberId") String memberId) {
-        log.info("회원 탈퇴 요청 : memberId = {}", memberId);
-        return ApiResponse.onSuccess( memberService.deleteByMemberId(memberId));
-
     }
 
 
