@@ -39,12 +39,17 @@ public class AdminController {
         return ApiResponse.onSuccess(oracleImageService.deleteAllPreAuth());
     }
 
-    // 개발 단계에서만 사용하는 API
     @DeleteMapping("/member")
     public ApiResponse<?> deleteMember(@RequestParam(value = "memberId") String memberId) {
         log.info("회원 삭제 요청 : AdminId = {}, memberId = {}", getLoginMemberId(),memberId);
         return ApiResponse.onSuccess( memberService.deleteByMemberId(memberId));
 
+    }
+
+    @DeleteMapping("/member/all")
+    public ApiResponse<?> deleteAllMember() {
+        log.info("회원 전체 삭제 요청 : AdminId = {}", getLoginMemberId());
+        return ApiResponse.onSuccess(memberService.deleteAllMember());
     }
 
     private String getLoginMemberId() {

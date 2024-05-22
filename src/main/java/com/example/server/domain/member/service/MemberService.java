@@ -287,4 +287,10 @@ public class MemberService {
         memberRepository.deleteByMemberId(memberId);
         return "삭제 완료";
     }
+
+    // 관리자용
+    public String deleteAllMember() {
+        memberRepository.deleteAll();
+        return "전체 삭제 완료";
+    }
 }
