@@ -1,7 +1,6 @@
 package com.example.server.domain.image.controller;
 
 import com.example.server.domain.image.service.ImageService;
-import com.example.server.domain.image.service.OracleImageService;
 import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
@@ -18,16 +17,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class ImageController {
 
     private final ImageService imageService;
-    private final OracleImageService oracleImageService;
-
     @PostMapping()
     public ApiResponse<?> uploadImage(@RequestPart(value="image", required = true) MultipartFile image) throws Exception {
         return ApiResponse.onSuccess(imageService.uploadImg(image, getLoginMemberId()));
-    }
-
-    @DeleteMapping("/preAuth")
-    public ApiResponse<?> deletePreAuth() throws Exception{
-        return ApiResponse.onSuccess(oracleImageService.deleteAllImage());
     }
 
     private String getLoginMemberId() {

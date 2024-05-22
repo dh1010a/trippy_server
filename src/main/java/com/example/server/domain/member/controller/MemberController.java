@@ -178,14 +178,6 @@ public class MemberController {
         return SecurityUtil.getLoginMemberId().orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
     }
 
-    // 개발 단계에서만 사용하는 API
-    @DeleteMapping("/delete")
-    public ApiResponse<?> deleteMember(@RequestParam(value = "memberId") String memberId) {
-        log.info("회원 탈퇴 요청 : memberId = {}", memberId);
-        return ApiResponse.onSuccess( memberService.deleteByMemberId(memberId));
-
-    }
-
 
 
 }
