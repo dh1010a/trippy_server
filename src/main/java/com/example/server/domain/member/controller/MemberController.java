@@ -14,12 +14,8 @@ import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import com.example.server.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.util.Optional;
 
 import static com.example.server.domain.member.dto.MemberResponseDto.*;
 

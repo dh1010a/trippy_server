@@ -19,6 +19,8 @@ import com.oracle.bmc.objectstorage.ObjectStorage;
 import com.oracle.bmc.objectstorage.ObjectStorageClient;
 import com.oracle.bmc.objectstorage.model.CreatePreauthenticatedRequestDetails;
 import com.oracle.bmc.objectstorage.requests.CreatePreauthenticatedRequestRequest;
+import com.oracle.bmc.objectstorage.requests.DeleteObjectRequest;
+import com.oracle.bmc.objectstorage.requests.DeletePreauthenticatedRequestRequest;
 import com.oracle.bmc.objectstorage.requests.PutObjectRequest;
 import com.oracle.bmc.objectstorage.responses.CreatePreauthenticatedRequestResponse;
 import com.oracle.bmc.objectstorage.transfer.UploadConfiguration;
@@ -146,24 +148,25 @@ public class OracleImageService implements ImageService {
 
     // 버킷에서 이미지와 인증정보 삭제
     @Override
-    public void deleteImg(Long idx) throws Exception {
-//        ObjectStorage client = getClient();
-//        Image img = imageRepository.findImageByIdx(idx).orElseThrow(
-//                () -> new ErrorHandler(ErrorStatus.IMAGE_NOT_FOUND)
-//        );
-//        DeleteObjectRequest request =
-//                DeleteObjectRequest.builder()
-//                        .bucketName(BUCKET_NAME)
-//                        .namespaceName(BUCKET_NAME_SPACE)
-//                        .objectName(img.getImgUrl())
-//                        .build();
-//
-//        deletePreAuth(img.getParId());
-//
-//        client.deleteObject(request);
-//        client.close();
-//
-//        imageRepository.delete(img);
+    public void deleteImg(Long id) throws Exception {
+        ObjectStorage client = getClient();
+        Image img = imageRepository.findById(id).orElseThrow(
+                () -> new ErrorHandler(ErrorStatus.IMAGE_NOT_FOUND)
+        );
+        DeleteObjectRequest request =
+                DeleteObjectRequest.builder()
+                        .bucketName(BUCKET_NAME)
+                        .namespaceName(BUCKET_NAME_SPACE)
+                        .objectName(img.getImgUrl())
+                        .build();
+
+        deletePreAuth(img.getAuthenticateId());
+
+        client.deleteObject(request);
+        client.close();
+
+        imageRepository.delete(img);
+        log.info("이미지 삭제에 성공하였습니다. 이미지 ID : {}", id);
     }
 
     // 오라클 버킷으로 파일 업로드
@@ -230,6 +233,20 @@ public class OracleImageService implements ImageService {
                 .accessUri(DEFAULT_URI_PREFIX + response.getPreauthenticatedRequest().getAccessUri())
                 .build();
     }
+
+    private void deletePreAuth(String parId) throws Exception {
+        ObjectStorage client = getClient();
+        DeletePreauthenticatedRequestRequest request =
+                DeletePreauthenticatedRequestRequest.builder()
+                        .namespaceName(BUCKET_NAME_SPACE)
+                        .bucketName(BUCKET_NAME)
+                        .parId(parId)
+                        .build();
+
+        client.deletePreauthenticatedRequest(request);
+        client.close();
+    }
+
 
 
     // 로컬에 파일 업로드 해서 convert
