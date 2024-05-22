@@ -48,6 +48,10 @@ public class MemberService {
         if (isExistByEmail(requestDto.getEmail())) {
             throw new ErrorHandler(ErrorStatus.MEMBER_EMAIL_ALREADY_EXIST);
         }
+
+        if (isExistByMemberId(requestDto.getMemberId())) {
+            throw new ErrorHandler(ErrorStatus.MEMBER_ID_ALREADY_EXIST);
+        }
 //        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         Member member = Member.builder()
                 .memberId(requestDto.getMemberId())
@@ -60,6 +64,12 @@ public class MemberService {
                 .build();
         memberRepository.save(member);
         log.info("로컬 회원가입에 성공하였습니다. memberIdx = {}, memberId = {}, nickName = {}", member.getIdx(), member.getMemberId(), member.getNickName());
+
+        // 개발용 관리자 계정
+        if (member.getEmail().equals("dh1010a@gmail.com")) {
+            member.setRole(Role.ROLE_ADMIN);
+        }
+
         return MemberDtoConverter.convertToMemberTaskDto(member);
     }
 
@@ -276,5 +286,11 @@ public class MemberService {
         }
         memberRepository.deleteByMemberId(memberId);
         return "삭제 완료";
+    }
+
+    // 관리자용
+    public String deleteAllMember() {
+        memberRepository.deleteAll();
+        return "전체 삭제 완료";
     }
 }

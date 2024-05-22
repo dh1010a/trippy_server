@@ -29,6 +29,9 @@ public enum ErrorStatus implements BaseErrorCode {
     MEMBER_BLOG_NAME_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4008", "중복된 블로그명입니다."),
     MEMBER_AUTHORIZATION_NOT_VALID(HttpStatus.UNAUTHORIZED, "MEMBER4009", "유효하지 않은 인증정보 입니다."),
     MEMBER_FOLLOW_MEMBER_NOT_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4010", "대상 유저를 팔로우 또는 팔로잉 하지 않습니다."),
+    MEMBER_ACCESS_TOKEN_NOT_EXIST(HttpStatus.UNAUTHORIZED, "MEMBER4011", "토큰 정보가 존재하지 않습니다."),
+    MEMBER_NOT_AUTHENTICATED(HttpStatus.FORBIDDEN, "MEMBER4012", "권한이 없는 사용자입니다."),
+    MEMBER_ID_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4013", "중복된 멤버 아이디입니다."),
     MEMBER_LOGIN_NOT_SUPPORT(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "MEMBER4015", "지원되지 않는 로그인 형식입니다."),
 
     //사진 응답

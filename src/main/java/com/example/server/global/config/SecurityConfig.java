@@ -74,6 +74,9 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         ;
         http
+                .exceptionHandling(ex -> ex
+                        .accessDeniedHandler(new CustomAccessDeniedHandler(jwtService))
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint()))
                 .addFilterAfter(jsonUsernamePasswordLoginFilter(), LogoutFilter.class)
                 .addFilterBefore(jwtAuthenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(auth2AccessTokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);

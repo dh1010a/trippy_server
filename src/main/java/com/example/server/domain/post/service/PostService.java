@@ -25,9 +25,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.example.server.domain.image.dto.ImageDtoConverter.convertToImage;
-import static com.example.server.domain.post.dto.TagDtoConverter.convertToTag;
-
 @Service
 @Transactional
 @RequiredArgsConstructor

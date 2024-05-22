@@ -17,4 +17,19 @@ public class ImageResponseDto {
         private Long postId;
         private String imgUrl;
     }
+
+    @Builder
+    @Data
+    public static class UploadResponseDto {
+        String accessUri;
+        String authenticateId;
+        String imgUrl;
+    }
+
+    @Data
+    @Builder
+    public static class UpdateImageResponseDto {
+        String memberId;
+        String accessUri;
+    }
 }
