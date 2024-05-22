@@ -25,10 +25,6 @@ public class Image {
     private Post post;
 
     @OneToOne
-    @JoinColumn(name = "image_id")
-    private Image profileImage;
-
-    @OneToOne
     @JoinColumn(name = "member_idx")
     private Member member;
 

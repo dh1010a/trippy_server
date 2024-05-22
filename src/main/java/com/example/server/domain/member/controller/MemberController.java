@@ -1,6 +1,9 @@
 package com.example.server.domain.member.controller;
 
 
+import com.example.server.domain.image.dto.ImageResponseDto;
+import com.example.server.domain.image.dto.ImageResponseDto.UploadResponseDto;
+import com.example.server.domain.image.service.ImageService;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.dto.MemberRequestDto;
 import com.example.server.domain.member.dto.MemberRequestDto.CommonCreateMemberRequestDto;
@@ -16,7 +19,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.Optional;
 
 import static com.example.server.domain.member.dto.MemberResponseDto.*;
@@ -29,6 +34,7 @@ public class MemberController {
 
     private final MemberService memberService;
     private final MemberRepository memberRepository;
+    private final ImageService imageService;
 
     @PostMapping("/signup")
     public ApiResponse<?> signUp(@RequestBody CreateMemberRequestDto createMemberRequestDto) {
@@ -160,6 +166,18 @@ public class MemberController {
         String memberId = getLoginMemberId();
         log.info("북마크 조회 요청 : memberId = {}", memberId);
         return ApiResponse.onSuccess(memberService.getBookmarkList(memberId));
+    }
+
+    @PostMapping(value = "/image/{type}")
+    public ApiResponse<?> uploadImage(@RequestPart(value="image", required = true) MultipartFile image,
+                                                        @PathVariable("type") String type) throws Exception{
+        String memberId = getLoginMemberId();
+        UploadResponseDto responseDto = type.equals("profile") ? imageService.uploadProfileImg(image, memberId) : imageService.uploadImg(image, memberId);
+
+//		File convertFile = new File(System.getProperty("user.home") + "/rideTogetherDummy/" + image.getOriginalFilename());
+//		imageService.removeNewFile(convertFile);
+        return ApiResponse.onSuccess(responseDto);
+
     }
 
 

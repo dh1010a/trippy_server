@@ -18,4 +18,12 @@ public class ImageResponseDto {
         private Long memberId;
         private String imgUrl;
     }
+
+    @Builder
+    @Data
+    public static class UploadResponseDto {
+        String accessUri;
+        String authenticateId;
+        String imgUrl;
+    }
 }

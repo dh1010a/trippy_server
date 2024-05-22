@@ -62,6 +62,14 @@ dependencies {
     //redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
+    // oci bucket
+    implementation 'com.oracle.oci.sdk:oci-java-sdk:3.38.0'
+    implementation 'com.oracle.oci.sdk:oci-java-sdk-common:3.38.0'
+    implementation 'com.oracle.oci.sdk:oci-java-sdk-objectstorage:3.38.0'
+    implementation 'com.oracle.oci.sdk:oci-java-sdk-common-httpclient:3.38.0'
+    implementation 'com.oracle.oci.sdk:oci-java-sdk-common-httpclient-choices:3.38.0'
+    implementation ('com.oracle.oci.sdk:oci-java-sdk-common-httpclient-jersey3:3.37.0')
+
 }
 
 tasks.named('test') {
