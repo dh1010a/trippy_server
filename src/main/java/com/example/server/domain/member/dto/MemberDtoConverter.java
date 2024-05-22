@@ -1,11 +1,13 @@
 package com.example.server.domain.member.dto;
 
+import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.dto.MemberResponseDto.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class MemberDtoConverter {
 
@@ -20,15 +22,20 @@ public class MemberDtoConverter {
 
     public static MemberInfoResponseDto convertToInfoResponseDto (Member member) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        List<Image> images = member.getImages();
+        Image profileImage = images.stream().filter(Image::isProfileImage).findAny().orElse(null);
+        Image blogTitleImage = images.stream().filter(Image::isBlogTitleImage).findAny().orElse(null);
+
         return MemberInfoResponseDto.builder()
                 .idx(member.getIdx())
                 .memberId(member.getMemberId())
                 .nickName(member.getNickName())
                 .email(member.getEmail())
-                .profileImageUrl(member.getProfileImageUrl())
+                .profileImageUrl(profileImage != null ? profileImage.getAccessUri() : null)
                 .blogName(member.getBlogName())
                 .blogIntroduce(member.getBlogIntroduce())
-                .blogTitleImgUrl(member.getBlogTitleImgUrl())
+                .blogTitleImgUrl(blogTitleImage != null ? blogTitleImage.getAccessUri() : null)
                 .role(member.getRole().getTitle())
                 .activeStatus(member.getActiveState().name())
                 .socialType(member.getSocialType().getSocialName())

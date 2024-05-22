@@ -1,6 +1,10 @@
 package com.example.server.domain.image.service;
 
+import com.example.server.domain.image.domain.Image;
+import com.example.server.domain.image.dto.ImageResponseDto;
+import com.example.server.domain.image.dto.ImageResponseDto.UpdateImageResponseDto;
 import com.example.server.domain.image.dto.ImageResponseDto.UploadResponseDto;
+import com.example.server.domain.image.model.ImageType;
 import com.example.server.domain.image.repository.ImageRepository;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.repository.MemberRepository;
@@ -47,9 +51,10 @@ public class OracleImageService implements ImageService {
     private static final String BUCKET_NAME = "RideTogetherHYU_Bucket";
     private static final String BUCKET_NAME_SPACE = "axjoaeuyezzj";
     private static final String PROFILE_IMG_DIR = "profile/";
+    private static final String BLOG_IMG_DIR = "blog/";
+    private static final String POST_IMG_DIR = "post/";
     public static final String DEFAULT_URI_PREFIX = "https://" + BUCKET_NAME_SPACE + ".objectstorage."
             + Region.AP_CHUNCHEON_1.getRegionId() + ".oci.customer-oci.com";
-    private static final String POST_IMG_DIR = "post/";
 
 
     public ObjectStorage getClient() throws Exception {
@@ -79,12 +84,50 @@ public class OracleImageService implements ImageService {
     }
 
     @Override
-    public UploadResponseDto uploadProfileImg(MultipartFile file, String memberId) throws Exception {
+    public UpdateImageResponseDto uploadProfileImg(MultipartFile file, String memberId) throws Exception {
         File uploadFile = convert(file)  // 파일 변환할 수 없으면 에러
                 .orElseThrow(() -> new IllegalArgumentException("error: MultipartFile -> File convert fail"));
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
         String fileDir = member.getIdx() + "/" + PROFILE_IMG_DIR;
-        return upload(uploadFile, fileDir);
+        UploadResponseDto upload = upload(uploadFile, fileDir);
+
+        Image image = Image.builder()
+                .member(member)
+                .imgUrl(upload.getImgUrl())
+                .accessUri(upload.getAccessUri())
+                .authenticateId(upload.getAuthenticateId())
+                .imageType(ImageType.PROFILE)
+                .build();
+
+        imageRepository.save(image);
+
+        return UpdateImageResponseDto.builder()
+                .memberId(memberId)
+                .accessUri(upload.getAccessUri())
+                .build();
+    }
+
+    @Override
+    public UpdateImageResponseDto uploadBlogImg(MultipartFile file, String memberId) throws Exception {
+        File uploadFile = convert(file)  // 파일 변환할 수 없으면 에러
+                .orElseThrow(() -> new IllegalArgumentException("error: MultipartFile -> File convert fail"));
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        String fileDir = member.getIdx() + "/" + BLOG_IMG_DIR;
+        UploadResponseDto upload = upload(uploadFile, fileDir);
+
+        Image image = Image.builder()
+                .member(member)
+                .imgUrl(upload.getImgUrl())
+                .accessUri(upload.getAccessUri())
+                .authenticateId(upload.getAuthenticateId())
+                .imageType(ImageType.BLOG)
+                .build();
+        imageRepository.save(image);
+
+        return UpdateImageResponseDto.builder()
+                .memberId(memberId)
+                .accessUri(upload.getAccessUri())
+                .build();
     }
 
     @Override

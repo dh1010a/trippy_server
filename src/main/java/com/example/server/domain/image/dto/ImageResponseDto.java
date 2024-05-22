@@ -26,4 +26,11 @@ public class ImageResponseDto {
         String authenticateId;
         String imgUrl;
     }
+
+    @Data
+    @Builder
+    public static class UpdateImageResponseDto {
+        String memberId;
+        String accessUri;
+    }
 }

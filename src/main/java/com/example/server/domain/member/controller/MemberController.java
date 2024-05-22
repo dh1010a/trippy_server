@@ -1,14 +1,11 @@
 package com.example.server.domain.member.controller;
 
 
-import com.example.server.domain.image.dto.ImageResponseDto;
-import com.example.server.domain.image.dto.ImageResponseDto.UploadResponseDto;
+import com.example.server.domain.image.dto.ImageResponseDto.UpdateImageResponseDto;
 import com.example.server.domain.image.service.ImageService;
-import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.dto.MemberRequestDto;
 import com.example.server.domain.member.dto.MemberRequestDto.CommonCreateMemberRequestDto;
 import com.example.server.domain.member.dto.MemberRequestDto.CreateMemberRequestDto;
-import com.example.server.domain.member.dto.MemberResponseDto;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.domain.member.service.MemberService;
 import com.example.server.global.apiPayload.ApiResponse;
@@ -172,7 +169,7 @@ public class MemberController {
     public ApiResponse<?> uploadImage(@RequestPart(value="image", required = true) MultipartFile image,
                                                         @PathVariable("type") String type) throws Exception{
         String memberId = getLoginMemberId();
-        UploadResponseDto responseDto = type.equals("profile") ? imageService.uploadProfileImg(image, memberId) : imageService.uploadImg(image, memberId);
+        UpdateImageResponseDto responseDto = type.equals("profile") ? imageService.uploadProfileImg(image, memberId) : imageService.uploadBlogImg(image, memberId);
 
 //		File convertFile = new File(System.getProperty("user.home") + "/rideTogetherDummy/" + image.getOriginalFilename());
 //		imageService.removeNewFile(convertFile);

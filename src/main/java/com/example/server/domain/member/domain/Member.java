@@ -47,11 +47,7 @@ public class Member extends BaseTimeEntity {
 //    @Column(nullable = false, unique = true)
     private String email;
 
-    private String profileImageUrl;
-
     private String blogName;
-
-    private String blogTitleImgUrl;
 
     private String blogIntroduce;
 
@@ -82,9 +78,9 @@ public class Member extends BaseTimeEntity {
 //    @JsonIgnore
 //    private List<MemberTicket> memberTickets;
 //
-    @OneToOne
-    @JoinColumn(name = "image_id")
-    private Image profileImage;
+    @OneToMany(mappedBy = "member")
+    @JsonIgnore
+    private List<Image> images;
 
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -112,9 +108,6 @@ public class Member extends BaseTimeEntity {
         this.socialType = type;
     }
 
-    public void updateProfileImgUrl(String profileImageUrl) {
-        this.profileImageUrl = profileImageUrl;
-    }
 
     public void updateMemberFollowing(MemberFollow memberFollow) {
         this.memberFollows.add(memberFollow);
@@ -126,14 +119,6 @@ public class Member extends BaseTimeEntity {
 
     public void updateBlogName(String blogName) {
         this.blogName = blogName;
-    }
-
-    public void updateBlogTitleImgUrl(String blogTitleImgUrl) {
-        this.blogTitleImgUrl = blogTitleImgUrl;
-    }
-
-    public void updateProfileImageUrl(String profileImageUrl) {
-        this.profileImageUrl = profileImageUrl;
     }
 
     public void updateBlogIntroduce(String blogIntroduce) {
