@@ -23,7 +23,6 @@ public class AdminController {
 
     private final ImageService imageService;
     private final OracleImageService oracleImageService;
-    private final MemberRepository memberRepository;
     private final MemberService memberService;
 
 

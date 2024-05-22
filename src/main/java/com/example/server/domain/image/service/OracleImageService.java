@@ -95,6 +95,7 @@ public class OracleImageService implements ImageService {
         if (!images.isEmpty()) {
             Image profileImage = images.stream().filter(Image::isProfileImage).findAny().orElse(null);
             if (profileImage != null) {
+                deleteImg(profileImage.getId());
                 imageRepository.delete(profileImage);
             }
         }
@@ -128,6 +129,7 @@ public class OracleImageService implements ImageService {
         if (!images.isEmpty()) {
             Image blogImage = images.stream().filter(Image::isBlogTitleImage).findAny().orElse(null);
             if (blogImage != null) {
+                deleteImg(blogImage.getId());
                 imageRepository.delete(blogImage);
             }
         }
