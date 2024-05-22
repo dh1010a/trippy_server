@@ -18,11 +18,12 @@ import com.oracle.bmc.auth.ConfigFileAuthenticationDetailsProvider;
 import com.oracle.bmc.objectstorage.ObjectStorage;
 import com.oracle.bmc.objectstorage.ObjectStorageClient;
 import com.oracle.bmc.objectstorage.model.CreatePreauthenticatedRequestDetails;
-import com.oracle.bmc.objectstorage.requests.CreatePreauthenticatedRequestRequest;
-import com.oracle.bmc.objectstorage.requests.DeleteObjectRequest;
-import com.oracle.bmc.objectstorage.requests.DeletePreauthenticatedRequestRequest;
-import com.oracle.bmc.objectstorage.requests.PutObjectRequest;
+import com.oracle.bmc.objectstorage.model.ObjectSummary;
+import com.oracle.bmc.objectstorage.model.PreauthenticatedRequestSummary;
+import com.oracle.bmc.objectstorage.requests.*;
 import com.oracle.bmc.objectstorage.responses.CreatePreauthenticatedRequestResponse;
+import com.oracle.bmc.objectstorage.responses.ListObjectsResponse;
+import com.oracle.bmc.objectstorage.responses.ListPreauthenticatedRequestsResponse;
 import com.oracle.bmc.objectstorage.transfer.UploadConfiguration;
 import com.oracle.bmc.objectstorage.transfer.UploadManager;
 import com.oracle.bmc.objectstorage.transfer.UploadManager.UploadRequest;
@@ -54,7 +55,7 @@ public class OracleImageService implements ImageService {
     private static final String BUCKET_NAME_SPACE = "axjoaeuyezzj";
     private static final String PROFILE_IMG_DIR = "profile/";
     private static final String BLOG_IMG_DIR = "blog/";
-    private static final String POST_IMG_DIR = "post/";
+    private static final String DEFAULT_IMG_DIR = "img/";
     public static final String DEFAULT_URI_PREFIX = "https://" + BUCKET_NAME_SPACE + ".objectstorage."
             + Region.AP_CHUNCHEON_1.getRegionId() + ".oci.customer-oci.com";
 
@@ -90,7 +91,16 @@ public class OracleImageService implements ImageService {
         File uploadFile = convert(file)  // 파일 변환할 수 없으면 에러
                 .orElseThrow(() -> new IllegalArgumentException("error: MultipartFile -> File convert fail"));
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        List<Image> images = member.getImages();
+        if (!images.isEmpty()) {
+            Image profileImage = images.stream().filter(Image::isProfileImage).findAny().orElse(null);
+            if (profileImage != null) {
+                imageRepository.delete(profileImage);
+            }
+        }
         String fileDir = member.getIdx() + "/" + PROFILE_IMG_DIR;
+
+        log.info("사진 업로드 요청. MemberId : {}", memberId);
         UploadResponseDto upload = upload(uploadFile, fileDir);
 
         Image image = Image.builder()
@@ -114,7 +124,17 @@ public class OracleImageService implements ImageService {
         File uploadFile = convert(file)  // 파일 변환할 수 없으면 에러
                 .orElseThrow(() -> new IllegalArgumentException("error: MultipartFile -> File convert fail"));
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        List<Image> images = member.getImages();
+        if (!images.isEmpty()) {
+            Image blogImage = images.stream().filter(Image::isBlogTitleImage).findAny().orElse(null);
+            if (blogImage != null) {
+                imageRepository.delete(blogImage);
+            }
+        }
+
         String fileDir = member.getIdx() + "/" + BLOG_IMG_DIR;
+        log.info("사진 업로드 요청. MemberId : {}", memberId);
+
         UploadResponseDto upload = upload(uploadFile, fileDir);
 
         Image image = Image.builder()
@@ -137,7 +157,8 @@ public class OracleImageService implements ImageService {
         File uploadFile = convert(file)  // 파일 변환할 수 없으면 에러
                 .orElseThrow(() -> new IllegalArgumentException("error: MultipartFile -> File convert fail"));
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
-        String fileDir = member.getIdx() + "/" + POST_IMG_DIR;
+        String fileDir = member.getIdx() + "/" + DEFAULT_IMG_DIR;
+        log.info("사진 업로드 요청. MemberId : {}", memberId);
         return upload(uploadFile, fileDir);
     }
 
@@ -212,7 +233,7 @@ public class OracleImageService implements ImageService {
         log.info("권한을 얻어오기 위해 시도중입니다. 파일 이름 : {}", imgUrl);
         CreatePreauthenticatedRequestDetails details =
                 CreatePreauthenticatedRequestDetails.builder()
-                        .accessType(CreatePreauthenticatedRequestDetails.AccessType.ObjectReadWrite)
+                        .accessType(CreatePreauthenticatedRequestDetails.AccessType.ObjectRead)
                         .objectName(imgUrl)
                         .timeExpires(expireTime)
                         .name(imgUrl)
@@ -233,6 +254,49 @@ public class OracleImageService implements ImageService {
                 .accessUri(DEFAULT_URI_PREFIX + response.getPreauthenticatedRequest().getAccessUri())
                 .build();
     }
+
+    public String deleteAllPreAuth() throws Exception {
+        ObjectStorage client = getClient();
+
+        ListPreauthenticatedRequestsRequest listPreauthenticatedRequestsRequest
+                = ListPreauthenticatedRequestsRequest.builder()
+                .namespaceName(BUCKET_NAME_SPACE)
+                .bucketName(BUCKET_NAME)
+                .build();
+
+        ListPreauthenticatedRequestsResponse response = client.listPreauthenticatedRequests(listPreauthenticatedRequestsRequest);
+        log.info("response : {}", response.getItems());
+        List<PreauthenticatedRequestSummary> items = response.getItems();
+        for (PreauthenticatedRequestSummary item : items) {
+            System.out.println("item = " + item);
+            deletePreAuth(item.getId());
+        }
+        client.close();
+        return "모든 사전인증 요청이 삭제되었습니다.";
+    }
+
+    public String deleteAllImage() throws Exception {
+        ObjectStorage client = getClient();
+        ListObjectsRequest listObjectsRequest = ListObjectsRequest.builder()
+                .namespaceName(BUCKET_NAME_SPACE)
+                .bucketName(BUCKET_NAME)
+                .build();
+
+        ListObjectsResponse response = client.listObjects(listObjectsRequest);
+        List<ObjectSummary> objects = response.getListObjects().getObjects();
+        for (ObjectSummary object : objects) {
+            DeleteObjectRequest request = DeleteObjectRequest.builder()
+                    .namespaceName(BUCKET_NAME_SPACE)
+                    .bucketName(BUCKET_NAME)
+                    .objectName(object.getName())
+                    .build();
+            client.deleteObject(request);
+        }
+        client.close();
+        return "모든 이미지가 삭제되었습니다.";
+    }
+
+
 
     private void deletePreAuth(String parId) throws Exception {
         ObjectStorage client = getClient();

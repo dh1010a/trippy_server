@@ -37,6 +37,7 @@ public class Image {
 
     private String authenticateId;
 
+    @Enumerated(EnumType.STRING)
     private ImageType imageType;
 
     public void setPost(Post post) {
