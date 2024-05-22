@@ -29,7 +29,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setStatus(ErrorStatus.MEMBER_EMAIL_PASSWORD_NOT_MATCH.getHttpStatus().value());
+        response.setStatus(ErrorStatus._UNAUTHORIZED.getHttpStatus().value());
         response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(),
                 ErrorStatus._UNAUTHORIZED.getMessage(), null)));
         response.setStatus(HttpStatus.UNAUTHORIZED.value());

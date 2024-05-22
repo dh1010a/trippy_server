@@ -108,6 +108,10 @@ public class Member extends BaseTimeEntity {
         this.socialType = type;
     }
 
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
 
     public void updateMemberFollowing(MemberFollow memberFollow) {
         this.memberFollows.add(memberFollow);
