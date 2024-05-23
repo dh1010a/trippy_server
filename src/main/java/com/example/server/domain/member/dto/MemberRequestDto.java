@@ -17,9 +17,18 @@ public class MemberRequestDto {
     @Builder
     @Data
     public static class CommonCreateMemberRequestDto {
+        private CommonCreateImageDto profileImage;
         private String nickName;
         private String blogName;
         private String blogIntroduce;
+    }
+
+    @Builder
+    @Data
+    public static class CommonCreateImageDto {
+        private String accessUri;
+        private String authenticateId;
+        private String imgUrl;
     }
 
     @Builder

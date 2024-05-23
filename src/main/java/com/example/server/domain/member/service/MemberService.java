@@ -2,6 +2,9 @@ package com.example.server.domain.member.service;
 
 import com.example.server.domain.follow.repository.MemberFollowRepository;
 import com.example.server.domain.follow.domain.MemberFollow;
+import com.example.server.domain.image.domain.Image;
+import com.example.server.domain.image.model.ImageType;
+import com.example.server.domain.image.repository.ImageRepository;
 import com.example.server.domain.mail.application.MailService;
 import com.example.server.domain.member.domain.BookMark;
 import com.example.server.domain.member.domain.Member;
@@ -40,6 +43,7 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final MemberFollowRepository memberFollowRepository;
     private final MailService mailService;
+    private final ImageRepository imageRepository;
 
     private static final String DEFAULT_BLOG_SUFFIX = ".blog";
 
@@ -92,6 +96,15 @@ public class MemberService {
 
     public MemberTaskResultResponseDto commonSignUp(CommonCreateMemberRequestDto requestDto, String memberId) {
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Image image = Image.builder()
+                .accessUri(requestDto.getProfileImage().getAccessUri())
+                .authenticateId(requestDto.getProfileImage().getAuthenticateId())
+                .imgUrl(requestDto.getProfileImage().getImgUrl())
+                .imageType(ImageType.PROFILE)
+                .member(member)
+                .build();
+        imageRepository.save(image);
+
         member.updateNickName(requestDto.getNickName());
         member.updateBlogName(requestDto.getBlogName());
         member.updateBlogIntroduce(requestDto.getBlogIntroduce());
