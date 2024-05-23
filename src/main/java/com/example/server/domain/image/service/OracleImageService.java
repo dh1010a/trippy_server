@@ -1,6 +1,7 @@
 package com.example.server.domain.image.service;
 
 import com.example.server.domain.image.domain.Image;
+import com.example.server.domain.image.dto.ImageDto;
 import com.example.server.domain.image.dto.ImageResponseDto;
 import com.example.server.domain.image.dto.ImageResponseDto.UpdateImageResponseDto;
 import com.example.server.domain.image.dto.ImageResponseDto.UploadResponseDto;
@@ -190,6 +191,22 @@ public class OracleImageService implements ImageService {
 
         imageRepository.delete(img);
         log.info("이미지 삭제에 성공하였습니다. 이미지 ID : {}", id);
+    }
+
+    @Override
+    public void deleteImg(ImageDto imageDto) throws Exception {
+        ObjectStorage client = getClient();
+        DeleteObjectRequest request = DeleteObjectRequest.builder()
+                .bucketName(BUCKET_NAME)
+                .namespaceName(BUCKET_NAME_SPACE)
+                .objectName(imageDto.getImgUrl())
+                .build();
+
+        deletePreAuth(imageDto.getAuthenticateId());
+
+        client.deleteObject(request);
+        client.close();
+        log.info("이미지 삭제에 성공하였습니다. 이미지 URL : {}", imageDto.getImgUrl());
     }
 
     // 오라클 버킷으로 파일 업로드

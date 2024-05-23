@@ -1,5 +1,6 @@
 package com.example.server.domain.image.service;
 
+import com.example.server.domain.image.dto.ImageDto;
 import com.example.server.domain.image.dto.ImageResponseDto;
 import com.example.server.domain.image.dto.ImageResponseDto.UploadResponseDto;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,6 +16,8 @@ public interface ImageService {
     public MultipartFile downloadImg(Long imageIdx, Long memberIdx) throws Exception;
 
     public void deleteImg(Long imageIdx) throws Exception;
+
+    public void deleteImg(ImageDto imageDto) throws Exception;
 
     public void removeNewFile(File targetFile) ;
 
