@@ -4,4 +4,4 @@ WORKDIR /app
 COPY build/libs/server-0.0.1-SNAPSHOT.jar trippyj.jar
 
 # JAR 파일 실행
-CMD ["java", "-jar", "trippyj.jar"]
+CMD ["java", "-jar", "trippyj.jar", "--spring.profiles.active=prod-profile"]

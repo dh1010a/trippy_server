@@ -1,5 +1,6 @@
 package com.example.server.domain.member.dto;
 
+import com.example.server.domain.image.dto.ImageDto;
 import lombok.*;
 
 import java.util.List;
@@ -17,10 +18,12 @@ public class MemberRequestDto {
     @Builder
     @Data
     public static class CommonCreateMemberRequestDto {
+        private ImageDto profileImage;
         private String nickName;
         private String blogName;
         private String blogIntroduce;
     }
+
 
     @Builder
     @Data

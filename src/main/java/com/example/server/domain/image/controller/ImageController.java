@@ -1,5 +1,6 @@
 package com.example.server.domain.image.controller;
 
+import com.example.server.domain.image.dto.ImageDto;
 import com.example.server.domain.image.service.ImageService;
 import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
@@ -17,9 +18,16 @@ import org.springframework.web.multipart.MultipartFile;
 public class ImageController {
 
     private final ImageService imageService;
-    @PostMapping()
+
+    @PostMapping
     public ApiResponse<?> uploadImage(@RequestPart(value="image", required = true) MultipartFile image) throws Exception {
         return ApiResponse.onSuccess(imageService.uploadImg(image, getLoginMemberId()));
+    }
+
+    @DeleteMapping
+    public ApiResponse<?> deleteImage(@RequestBody ImageDto imageDto) throws Exception{
+        imageService.deleteImg(imageDto);
+        return ApiResponse.onSuccess(null);
     }
 
     private String getLoginMemberId() {
