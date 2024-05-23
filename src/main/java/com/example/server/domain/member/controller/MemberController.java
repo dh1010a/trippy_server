@@ -36,7 +36,7 @@ public class MemberController {
     }
 
     @PostMapping("/signup/common")
-    public ApiResponse<?> commonSignUp(@RequestBody CommonCreateMemberRequestDto commonCreateMemberRequestDto) {
+    public ApiResponse<?> commonSignUp(@RequestBody CommonCreateMemberRequestDto commonCreateMemberRequestDto) throws Exception{
         String loginMemberId = getLoginMemberId();
         log.info("공통 회원가입 요청 : memberId = {}", loginMemberId);
         return ApiResponse.onSuccess(memberService.commonSignUp(commonCreateMemberRequestDto, loginMemberId));

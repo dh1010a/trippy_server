@@ -5,6 +5,7 @@ import com.example.server.domain.follow.domain.MemberFollow;
 import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.image.model.ImageType;
 import com.example.server.domain.image.repository.ImageRepository;
+import com.example.server.domain.image.service.OracleImageService;
 import com.example.server.domain.mail.application.MailService;
 import com.example.server.domain.member.domain.BookMark;
 import com.example.server.domain.member.domain.Member;
@@ -44,6 +45,7 @@ public class MemberService {
     private final MemberFollowRepository memberFollowRepository;
     private final MailService mailService;
     private final ImageRepository imageRepository;
+    private final OracleImageService oracleImageService;
 
     private static final String DEFAULT_BLOG_SUFFIX = ".blog";
 
@@ -94,8 +96,9 @@ public class MemberService {
         return member;
     }
 
-    public MemberTaskResultResponseDto commonSignUp(CommonCreateMemberRequestDto requestDto, String memberId) {
+    public MemberTaskResultResponseDto commonSignUp(CommonCreateMemberRequestDto requestDto, String memberId) throws Exception{
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        checkProfileImageExistsAndDelete(member);
         Image image = Image.builder()
                 .accessUri(requestDto.getProfileImage().getAccessUri())
                 .authenticateId(requestDto.getProfileImage().getAuthenticateId())
@@ -108,7 +111,7 @@ public class MemberService {
         member.updateNickName(requestDto.getNickName());
         member.updateBlogName(requestDto.getBlogName());
         member.updateBlogIntroduce(requestDto.getBlogIntroduce());
-        log.info("공통 회원가입이 완료되었습니다. memberId = {}, nickName = {}, blogName = {}, blogIntroduce = {}", member.getMemberId(), member.getNickName(), member.getBlogName(), member.getBlogIntroduce());
+        log.info("공통 회원가입이 완료되었습니다. memberId = {}, nickName = {}, blogName = {}, blogIntroduce = {}, profileImgUrl = {}", member.getMemberId(), member.getNickName(), member.getBlogName(), member.getBlogIntroduce(), image.getAccessUri());
         return MemberDtoConverter.convertToMemberTaskDto(member);
 
     }
@@ -224,6 +227,17 @@ public class MemberService {
                 .isSuccess(true)
                 .build();
 
+    }
+
+    public void checkProfileImageExistsAndDelete(Member member) throws Exception{
+        List<Image> images = member.getImages();
+        if (!images.isEmpty()) {
+            Image profileImage = images.stream().filter(Image::isProfileImage).findAny().orElse(null);
+            if (profileImage != null) {
+                oracleImageService.deleteImg(profileImage.getId());
+                imageRepository.delete(profileImage);
+            }
+        }
     }
 
     public MemberTaskSuccessResponseDto updateInterestedTypes(String memberId, MemberRequestDto.UpdateInterestedTypesRequestDto requestDto) {
