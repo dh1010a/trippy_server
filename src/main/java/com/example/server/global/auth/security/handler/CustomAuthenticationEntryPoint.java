@@ -33,6 +33,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(),
                 ErrorStatus._UNAUTHORIZED.getMessage(), null)));
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        log.info("Access denied: " + ErrorStatus._UNAUTHORIZED.getMessage());
+        log.info("Access denied : {}, requestURI = {} " ,ErrorStatus._UNAUTHORIZED.getMessage(), request.getRequestURI());
     }
 }
