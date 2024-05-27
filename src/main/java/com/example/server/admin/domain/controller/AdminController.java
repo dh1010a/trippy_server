@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/admin")
 public class AdminController {
 
-    private final ImageService imageService;
     private final OracleImageService oracleImageService;
     private final MemberService memberService;
 
