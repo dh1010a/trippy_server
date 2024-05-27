@@ -57,6 +57,7 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
 				.memberId(memberId)
 				.accessToken(jwtToken.getAccessToken())
 				.refreshToken(jwtToken.getRefreshToken())
+				.role(member.getRole().getTitle())
 				.build();
 
 		response.getWriter().write(objectMapper.writeValueAsString(
