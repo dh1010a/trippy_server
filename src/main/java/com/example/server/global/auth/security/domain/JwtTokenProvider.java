@@ -54,7 +54,7 @@ public class JwtTokenProvider {
 
 	public JwtToken createToken(Authentication authentication) {
 		String accessToken = createAccessToken(authentication);
-		String refreshToken = createRefreshToken();
+		String refreshToken = createRefreshToken(authentication);
 
 		return JwtToken.builder()
 				.grantType("Bearer")
@@ -63,13 +63,29 @@ public class JwtTokenProvider {
 				.build();
 	}
 
-	public String createRefreshToken() {
+	public String createRefreshToken(Authentication authentication) {
+		Date now = new Date();
+		Date refreshTokenExpiration = new Date(now.getTime() + REFRESH_TOKEN_EXPIRE_DATE * 24 * 60 * 60 * 1000);
+
+		CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+
+		return Jwts.builder()
+				.setSubject(REFRESH_TOKEN_CLAIM)
+				.setIssuedAt(now)
+				.claim(MEMBER_ID_CLAIM, user.getMemberId())
+				.setExpiration(refreshTokenExpiration)
+				.signWith(key, SignatureAlgorithm.HS512)
+				.compact();
+	}
+
+	public String createRefreshToken(String memberId) {
 		Date now = new Date();
 		Date refreshTokenExpiration = new Date(now.getTime() + REFRESH_TOKEN_EXPIRE_DATE * 24 * 60 * 60 * 1000);
 
 		return Jwts.builder()
 				.setSubject(REFRESH_TOKEN_CLAIM)
 				.setIssuedAt(now)
+				.claim(MEMBER_ID_CLAIM, memberId)
 				.setExpiration(refreshTokenExpiration)
 				.signWith(key, SignatureAlgorithm.HS512)
 				.compact();
@@ -151,18 +167,23 @@ public class JwtTokenProvider {
 			return true;
 		} catch (SecurityException | MalformedJwtException e) {
 			log.info("Invalid JWT Token", e);
+			return false;
 		} catch (SignatureException exception) {
 			log.error("JWT signature validation fails");
+			return false;
 		} catch (ExpiredJwtException e) {
 			log.info("Expired JWT Token", e);
+			return false;
 		} catch (UnsupportedJwtException e) {
 			log.info("Unsupported JWT Token", e);
+			return false;
 		} catch (IllegalArgumentException e) {
 			log.info("JWT claims string is empty.", e);
+			return false;
 		} catch (Exception exception) {
 			log.error("JWT validation fails", exception);
+			return false;
 		}
-		return false;
 	}
 
 

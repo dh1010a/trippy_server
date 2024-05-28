@@ -4,11 +4,13 @@ import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
+import com.example.server.global.auth.security.domain.JwtToken;
 import com.example.server.global.auth.security.service.JwtService;
 import com.example.server.global.auth.security.domain.CustomUserDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -34,8 +38,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();//5
 
-	private final String NO_CHECK_URL = "/api/member/login";//1
-	private final String NO_CHECK_URL_2 = "/api/member/login/oauth2";
+	private static final String NO_CHECK_URL = "/api/member/login";//1
+	private static final String NO_CHECK_URL_2 = "/api/member/login/oauth2";
+	private static final String NO_CHECK_URL_3 = "/api/member/login-extension";
 
 	/**
 	 * 1. 리프레시 토큰이 오는 경우 -> 유효하면 AccessToken 재발급후, 필터 진행 X, 바로 튕기기
@@ -44,35 +49,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	 */
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-		if(request.getRequestURI().equals(NO_CHECK_URL) || request.getRequestURI().contains(NO_CHECK_URL_2)) {
+		if(request.getRequestURI().equals(NO_CHECK_URL) || request.getRequestURI().contains(NO_CHECK_URL_2) ) {
 			filterChain.doFilter(request, response);
 			return;//안해주면 아래로 내려가서 계속 필터를 진행해버림
 		}
 
-		String refreshToken = jwtService
-				.extractRefreshToken(request)
-				.filter(jwtService::isTokenValid)
-				.orElse(null); //2
+		checkAccessTokenAndAuthentication(request, response, filterChain);
 
-		if(refreshToken != null){
-			checkRefreshTokenAndReIssueAccessToken(response, refreshToken);//3
-			return;
-		}
-
-		checkAccessTokenAndAuthentication(request, response, filterChain);//4
+		filterChain.doFilter(request, response);
 	}
 
 	private void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 		try {
-//			if (request.getHeader("Authorization") == null) {
-//				response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-//				response.setStatus(ErrorStatus.MEMBER_AUTHORIZATION_NOT_VALID.getHttpStatus().value());
-//				response.setContentType("application/json");
-//				response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.onFailure(ErrorStatus.MEMBER_ACCESS_TOKEN_NOT_EXIST.getCode(),
-//						ErrorStatus.MEMBER_ACCESS_TOKEN_NOT_EXIST.getMessage(),null)));
-//				log.info("Authentication failed: " + ErrorStatus.MEMBER_ACCESS_TOKEN_NOT_EXIST.getMessage());
-//				return;
-//			}
 			jwtService.extractAccessToken(request).filter(jwtService::isTokenValid).flatMap(jwtService::extractMemberId)
 					.flatMap(memberRepository::findByMemberId).ifPresent(this::saveAuthentication);
 			filterChain.doFilter(request, response);
@@ -96,12 +84,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		SecurityContext context = SecurityContextHolder.createEmptyContext();//5
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
-	}
-
-	private void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshToken){
-		memberRepository.findByRefreshToken(refreshToken)
-				.ifPresent(member -> jwtService.sendAccessToken(response,
-						jwtService.reIssueAccessToken(member.getMemberId())));
-
 	}
 }

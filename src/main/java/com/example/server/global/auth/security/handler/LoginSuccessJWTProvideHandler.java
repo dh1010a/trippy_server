@@ -8,6 +8,7 @@ import com.example.server.global.auth.security.service.JwtService;
 import com.example.server.global.auth.security.domain.JwtToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -31,6 +33,8 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
 	private final MemberRepository memberRepository;
 
 	private ObjectMapper objectMapper = new ObjectMapper();
+
+	private static final String REFRESH_TOKEN = "refreshToken";
 
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -56,14 +60,42 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
 		LoginDto loginDto = LoginDto.builder()
 				.memberId(memberId)
 				.accessToken(jwtToken.getAccessToken())
-				.refreshToken(jwtToken.getRefreshToken())
 				.role(member.getRole().getTitle())
 				.build();
 
-		response.getWriter().write(objectMapper.writeValueAsString(
-				ApiResponse.onSuccess(loginDto)
-		));
+		setCookieForLocal(response, jwtToken); // 개발단계에서 사용
+
+		response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.onSuccess(loginDto)));
+
+
+
+//		if(request.getServerName().equals("localhost")){
+//			setCookieForLocal(response, jwtToken);
+//		}
+//		else{
+//			setCookieForProd(response, jwtToken);
+//		}
+
 	}
+
+	private void setCookieForLocal(HttpServletResponse response, JwtToken jwtToken) {
+		Cookie cookie = new Cookie(REFRESH_TOKEN, jwtToken.getRefreshToken());
+		cookie.setPath("/"); // 모든 곳에서 쿠키열람이 가능하도록 설정
+		cookie.setMaxAge(60 * 60 * 24); //쿠키 만료시간 24시간
+
+		response.addCookie(cookie);
+	}
+
+	private void setCookieForProd(HttpServletResponse response, JwtToken jwtToken) {
+		Cookie cookie = new Cookie(REFRESH_TOKEN, jwtToken.getRefreshToken());
+		cookie.setHttpOnly(true);  //httponly 옵션 설정
+		cookie.setSecure(true); //https 옵션 설정
+		cookie.setPath("/"); // 모든 곳에서 쿠키열람이 가능하도록 설정
+		cookie.setMaxAge(60 * 60 * 24); //쿠키 만료시간 24시간
+
+		response.addCookie(cookie);
+	}
+
 
 	private String extractMemberId(Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();

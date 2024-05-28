@@ -12,9 +12,7 @@ public interface JwtService {
 	JwtToken createJwtToken(String memberId, String password);
 	JwtToken createJwtToken(Authentication authentication);
 	String reIssueAccessToken(String memberId);
-	String reIssueRefreshToken(String memberId, String password);
-
-	void updateRefreshToken(String memberId, JwtToken jwtToken);
+	String reIssueAndSaveRefreshToken(String memberId);
 
 	void destroyRefreshToken(String email);
 
