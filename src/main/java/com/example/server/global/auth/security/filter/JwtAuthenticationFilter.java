@@ -49,14 +49,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	 */
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-		if(request.getRequestURI().equals(NO_CHECK_URL) || request.getRequestURI().contains(NO_CHECK_URL_2) ) {
+		if(request.getRequestURI().equals(NO_CHECK_URL) || request.getRequestURI().contains(NO_CHECK_URL_2) ||
+				request.getRequestURI().equals(NO_CHECK_URL_3)) {
 			filterChain.doFilter(request, response);
 			return;//안해주면 아래로 내려가서 계속 필터를 진행해버림
 		}
 
 		checkAccessTokenAndAuthentication(request, response, filterChain);
 
-		filterChain.doFilter(request, response);
 	}
 
 	private void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {

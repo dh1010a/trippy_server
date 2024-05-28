@@ -5,7 +5,6 @@ import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
-import com.example.server.global.auth.security.domain.CustomUserDetails;
 import com.example.server.global.auth.security.dto.LoginResponseDto;
 import com.example.server.global.auth.security.service.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,17 +15,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -37,8 +28,6 @@ public class SilentReAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final MemberRepository memberRepository;
     private ObjectMapper objectMapper = new ObjectMapper();
-
-    private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();//5
 
     private static final String MATCH_URL = "/api/member/login-extension";//1
 
