@@ -32,7 +32,7 @@ public class SilentReAuthenticationFilter extends OncePerRequestFilter {
     private static final String MATCH_URL = "/api/member/login-extension";//1
 
     private static final String REFRESH_TOKEN = "refreshToken";
-    private static final String HTTP_METHOD = "POST";
+    private static final String HTTP_METHOD = "GET";
 
 
     @Override
@@ -42,14 +42,18 @@ public class SilentReAuthenticationFilter extends OncePerRequestFilter {
             return;//안해주면 아래로 내려가서 계속 필터를 진행해버림
         }
 
+        response.setContentType("application/json");
+        response.setCharacterEncoding("utf-8");
+
         if (!request.getMethod().equals(HTTP_METHOD)) {
-            throw new ErrorHandler(ErrorStatus._BAD_REQUEST);
+            response.setStatus(ErrorStatus._BAD_REQUEST.getHttpStatus().value());
+            response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(),
+                    ErrorStatus._BAD_REQUEST.getMessage(), null)));
+            return ;
         }
 
         String refreshToken = resolveRefreshToken(request);
         if (refreshToken == null) {
-            response.setContentType("application/json");
-            response.setCharacterEncoding("utf-8");
             response.setStatus(ErrorStatus.MEMBER_COOKIE_NOT_FOUND.getHttpStatus().value());
             response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.onFailure(ErrorStatus.MEMBER_COOKIE_NOT_FOUND.getCode(),
                     ErrorStatus.MEMBER_COOKIE_NOT_FOUND.getMessage(), null)));
