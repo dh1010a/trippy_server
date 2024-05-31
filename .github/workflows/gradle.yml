@@ -36,6 +36,13 @@ jobs:
           echo "${{ secrets.PROPERTIES }}" > ./application.yaml
       shell: bash
 
+    - name: Make application-openApi.yaml
+      run: |
+        cd ./src/main/resources
+        touch ./application-openApi.yaml
+        echo "${{ secrets.OPENAPI }}" > ./application-openApi.yaml
+      shell: bash
+
 
     - name: Make application-jwt.yaml
       run: |
