@@ -2,10 +2,11 @@ package com.example.server.domain.country.service;
 
 import com.example.server.domain.country.domain.Country;
 import com.example.server.domain.country.dto.CountryDtoConverter;
+import com.example.server.domain.country.dto.CountryResponseDto;
 import com.example.server.domain.country.dto.CountryResponseDto.CountryApiResponseDto;
 import com.example.server.domain.country.dto.CountryResponseDto.CountryDto;
+import com.example.server.domain.country.dto.CountryResponseDto.FindCountryResponseDto;
 import com.example.server.domain.country.repository.CountryRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +15,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
@@ -78,13 +78,19 @@ public class CountryService {
 
     }
 
-    public void saveCountryList(CountryApiResponseDto dto) {
+    private void saveCountryList(CountryApiResponseDto dto) {
         List<CountryDto> data = dto.getData();
         for (CountryDto countryDto : data) {
             Country country = CountryDtoConverter.convertDtoToCountry(countryDto);
             countryRepository.save(country);
             log.info("country 저장완료. : {}", country.getCountryNm());
         }
+    }
+
+    public FindCountryResponseDto getCountryByIsoAlp2(String countryIsoAlp2) {
+        return countryRepository.findByCountryIsoAlp2(countryIsoAlp2)
+                .map(CountryDtoConverter::convertCountryToDto)
+                .orElse(null);
     }
 
 

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class CountryResponseDto {
@@ -55,6 +54,16 @@ public class CountryResponseDto {
 
         @JsonProperty("iso_num")
         String isoNum;
+    }
+
+    @Data
+    @Builder
+    public static class FindCountryResponseDto{
+        private String countryNm;
+        private String countryEngNm;
+        private String countryIsoAlp2;
+        private String isoAlp3;
+        private String isoNum;
     }
 
 

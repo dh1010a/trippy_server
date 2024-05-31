@@ -13,4 +13,14 @@ public class CountryDtoConverter {
                 .isoNum(dto.getIsoNum())
                 .build();
     }
+
+    public static CountryResponseDto.FindCountryResponseDto convertCountryToDto(Country country) {
+        return CountryResponseDto.FindCountryResponseDto.builder()
+                .countryEngNm(country.getCountryEngNm())
+                .countryIsoAlp2(country.getCountryIsoAlp2())
+                .countryNm(country.getCountryNm())
+                .isoAlp3(country.getIsoAlp3())
+                .isoNum(country.getIsoNum())
+                .build();
+    }
 }
