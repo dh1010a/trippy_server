@@ -20,6 +20,7 @@ public class CountryController {
 
     @GetMapping
     public ApiResponse<?> getCountry(@RequestParam("isoApl2") String isoApl2) {
+        log.info("국가 조회 요청 : isoApl2 = {}", isoApl2);
         return ApiResponse.onSuccess(countryService.getCountryByIsoAlp2(isoApl2));
     }
 }

@@ -84,5 +84,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		SecurityContext context = SecurityContextHolder.createEmptyContext();//5
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
+
+		log.info("Authentication success: memberId = {}", member.getMemberId());
 	}
 }
