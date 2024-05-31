@@ -1,5 +1,6 @@
 package com.example.server.admin.domain.controller;
 
+import com.example.server.domain.country.service.CountryService;
 import com.example.server.domain.image.service.ImageService;
 import com.example.server.domain.image.service.OracleImageService;
 import com.example.server.domain.member.repository.MemberRepository;
@@ -10,10 +11,7 @@ import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import com.example.server.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -23,6 +21,12 @@ public class AdminController {
 
     private final OracleImageService oracleImageService;
     private final MemberService memberService;
+    private final CountryService countryService;
+
+    @GetMapping("/country/init")
+    public ApiResponse<?> saveCountryList() {
+        return ApiResponse.onSuccess(countryService.getCountryList());
+    }
 
 
     @DeleteMapping("/image/all")
