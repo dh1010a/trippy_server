@@ -62,8 +62,6 @@ public class CountryService {
                 .bodyToMono(String.class)
                 .block();
 
-        log.info(response);
-
         CountryApiResponseDto dto = null;
         try {
             ObjectMapper mapper = new ObjectMapper();
