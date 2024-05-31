@@ -10,7 +10,6 @@ public class LoginResponseDto {
 	public static class LoginDto {
 		public String memberId;
 		public String accessToken;
-		public String refreshToken;
 		public String role;
 	}
 

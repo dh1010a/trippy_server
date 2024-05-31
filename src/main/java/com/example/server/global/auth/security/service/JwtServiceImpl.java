@@ -71,15 +71,20 @@ public class JwtServiceImpl implements JwtService {
 	}
 
 	@Override
-	public String reIssueRefreshToken(String memberId, String password) {
-		return jwtTokenProvider.createRefreshToken();
-	}
-
-	@Override
-	public void updateRefreshToken(String memberId, JwtToken jwtToken) {
+	public String reIssueAndSaveRefreshToken(String memberId) {
+		String refreshToken =  jwtTokenProvider.createRefreshToken(memberId);
 		memberRepository.findByMemberId(memberId)
 				.ifPresentOrElse(
-						member -> member.updateRefreshToken(jwtToken.getRefreshToken()),
+						member -> member.updateRefreshToken(refreshToken),
+						() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND)
+				);
+		return refreshToken;
+	}
+
+	public void updateRefreshToken(String memberId, String refreshToken) {
+		memberRepository.findByMemberId(memberId)
+				.ifPresentOrElse(
+						member -> member.updateRefreshToken(refreshToken),
 						() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND)
 				);
 	}

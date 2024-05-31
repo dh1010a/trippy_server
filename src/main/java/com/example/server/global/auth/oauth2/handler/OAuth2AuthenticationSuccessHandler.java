@@ -51,7 +51,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         LoginResponseDto.LoginDto loginDto = LoginResponseDto.LoginDto.builder()
                 .memberId(memberId)
                 .accessToken(jwtToken.getAccessToken())
-                .refreshToken(jwtToken.getRefreshToken())
                 .build();
 
         response.getWriter().write(objectMapper.writeValueAsString(

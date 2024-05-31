@@ -3,6 +3,7 @@ package com.example.server.global.config;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.global.auth.oauth2.domain.AccessTokenAuthenticationProvider;
 import com.example.server.global.auth.oauth2.filter.OAuth2AccessTokenAuthenticationFilter;
+import com.example.server.global.auth.security.filter.SilentReAuthenticationFilter;
 import com.example.server.global.auth.security.service.CustomUserDetailsService;
 import com.example.server.global.auth.security.service.JwtService;
 import com.example.server.global.auth.security.filter.JsonUsernamePasswordAuthenticationFilter;
@@ -66,7 +67,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers( "/api/member/signup", "/", "/api/member/login", "/api/member/isDuplicated", "/api/member/oauth").permitAll()
+                        .requestMatchers( "/api/member/signup", "/", "/api/member/isDuplicated", "/api/member/oauth").permitAll()
                         .requestMatchers( "/api/email/send", "/api/member/password", "/api/email/confirm", "/api/member/find", "/api/member/delete").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
@@ -77,6 +78,7 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex
                         .accessDeniedHandler(new CustomAccessDeniedHandler(jwtService))
                         .authenticationEntryPoint(new CustomAuthenticationEntryPoint()))
+                .addFilterAfter(silentReAuthenticationFilter(), LogoutFilter.class)
                 .addFilterAfter(jsonUsernamePasswordLoginFilter(), LogoutFilter.class)
                 .addFilterBefore(jwtAuthenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(auth2AccessTokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
@@ -133,6 +135,11 @@ public class SecurityConfig {
     @Bean
     OAuth2AccessTokenAuthenticationFilter auth2AccessTokenAuthenticationFilter() {
         return new OAuth2AccessTokenAuthenticationFilter(provider, loginSuccessJWTProvideHandler(), loginFailureHandler());
+    }
+
+    @Bean
+    public SilentReAuthenticationFilter silentReAuthenticationFilter() {
+        return new SilentReAuthenticationFilter(jwtService, memberRepository);
     }
 
 

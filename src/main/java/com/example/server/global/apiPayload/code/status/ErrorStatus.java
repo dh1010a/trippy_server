@@ -32,6 +32,7 @@ public enum ErrorStatus implements BaseErrorCode {
     MEMBER_ACCESS_TOKEN_NOT_EXIST(HttpStatus.UNAUTHORIZED, "MEMBER4011", "토큰 정보가 존재하지 않습니다."),
     MEMBER_NOT_AUTHENTICATED(HttpStatus.FORBIDDEN, "MEMBER4012", "권한이 없는 사용자입니다."),
     MEMBER_ID_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4013", "중복된 멤버 아이디입니다."),
+    MEMBER_COOKIE_NOT_FOUND(HttpStatus.UNAUTHORIZED, "MEMBER4014", "쿠키 정보가 존재하지 않습니다."),
     MEMBER_LOGIN_NOT_SUPPORT(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "MEMBER4015", "지원되지 않는 로그인 형식입니다."),
 
     //사진 응답
