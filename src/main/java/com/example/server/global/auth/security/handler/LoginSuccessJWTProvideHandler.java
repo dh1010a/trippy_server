@@ -45,7 +45,7 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
 		Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 		member.updateRefreshToken(jwtToken.getRefreshToken());
 
-		jwtService.sendAccessToken(response, jwtToken.getAccessToken());
+		jwtService.sendAccessToken(response, jwtToken);
 		log.info( "로그인에 성공합니다. memberId: {}" , memberId);
 		log.info( "AccessToken 을 발급합니다. AccessToken: {}" ,jwtToken.getAccessToken());
 		log.info( "RefreshToken 을 발급합니다. RefreshToken: {}" ,jwtToken.getRefreshToken());

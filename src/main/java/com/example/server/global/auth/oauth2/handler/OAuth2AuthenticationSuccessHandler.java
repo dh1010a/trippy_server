@@ -36,7 +36,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String memberId = extractMemberId(authentication);
         JwtToken jwtToken = jwtService.createJwtToken(authentication);
 
-        jwtService.sendAccessAndRefreshToken(response, jwtToken);
+        jwtService.sendAccessToken(response, jwtToken);
         log.info( "로그인에 성공합니다. memberId: {}" , memberId);
         log.info( "AccessToken 을 발급합니다. AccessToken: {}" ,jwtToken.getAccessToken());
         log.info( "RefreshToken 을 발급합니다. RefreshToken: {}" ,jwtToken.getRefreshToken());
