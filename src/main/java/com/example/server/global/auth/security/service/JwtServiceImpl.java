@@ -99,16 +99,16 @@ public class JwtServiceImpl implements JwtService {
 	}
 
 	@Override
-	public void sendAccessAndRefreshToken(HttpServletResponse response, JwtToken jwtToken) {
+	public void sendAccessToken(HttpServletResponse response, JwtToken jwtToken) {
 		response.setStatus(HttpServletResponse.SC_OK);
 
 		setAccessTokenHeader(response, jwtToken.getAccessToken());
-		setRefreshTokenHeader(response, jwtToken.getRefreshToken());
+//		setRefreshTokenHeader(response, jwtToken.getRefreshToken());
 
 	}
 
 	@Override
-	public void sendAccessToken(HttpServletResponse response, String accessToken)  {
+	public void sendReIssuedAccessToken(HttpServletResponse response, String accessToken)  {
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.setContentType("application/json");
 		response.setCharacterEncoding("utf-8");
@@ -156,11 +156,6 @@ public class JwtServiceImpl implements JwtService {
 	@Override
 	public void setAccessTokenHeader(HttpServletResponse response, String accessToken) {
 		response.setHeader(accessHeader, accessToken);
-	}
-
-	@Override
-	public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken) {
-		response.setHeader(refreshHeader, refreshToken);
 	}
 
 	@Override

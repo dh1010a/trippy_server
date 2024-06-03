@@ -16,8 +16,8 @@ public interface JwtService {
 
 	void destroyRefreshToken(String email);
 
-	void sendAccessAndRefreshToken(HttpServletResponse response, JwtToken jwtToken);
-	void sendAccessToken(HttpServletResponse response, String token);
+	void sendAccessToken(HttpServletResponse response, JwtToken jwtToken);
+	void sendReIssuedAccessToken(HttpServletResponse response, String token);
 
 	Optional<String> extractAccessToken(HttpServletRequest request);
 
@@ -26,8 +26,6 @@ public interface JwtService {
 	Optional<String> extractMemberId(String accessToken);
 
 	void setAccessTokenHeader(HttpServletResponse response, String token);
-
-	void setRefreshTokenHeader(HttpServletResponse response, String token);
 
 	boolean isTokenValid(String token);
 
