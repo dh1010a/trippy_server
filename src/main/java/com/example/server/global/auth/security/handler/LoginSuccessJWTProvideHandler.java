@@ -80,6 +80,7 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
 
 	private void setCookieForLocal(HttpServletResponse response, JwtToken jwtToken) {
 		Cookie cookie = new Cookie(REFRESH_TOKEN, jwtToken.getRefreshToken());
+		cookie.setHttpOnly(true);  //httponly 옵션 설정
 		cookie.setPath("/"); // 모든 곳에서 쿠키열람이 가능하도록 설정
 		cookie.setMaxAge(60 * 60 * 24); //쿠키 만료시간 24시간
 

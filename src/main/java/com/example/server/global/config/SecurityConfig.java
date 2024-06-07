@@ -3,6 +3,7 @@ package com.example.server.global.config;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.global.auth.oauth2.domain.AccessTokenAuthenticationProvider;
 import com.example.server.global.auth.oauth2.filter.OAuth2AccessTokenAuthenticationFilter;
+import com.example.server.global.auth.oauth2.handler.OAuth2AuthenticationSuccessHandler;
 import com.example.server.global.auth.security.filter.SilentReAuthenticationFilter;
 import com.example.server.global.auth.security.service.CustomUserDetailsService;
 import com.example.server.global.auth.security.service.JwtService;
@@ -67,7 +68,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers( "/api/member/signup", "/", "/api/member/isDuplicated", "/api/member/oauth").permitAll()
+                        .requestMatchers( "/api/member/signup", "/", "/api/member/isDuplicated", "/api/member/login/oauth").permitAll()
                         .requestMatchers( "/api/email/send", "/api/member/password", "/api/email/confirm", "/api/member/find", "/api/member/delete").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
