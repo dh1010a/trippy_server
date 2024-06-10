@@ -16,6 +16,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @Component
 @Transactional
@@ -43,11 +45,13 @@ public class AccessTokenAuthenticationProvider implements AuthenticationProvider
 
 
     private Member saveOrGet(CustomUserDetails oAuth2User) {
-        Member member = memberRepository.findBySocialTypeAndMemberId(oAuth2User.getSocialType(), oAuth2User.getMemberId())
-                .orElse(memberService.createDefaultOAuth2Member(oAuth2User));
+        Optional<Member> member = memberRepository.findBySocialTypeAndMemberId(oAuth2User.getSocialType(), oAuth2User.getMemberId());
+        if (member.isEmpty()) {
+            member = Optional.ofNullable(memberService.createDefaultOAuth2Member(oAuth2User));
+        }
         log.info("회원 정보 : Idx = {}, memberId = {}, email = {}, socialType = {}",
-                    member.getIdx(), member.getMemberId(), member.getEmail(), member.getSocialType().getSocialName());
-        return member;
+                    member.get().getIdx(), member.get().getMemberId(), member.get().getEmail(), member.get().getSocialType().getSocialName());
+        return member.get();
     }
 
 
