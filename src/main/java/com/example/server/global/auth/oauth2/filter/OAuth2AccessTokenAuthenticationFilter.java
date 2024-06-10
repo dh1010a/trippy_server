@@ -32,7 +32,7 @@ public class OAuth2AccessTokenAuthenticationFilter extends AbstractAuthenticatio
 
     private static final String DEFAULT_OAUTH2_LOGIN_REQUEST_URL_PREFIX = "/api/member/login/oauth2/";
 
-    private static final String HTTP_METHOD = "GET";
+    private static final String HTTP_METHOD = "POST";
 
     private static final String ACCESS_TOKEN_HEADER_NAME = "Authorization";
 
