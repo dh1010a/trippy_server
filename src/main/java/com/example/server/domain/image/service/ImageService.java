@@ -9,8 +9,6 @@ import java.io.File;
 
 public interface ImageService {
 
-    public ImageResponseDto.UpdateImageResponseDto uploadProfileImg(MultipartFile file, String memberId) throws Exception;
-    public ImageResponseDto.UpdateImageResponseDto uploadBlogImg(MultipartFile file, String memberId) throws Exception;
     public UploadResponseDto uploadImg(MultipartFile file, String memberId) throws Exception;
 
     public MultipartFile downloadImg(Long imageIdx, Long memberIdx) throws Exception;

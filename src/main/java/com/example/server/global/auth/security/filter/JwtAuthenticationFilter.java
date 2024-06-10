@@ -42,11 +42,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private static final String NO_CHECK_URL_2 = "/api/member/login/oauth2";
 	private static final String NO_CHECK_URL_3 = "/api/member/login-extension";
 
-	/**
-	 * 1. 리프레시 토큰이 오는 경우 -> 유효하면 AccessToken 재발급후, 필터 진행 X, 바로 튕기기
-	 *
-	 * 2. 리프레시 토큰은 없고 AccessToken만 있는 경우 -> 유저정보 저장후 필터 계속 진행
-	 */
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 		if(request.getRequestURI().equals(NO_CHECK_URL) || request.getRequestURI().contains(NO_CHECK_URL_2) ||

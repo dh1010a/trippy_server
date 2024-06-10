@@ -30,7 +30,7 @@ public class JsonUsernamePasswordAuthenticationFilter extends AbstractAuthentica
 
     public JsonUsernamePasswordAuthenticationFilter(ObjectMapper objectMapper) {
 
-        super(DEFAULT_LOGIN_PATH_REQUEST_MATCHER);   // 위에서 설정한  /oauth2/login/* 의 요청에, GET으로 온 요청을 처리하기 위해 설정
+        super(DEFAULT_LOGIN_PATH_REQUEST_MATCHER);   // 위에서 설정한  /api/member/login 의 요청에, POST 온 요청을 처리하기 위해 설정
 
         this.objectMapper = objectMapper;
     }
