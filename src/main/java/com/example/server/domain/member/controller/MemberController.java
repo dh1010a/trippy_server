@@ -161,17 +161,6 @@ public class MemberController {
         return ApiResponse.onSuccess(memberService.getBookmarkList(memberId));
     }
 
-    @PostMapping(value = "/image/{type}")
-    public ApiResponse<?> uploadImage(@RequestPart(value="image", required = true) MultipartFile image,
-                                                        @PathVariable("type") String type) throws Exception{
-        String memberId = getLoginMemberId();
-        UpdateImageResponseDto responseDto = type.equals("profile") ? imageService.uploadProfileImg(image, memberId) : imageService.uploadBlogImg(image, memberId);
-
-//		File convertFile = new File(System.getProperty("user.home") + "/rideTogetherDummy/" + image.getOriginalFilename());
-//		imageService.removeNewFile(convertFile);
-        return ApiResponse.onSuccess(responseDto);
-
-    }
 
 
     private String getLoginMemberId() {
