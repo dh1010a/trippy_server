@@ -43,6 +43,9 @@ public class JwtServiceImpl implements JwtService {
 	@Value("${jwt.refresh.header}")
 	private String refreshHeader;
 
+	@Value("${jwt.domain}")
+	private String domain;
+
 	private static final String BEARER = "Bearer ";
 
 	//== 메서드 ==//
@@ -161,5 +164,9 @@ public class JwtServiceImpl implements JwtService {
 	@Override
 	public boolean isTokenValid(String token) {
 		return jwtTokenProvider.validateToken(token);
+	}
+
+	public String getDomain() {
+		return domain;
 	}
 }

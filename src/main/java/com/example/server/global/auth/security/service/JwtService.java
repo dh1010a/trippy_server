@@ -29,4 +29,6 @@ public interface JwtService {
 
 	boolean isTokenValid(String token);
 
+	String getDomain();
+
 }
