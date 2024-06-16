@@ -36,6 +36,8 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
 
 	private static final String REFRESH_TOKEN = "refreshToken";
 
+
+
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 										Authentication authentication) throws IOException, ServletException {
@@ -63,28 +65,32 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
 				.role(member.getRole().getTitle())
 				.build();
 
-		setCookieForLocal(response, jwtToken); // 개발단계에서 사용
+//		setCookieForLocal(response, jwtToken); // 개발단계에서 사용
 
 		response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.onSuccess(loginDto)));
 
 
 
-//		if(request.getServerName().equals("localhost")){
-//			setCookieForLocal(response, jwtToken);
-//		}
-//		else{
-//			setCookieForProd(response, jwtToken);
-//		}
+		if(request.getServerName().equals("localhost")){
+			setCookieForLocal(response, jwtToken);
+		}
+		else{
+			setCookieForProd(response, jwtToken);
+		}
 
 	}
 
 	private void setCookieForLocal(HttpServletResponse response, JwtToken jwtToken) {
-		Cookie cookie = new Cookie(REFRESH_TOKEN, jwtToken.getRefreshToken());
-		cookie.setHttpOnly(true);  //httponly 옵션 설정
-		cookie.setPath("/"); // 모든 곳에서 쿠키열람이 가능하도록 설정
-		cookie.setMaxAge(60 * 60 * 24); //쿠키 만료시간 24시간
+//		Cookie cookie = new Cookie(REFRESH_TOKEN, jwtToken.getRefreshToken());
+//		cookie.setHttpOnly(true);  //httponly 옵션 설정
+//		cookie.setSecure(true); //https 옵션 설정
+//		cookie.setPath("/"); // 모든 곳에서 쿠키열람이 가능하도록 설정
+//		cookie.setDomain(jwtService.getDomain());
+//		cookie.setMaxAge(60 * 60 * 24 * 10); //쿠키 만료시간 24시간 * 10일
+		String cookieValue = "refreshToken="+ jwtToken.getRefreshToken() +"; "+"Path=/; "+"Domain="+jwtService.getDomain()+"; "+"Max-Age=1800; HttpOnly; SameSite=None; Secure";
+		response.addHeader("Set-Cookie",cookieValue);
 
-		response.addCookie(cookie);
+//		response.addCookie(cookie);
 	}
 
 	private void setCookieForProd(HttpServletResponse response, JwtToken jwtToken) {
