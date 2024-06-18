@@ -148,9 +148,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
-        corsConfiguration.setAllowedHeaders(Arrays.asList(corsProperties.getAllowedMethods(), "http://localhost:3000"));
+        corsConfiguration.setAllowedHeaders(Arrays.asList(corsProperties.getAllowedHeaders().split(",")));
         corsConfiguration.setAllowedMethods(Arrays.asList(corsProperties.getAllowedMethods().split(",")));
-        corsConfiguration.setAllowedOrigins(Arrays.asList(corsProperties.getAllowedOrigins().split(",")));
+        corsConfiguration.setAllowedOrigins(Arrays.asList(corsProperties.getAllowedOrigins(), "http://localhost:3000"));
         corsConfiguration.setExposedHeaders(Arrays.asList("Authorization", "Authorization-refresh"));
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setMaxAge(corsConfiguration.getMaxAge());
