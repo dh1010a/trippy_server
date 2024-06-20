@@ -32,7 +32,7 @@ public class SilentReAuthenticationFilter extends OncePerRequestFilter {
     private static final String MATCH_URL = "/api/member/login-extension";//1
 
     private static final String REFRESH_TOKEN = "refreshToken";
-    private static final String HTTP_METHOD = "GET";
+    private static final String HTTP_METHOD = "POST";
 
 
     @Override
