@@ -3,6 +3,7 @@ package com.example.server.domain.member.dto;
 import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.dto.MemberResponseDto.*;
+import com.example.server.domain.member.model.InterestedType;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -39,6 +40,7 @@ public class MemberDtoConverter {
                 .role(member.getRole().getTitle())
                 .activeStatus(member.getActiveState().name())
                 .socialType(member.getSocialType().getSocialName())
+                .interestedTypes(member.getInterestedTypes().stream().map(InterestedType::getTitle).toList())
                 .build();
     }
 
