@@ -39,6 +39,7 @@ public class MemberResponseDto {
         private String activeStatus;
         private String role;
         private String socialType;
+        private List<String> interestedTypes;
 
     }
 
