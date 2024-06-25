@@ -9,16 +9,15 @@ import com.example.server.domain.post.domain.Tag;
 import com.example.server.domain.post.dto.PostDtoConverter;
 import com.example.server.domain.post.dto.PostRequestDto;
 import com.example.server.domain.post.dto.PostResponseDto;
-import com.example.server.domain.post.repository.LikeRepository;
 import com.example.server.domain.post.repository.PostRepository;
 import com.example.server.domain.post.repository.TagRepository;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -51,6 +50,36 @@ public class PostService {
         Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND));
         return PostDtoConverter.convertToGetResponseDto(post);
     }
+
+    // GET api/post
+    public List<PostResponseDto.GetPostResponseDto> getAllPost(Integer page, Integer size){
+        // 둘다 0일때 => 변수 입력 안받음
+        if(page==0 && size==0){
+            List<Post> postList = postRepository.findAll();
+            return PostDtoConverter.convertToPostListResponseDto(postList);
+        }
+        else {
+            PageRequest pageable = PageRequest.of(page, size);
+            List<Post> postList = postRepository.findAll(pageable).getContent();
+            return PostDtoConverter.convertToPostListResponseDto(postList);
+        }
+    }
+
+    public List<PostResponseDto.GetPostResponseDto> getAllMemberPost(String memberId,Integer page, Integer size){
+        Optional<Member> member = memberRepository.findByMemberId(memberId);
+        // 둘다 0일때 => 변수 입력 안받음
+        if(page==0 && size==0){
+            List<Post> postList = postRepository.findAllByMember(member.get());
+            return PostDtoConverter.convertToPostListResponseDto(postList);
+        }
+        else {
+            Pageable pageable = PageRequest.of(page, size);
+            List<Post> postList = postRepository.findAllByMember(member.get(), pageable).getContent();
+            return PostDtoConverter.convertToPostListResponseDto(postList);
+        }
+
+    }
+
 
     // DELETE api/post
     public PostResponseDto.DeletePostResultResponseDto deletePost(Long postId, String memberId) {
