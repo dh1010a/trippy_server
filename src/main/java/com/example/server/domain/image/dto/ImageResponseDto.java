@@ -13,9 +13,9 @@ public class ImageResponseDto {
     @Builder
     @Data
     public static class ImageBasicResponseDto{
-        private Long id;
-        private Long postId;
         private String imgUrl;
+        private String accessUri;
+        private String authenticateId;
     }
 
     @Builder

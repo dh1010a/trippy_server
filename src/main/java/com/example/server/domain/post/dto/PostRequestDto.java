@@ -1,13 +1,16 @@
 package com.example.server.domain.post.dto;
 
 import com.example.server.domain.image.domain.Image;
+import com.example.server.domain.image.dto.ImageDto;
 import com.example.server.domain.image.dto.ImageResponseDto;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.domain.post.domain.Tag;
 import com.example.server.domain.post.model.PostType;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.List;
 
 public class PostRequestDto {
@@ -21,7 +24,7 @@ public class PostRequestDto {
         private String body;
         private PostType postType;
         private String location;
-        private List<String> images;
+        private List<ImageDto> images;
         private List<String> tags;
     }
 
@@ -39,7 +42,7 @@ public class PostRequestDto {
         private String body;
         private PostType postType;
         private String location;
-        private List<String> images;
+        private List<ImageDto> images;
         private List<String> tags;
     }
 }
