@@ -1,5 +1,6 @@
 package com.example.server.domain.post.domain;
 
+import com.example.server.domain.comment.domain.Comment;
 import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.member.domain.BookMark;
 import com.example.server.domain.member.domain.Member;
@@ -38,7 +39,7 @@ public class Post extends BaseTimeEntity {
     @JoinColumn(name = "member_idx")
     private Member member;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<BookMark> bookMarks;
 
@@ -54,6 +55,10 @@ public class Post extends BaseTimeEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Tag> tag;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Comment> comments;
 
     public void updatePost(PostRequestDto.UpdatePostRequestDto requestDto){
         this.title = requestDto.getTitle();

@@ -64,6 +64,8 @@ public class PostController {
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size
     ) {
+        if(page == null) page = 0;
+        if(size==null) size = 0;
         String memberId = getLoginMemberId();
         return ApiResponse.onSuccess(postService.getAllMemberPost(memberId,page,size));
     }
