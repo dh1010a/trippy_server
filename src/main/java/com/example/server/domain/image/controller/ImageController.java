@@ -23,7 +23,6 @@ public class ImageController {
     public ApiResponse<?> uploadImage(@RequestPart(value="image", required = true) MultipartFile image) throws Exception {
         return ApiResponse.onSuccess(imageService.uploadImg(image, getLoginMemberId()));
     }
-
     @DeleteMapping
     public ApiResponse<?> deleteImage(@RequestBody ImageDto imageDto) throws Exception{
         imageService.deleteImg(imageDto);

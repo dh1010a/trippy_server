@@ -2,6 +2,7 @@ package com.example.server.domain.member.domain;
 
 //import com.example.server.domain.badge.domain.MemberBadge;
 //import com.example.server.domain.follow.domain.MemberFollow;
+import com.example.server.domain.comment.domain.Comment;
 import com.example.server.domain.follow.domain.MemberFollow;
 import com.example.server.domain.image.domain.Image;
 //import com.example.server.domain.member.model.ActiveState;
@@ -95,6 +96,11 @@ public class Member extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private List<InterestedType> interestedTypes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Comment> comments;
+
 
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;

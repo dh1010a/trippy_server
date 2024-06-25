@@ -1,6 +1,8 @@
 package com.example.server.domain.post.service;
 
 import com.example.server.domain.image.domain.Image;
+import com.example.server.domain.image.dto.ImageDto;
+import com.example.server.domain.image.model.ImageType;
 import com.example.server.domain.image.repository.ImageRepository;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.repository.MemberRepository;
@@ -9,16 +11,17 @@ import com.example.server.domain.post.domain.Tag;
 import com.example.server.domain.post.dto.PostDtoConverter;
 import com.example.server.domain.post.dto.PostRequestDto;
 import com.example.server.domain.post.dto.PostResponseDto;
-import com.example.server.domain.post.repository.LikeRepository;
 import com.example.server.domain.post.repository.PostRepository;
 import com.example.server.domain.post.repository.TagRepository;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,10 +38,14 @@ public class PostService {
     private final TagRepository tagRepository;
     private final ImageRepository imageRepository;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     // POST api/post/
+    @Transactional
     public PostResponseDto.PostBasicResponseDto uploadPost(PostRequestDto.UploadPostRequestDto requestDto) {
         Member member = getMember(requestDto.getMemberId());
-        if (member == null) throw new ErrorHandler(ErrorStatus.MEMBER_EMAIL_ALREADY_EXIST);
+        if (member == null) throw new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND);
         Post post = savePost(requestDto);
         List<Tag> tags = saveTags(requestDto, post);
         List<Image> images = saveImages(requestDto,post);
@@ -51,6 +58,36 @@ public class PostService {
         Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND));
         return PostDtoConverter.convertToGetResponseDto(post);
     }
+
+    // GET api/post
+    public List<PostResponseDto.GetPostResponseDto> getAllPost(Integer page, Integer size){
+        // 둘다 0일때 => 변수 입력 안받음
+        if(page==0 && size==0){
+            List<Post> postList = postRepository.findAll();
+            return PostDtoConverter.convertToPostListResponseDto(postList);
+        }
+        else {
+            PageRequest pageable = PageRequest.of(page, size);
+            List<Post> postList = postRepository.findAll(pageable).getContent();
+            return PostDtoConverter.convertToPostListResponseDto(postList);
+        }
+    }
+
+    public List<PostResponseDto.GetPostResponseDto> getAllMemberPost(String memberId,Integer page, Integer size){
+        Optional<Member> member = memberRepository.findByMemberId(memberId);
+        // 둘다 0일때 => 변수 입력 안받음
+        if(page==0 && size==0){
+            List<Post> postList = postRepository.findAllByMember(member.get());
+            return PostDtoConverter.convertToPostListResponseDto(postList);
+        }
+        else {
+            Pageable pageable = PageRequest.of(page, size);
+            List<Post> postList = postRepository.findAllByMember(member.get(), pageable).getContent();
+            return PostDtoConverter.convertToPostListResponseDto(postList);
+        }
+
+    }
+
 
     // DELETE api/post
     public PostResponseDto.DeletePostResultResponseDto deletePost(Long postId, String memberId) {
@@ -67,7 +104,6 @@ public class PostService {
         if(!((post.getMember().getIdx()).equals(member.getIdx()))) throw new ErrorHandler(ErrorStatus.NO_PERMISSION__FOR_POST);
         updateTagsAndImages(post,requestDto.getTags(),requestDto.getImages());
         post.updatePost(requestDto);
-
         return PostDtoConverter.convertToPostBasicDto(post);
     }
 
@@ -112,10 +148,14 @@ public class PostService {
 
     // IMAGE 저장 메서드 for [POST api/post/]
     public List<Image> saveImages(PostRequestDto.UploadPostRequestDto requestDto,Post post) {
+
         return requestDto.getImages().stream()
-                .map(imageUrl -> {
-                    Image image = Image.builder().imgUrl(imageUrl)
+                .map(imageDto -> {
+                    Image image = Image.builder().imgUrl(imageDto.getImgUrl())
+                            .accessUri(imageDto.getAccessUri())
+                            .authenticateId(imageDto.getAuthenticateId())
                             .post(post)
+                            .imageType(ImageType.POST)
                             .build();
                     imageRepository.save(image);
                     return image;
@@ -130,7 +170,7 @@ public class PostService {
         postRepository.save(post);
     }
 
-    public void updateTagsAndImages(Post post,List<String> newTagNames, List<String> newImageUrls) {
+    public void updateTagsAndImages(Post post, List<String> newTagNames, List<ImageDto> newImagesDto) {
         // 기존 태그 및 이미지 가져오기
         List<Tag> originalTags = tagRepository.findAllByPost(post);
         List<Image> originalImages = imageRepository.findAllByPost(post);
@@ -151,26 +191,33 @@ public class PostService {
             }
         }
         // 새로운 이미지 추가
-        for (String newImageUrl : newImageUrls) {
-            if (originalImages.stream().noneMatch(image -> image.getImgUrl().equals(newImageUrl))) {
+        for (ImageDto newImageDto : newImagesDto) {
+            if (originalImages.stream().noneMatch(image -> image.getImgUrl().equals(newImageDto.getImgUrl()))) {
                 Image newImage = Image.builder()
-                                .imgUrl(newImageUrl)
+                                .imgUrl(newImageDto.getImgUrl())
+                        .authenticateId(newImageDto.getAuthenticateId())
+                        .accessUri(newImageDto.getAccessUri())
+                        .imageType(ImageType.POST)
                                 .post(post)
                                 .build();
                 imageRepository.save(newImage);
             }
             else {
-                originalImages.removeIf(image -> image.getImgUrl().equals(newImageUrl));
+                originalImages.removeIf(image -> image.getImgUrl().equals(newImageDto.getImgUrl()));
             }
         }
+
+        // 기존 태그 삭제 (이제 사용 되지 않는)
         for (Tag tag : originalTags) {
             tagRepository.delete(tag);
         }
 
-        // 기존 이미지 삭제
+        // 기존 이미지 삭제 (이제 사용 되지 않는)
         for (Image image : originalImages) {
             imageRepository.delete(image);
         }
+        tagRepository.flush();
+        imageRepository.flush();
     }
 
 

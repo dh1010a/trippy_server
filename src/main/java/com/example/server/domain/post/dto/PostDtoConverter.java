@@ -58,4 +58,11 @@ public class PostDtoConverter {
                 .isSuccess(true)
                 .build();
     }
+
+    public static  List<PostResponseDto.GetPostResponseDto> convertToPostListResponseDto(List<Post> posts) {
+        List<PostResponseDto.GetPostResponseDto> postDtos = posts.stream()
+                .map(post -> convertToGetResponseDto(post))
+                .collect(Collectors.toList());
+        return postDtos;
+    }
 }

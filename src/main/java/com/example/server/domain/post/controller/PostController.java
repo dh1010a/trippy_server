@@ -49,6 +49,27 @@ public class PostController {
         return ApiResponse.onSuccess(postService.getPost(postId));
     }
 
+    @GetMapping("/all")
+    public ApiResponse<?> getAllPost(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size
+    ) {
+        if(page == null) page = 0;
+        if(size==null) size = 0;
+         return ApiResponse.onSuccess(postService.getAllPost(page, size));
+    }
+
+    @GetMapping()
+    public ApiResponse<?> getAllMemberPost(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size
+    ) {
+        if(page == null) page = 0;
+        if(size==null) size = 0;
+        String memberId = getLoginMemberId();
+        return ApiResponse.onSuccess(postService.getAllMemberPost(memberId,page,size));
+    }
+
     private String getLoginMemberId() {
         return SecurityUtil.getLoginMemberId().orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
     }
