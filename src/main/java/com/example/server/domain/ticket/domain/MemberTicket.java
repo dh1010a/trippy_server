@@ -1,6 +1,7 @@
 package com.example.server.domain.ticket.domain;
 
 import com.example.server.domain.member.domain.Member;
+import com.example.server.domain.post.domain.Post;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,6 +20,10 @@ public class MemberTicket {
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
+
+    @OneToOne
+    @JoinColumn(name = "post_id")
+    private Post post;
 
     @ManyToOne
     @JoinColumn(name = "ticket_id")

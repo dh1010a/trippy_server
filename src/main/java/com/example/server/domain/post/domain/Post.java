@@ -6,6 +6,8 @@ import com.example.server.domain.member.domain.BookMark;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.post.dto.PostRequestDto;
 import com.example.server.domain.post.model.PostType;
+import com.example.server.domain.ticket.domain.MemberTicket;
+import com.example.server.domain.ticket.domain.Ticket;
 import com.example.server.global.common.BaseTimeEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -60,6 +62,13 @@ public class Post extends BaseTimeEntity {
     @JsonIgnore
     private List<Comment> comments;
 
+//    @OneToOne(mappedBy = "post")
+//    private MemberTicket memberTicket;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "ticket_id")
+    private Ticket ticket;
+
     public void updatePost(PostRequestDto.UpdatePostRequestDto requestDto){
         this.title = requestDto.getTitle();
         this.body = requestDto.getBody();
@@ -76,6 +85,11 @@ public class Post extends BaseTimeEntity {
 
     public void updateImages(List<Image> newImages) {
         this.images = newImages;
+    }
+
+    public void updateTicket(Ticket ticket){
+        this.ticket = ticket;
+        ticket.getImage().setPost(this);
     }
 
 }
