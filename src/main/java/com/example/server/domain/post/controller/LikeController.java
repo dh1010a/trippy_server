@@ -20,23 +20,28 @@ public class LikeController {
     @PostMapping("/{id}")
     public ApiResponse<?>  likeToPost(@PathVariable("id") Long postId){
         String memberId = getLoginMemberId();
+        log.info("게시물 좋아요 요청 : memberId = {}, postId = {}", memberId ,postId);
         return ApiResponse.onSuccess(likeService.likeToPost(postId,memberId));
     }
 
     @GetMapping("/{id}")
     public ApiResponse<?>  PostLikeList(@PathVariable("id") Long postId){
+        String memberId = getLoginMemberId();
+        log.info("게시물 좋아요 리스트 요청 : memberId = {}, postId = {}", memberId ,postId);
         return ApiResponse.onSuccess(likeService.PostLikeList(postId));
     }
 
     @GetMapping("/isLiked/{id}")
     public ApiResponse<?>  isLiked(@PathVariable("id") Long postId){
         String memberId = getLoginMemberId();
+
         return ApiResponse.onSuccess(likeService.isLiked(postId,memberId));
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse<?>  deletePostLike(@PathVariable("id") Long postId){
         String memberId = getLoginMemberId();
+        log.info("게시물 좋아요 취소 요청 : memberId = {}, postId = {}", memberId ,postId);
         return ApiResponse.onSuccess(likeService.deletePostLike(postId,memberId));
     }
 

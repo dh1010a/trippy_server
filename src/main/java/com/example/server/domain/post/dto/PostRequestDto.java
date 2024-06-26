@@ -6,6 +6,7 @@ import com.example.server.domain.image.dto.ImageResponseDto;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.domain.post.domain.Tag;
 import com.example.server.domain.post.model.PostType;
+import com.example.server.domain.ticket.dto.TicketRequestDto;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,6 +27,7 @@ public class PostRequestDto {
         private String location;
         private List<ImageDto> images;
         private List<String> tags;
+        private TicketRequestDto.UploadTicketRequestDto ticketRequest;
     }
 
     public static class UploadTagRequestDto{

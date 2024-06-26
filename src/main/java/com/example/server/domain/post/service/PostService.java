@@ -13,6 +13,9 @@ import com.example.server.domain.post.dto.PostRequestDto;
 import com.example.server.domain.post.dto.PostResponseDto;
 import com.example.server.domain.post.repository.PostRepository;
 import com.example.server.domain.post.repository.TagRepository;
+import com.example.server.domain.ticket.domain.Ticket;
+import com.example.server.domain.ticket.dto.TicketRequestDto;
+import com.example.server.domain.ticket.repository.TicketRepository;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import jakarta.persistence.EntityManager;
@@ -37,20 +40,23 @@ public class PostService {
     private final MemberRepository memberRepository;
     private final TagRepository tagRepository;
     private final ImageRepository imageRepository;
+    private final TicketRepository ticketRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
 
     // POST api/post/
     @Transactional
-    public PostResponseDto.PostBasicResponseDto uploadPost(PostRequestDto.UploadPostRequestDto requestDto) {
+    public PostResponseDto.GetPostResponseDto uploadPost(PostRequestDto.UploadPostRequestDto requestDto) {
         Member member = getMember(requestDto.getMemberId());
         if (member == null) throw new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND);
+        TicketRequestDto.UploadTicketRequestDto ticketRequestDto = requestDto.getTicketRequest();
         Post post = savePost(requestDto);
+        Ticket ticket = saveTicket(ticketRequestDto);
         List<Tag> tags = saveTags(requestDto, post);
         List<Image> images = saveImages(requestDto,post);
-        savePostWithTagsAndImage(post, tags, images);
-        return PostDtoConverter.convertToPostBasicDto(post);
+        savePostAndTicketAndAll(post, tags, images,ticket);
+        return PostDtoConverter.convertToGetResponseDto(post);
     }
 
     // GET api/post
@@ -98,13 +104,13 @@ public class PostService {
     }
 
     // PATCH api/post
-    public PostResponseDto.PostBasicResponseDto updatePost(PostRequestDto.UpdatePostRequestDto requestDto) {
+    public PostResponseDto.GetPostResponseDto updatePost(PostRequestDto.UpdatePostRequestDto requestDto) {
         Post post = postRepository.findById(requestDto.getId()).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND));
         Member member =  getMember(requestDto.getMemberId());
         if(!((post.getMember().getIdx()).equals(member.getIdx()))) throw new ErrorHandler(ErrorStatus.NO_PERMISSION__FOR_POST);
         updateTagsAndImages(post,requestDto.getTags(),requestDto.getImages());
         post.updatePost(requestDto);
-        return PostDtoConverter.convertToPostBasicDto(post);
+        return PostDtoConverter.convertToGetResponseDto(post);
     }
 
     // GET member 메서드
@@ -130,6 +136,31 @@ public class PostService {
                 .location(requestDto.getLocation())
                 .build();
         return post;
+    }
+
+    public Ticket saveTicket(TicketRequestDto.UploadTicketRequestDto requestDto){
+        Ticket ticket = Ticket.builder()
+                .departure(requestDto.getDeparture())
+                .destination(requestDto.getDestination())
+                .memberNum(requestDto.getMemberNum())
+                .startDate(requestDto.getStartDate())
+                .endDate(requestDto.getEndDate())
+                .ticketColor(requestDto.getTicketColor())
+                .transport(requestDto.getTransport())
+                .build();
+
+        if(requestDto.getImage()!=null){
+            Image ticketImage = Image.builder()
+                    .imageType(ImageType.TICKET)
+                    .authenticateId(requestDto.getImage().getAuthenticateId())
+                    .accessUri(requestDto.getImage().getAccessUri())
+                    .imgUrl(requestDto.getImage().getImgUrl())
+                    .build();
+
+            imageRepository.save(ticketImage);
+            ticket.updateImage(ticketImage);
+        }
+        return ticket;
     }
 
     // TAG 엔티티 저장 메서드
@@ -164,16 +195,22 @@ public class PostService {
     }
 
     // POST 저장 메서드 for [POST api/post/]
-    public void savePostWithTagsAndImage(Post post, List<Tag> tags, List<Image> images) {
+    @Transactional
+    public void savePostAndTicketAndAll(Post post, List<Tag> tags, List<Image> images, Ticket ticket) {
+
         post.updateTags(tags);
         post.updateImages(images);
+
+        ticketRepository.save(ticket);
+        post.updateTicket(ticket);
         postRepository.save(post);
     }
 
     public void updateTagsAndImages(Post post, List<String> newTagNames, List<ImageDto> newImagesDto) {
         // 기존 태그 및 이미지 가져오기
         List<Tag> originalTags = tagRepository.findAllByPost(post);
-        List<Image> originalImages = imageRepository.findAllByPost(post);
+//        List<Image> originalImages = imageRepository.findAllByPost(post);
+        List<Image> originalImages = imageRepository.findAllByPostAndImageType(post,ImageType.POST);
 
         // 새로운 태그 추가
         for (String newTagName : newTagNames) {
