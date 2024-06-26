@@ -148,7 +148,8 @@ public class OracleImageService implements ImageService {
         UploadManager uploadManager = getManager(client);
 
         String fileName = dirName + uploadFile.getName();   // 버킷에 저장된 파일 이름
-        String contentType = "img/" + fileName.substring(fileName.length() - 3); // PNG, JPG 만 가능함
+        String contentType = fileName.lastIndexOf(".") == 4 ? "img/" + fileName.substring(fileName.length() - 4)
+                : "img/" + fileName.substring(fileName.length() - 3);
         PutObjectRequest request = PutObjectRequest.builder()
                         .bucketName(BUCKET_NAME)
                         .namespaceName(BUCKET_NAME_SPACE)
