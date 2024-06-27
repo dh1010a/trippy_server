@@ -55,6 +55,11 @@ public enum ErrorStatus implements BaseErrorCode {
     POST_NOT_FOUND(HttpStatus.BAD_REQUEST, "POST4001", "존재하지 않는 게시물입니다."),
     NO_PERMISSION__FOR_POST(HttpStatus.BAD_REQUEST, "POST4002", "해당 게시물에 권한이 없는 유저입니다."),
     TICKET_NOT_FOUND(HttpStatus.BAD_REQUEST, "POST4003", "존재하지 않는 티켓입니다."),
+    POST_TYPE_ERROR(HttpStatus.BAD_REQUEST, "POST4001", "게시물 타입이 아닙니다."),
+
+    // OOTD 응답
+    OOTD_TYPE_ERROR(HttpStatus.BAD_REQUEST, "OOTD4001", "OOTD 타입이 아닙니다."),
+    OOTD_NOT_FOUND(HttpStatus.BAD_REQUEST, "OOTD4002", "존재하지 않는 OOTD 정보입니다."),
 
     // 댓글 응답
     PARENT_COMMENT_AND_POST_NOT_FOUND(HttpStatus.BAD_REQUEST, "COMMENT4001", "존재하지 않는 댓글이거나 부모 댓글이 게시글과 일치하지 않습니다."),

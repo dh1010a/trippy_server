@@ -1,5 +1,6 @@
 package com.example.server.domain.post.domain;
 
+import com.example.server.domain.post.dto.OotdReqResDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,4 +34,12 @@ public class Ootd {
 
     @OneToOne(mappedBy = "ootd", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Post post;
+
+    public void updateOotd(OotdReqResDto.UpdateOOTDRequestDto updateOOTDRequestDto){
+        this.area = updateOOTDRequestDto.getArea();
+        this.date = updateOOTDRequestDto.getDate();
+        this.detailLocation = updateOOTDRequestDto.getDetailLocation();
+        this.weatherStatus = updateOOTDRequestDto.getWeatherStatus();
+        this.weatherTemp = updateOOTDRequestDto.getWeatherTemp();
+    }
 }

@@ -22,6 +22,17 @@ public class OotdReqResDto {
 
     @Builder
     @Data
+    public static class UpdateOOTDRequestDto{
+        private Long id;
+        private String area;
+        private String weatherStatus;
+        private String weatherTemp;
+        private String detailLocation;
+        private LocalDate date;
+    }
+
+    @Builder
+    @Data
     public static class OotdBasicResponseDto{
         private Long id;
         private String area;

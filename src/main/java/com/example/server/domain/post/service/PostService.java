@@ -11,6 +11,7 @@ import com.example.server.domain.post.domain.Tag;
 import com.example.server.domain.post.dto.PostDtoConverter;
 import com.example.server.domain.post.dto.PostRequestDto;
 import com.example.server.domain.post.dto.PostResponseDto;
+import com.example.server.domain.post.model.PostType;
 import com.example.server.domain.post.repository.PostRepository;
 import com.example.server.domain.post.repository.TagRepository;
 import com.example.server.domain.ticket.domain.Ticket;
@@ -71,6 +72,9 @@ public class PostService {
     // GET api/post
     public PostResponseDto.GetPostResponseDto getPost(Long postId){
         Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND));
+        if(post.getPostType() == PostType.OOTD) {
+            throw new ErrorHandler(ErrorStatus.POST_TYPE_ERROR);
+        }
         return PostDtoConverter.convertToGetResponseDto(post);
     }
 
@@ -78,12 +82,12 @@ public class PostService {
     public List<PostResponseDto.GetPostResponseDto> getAllPost(Integer page, Integer size){
         // 둘다 0일때 => 변수 입력 안받음
         if(page==0 && size==0){
-            List<Post> postList = postRepository.findAll();
+            List<Post> postList = postRepository.findAllByPostType(PostType.POST);
             return PostDtoConverter.convertToPostListResponseDto(postList);
         }
         else {
             PageRequest pageable = PageRequest.of(page, size);
-            List<Post> postList = postRepository.findAll(pageable).getContent();
+            List<Post> postList = postRepository.findAllByPostType(PostType.POST,pageable).getContent();
             return PostDtoConverter.convertToPostListResponseDto(postList);
         }
     }
@@ -92,12 +96,12 @@ public class PostService {
         Optional<Member> member = memberRepository.findByMemberId(memberId);
         // 둘다 0일때 => 변수 입력 안받음
         if(page==0 && size==0){
-            List<Post> postList = postRepository.findAllByMember(member.get());
+            List<Post> postList = postRepository.findAllByMemberAndPostType(member.get(),PostType.POST);
             return PostDtoConverter.convertToPostListResponseDto(postList);
         }
         else {
             Pageable pageable = PageRequest.of(page, size);
-            List<Post> postList = postRepository.findAllByMember(member.get(), pageable).getContent();
+            List<Post> postList = postRepository.findAllByMemberAndPostType(member.get(),PostType.POST, pageable).getContent();
             return PostDtoConverter.convertToPostListResponseDto(postList);
         }
 

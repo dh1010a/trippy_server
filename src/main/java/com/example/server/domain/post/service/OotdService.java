@@ -9,6 +9,7 @@ import com.example.server.domain.post.dto.OotdReqResDto;
 import com.example.server.domain.post.dto.PostDtoConverter;
 import com.example.server.domain.post.dto.PostRequestDto;
 import com.example.server.domain.post.dto.PostResponseDto;
+import com.example.server.domain.post.model.PostType;
 import com.example.server.domain.post.repository.OotdRepository;
 import com.example.server.domain.post.repository.PostRepository;
 import com.example.server.domain.ticket.domain.Ticket;
@@ -18,10 +19,15 @@ import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+
+import static com.example.server.domain.post.dto.PostDtoConverter.convertToOotdBasicResponseDto;
 
 @Service
 @Transactional
@@ -32,6 +38,7 @@ public class OotdService {
     private final PostService postService;
     private final PostRepository postRepository;
 
+    // POST /api/ootd
     @Transactional
     public PostResponseDto.GetOotdPostResponseDto uploadOotdPost(PostRequestDto.UploadOOTDPostRequestDto requestDto) {
         PostRequestDto.CommonPostRequestDto postRequestDto = requestDto.getPostRequest();
@@ -53,6 +60,62 @@ public class OotdService {
         Ootd ootd = saveOotd(ootdRequestDto);
         savePostAndOOTDAndAll(post,ootd);
         return PostDtoConverter.convertToOotdResponseDto(post);
+    }
+
+    // GET /api/ootd/{id}
+    public PostResponseDto.GetOotdPostResponseDto getPost(Long postId){
+        Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND));
+        if(post.getPostType() == PostType.POST) {
+            throw new ErrorHandler(ErrorStatus.OOTD_TYPE_ERROR);
+        }
+        return PostDtoConverter.convertToOotdResponseDto(post);
+    }
+
+    // GET api/ootd/all
+    public List<PostResponseDto.GetOotdPostResponseDto> getAllPost(Integer page, Integer size){
+        // 둘다 0일때 => 변수 입력 안받음
+        if(page==0 && size==0){
+            List<Post> postList = postRepository.findAllByPostType(PostType.OOTD);
+            return PostDtoConverter.convertToOOTDListResponseDto(postList);
+        }
+        else {
+            PageRequest pageable = PageRequest.of(page, size);
+            List<Post> postList = postRepository.findAllByPostType(PostType.OOTD,pageable).getContent();
+            return PostDtoConverter.convertToOOTDListResponseDto(postList);
+        }
+    }
+
+    // GET api/ootd/
+    public List<PostResponseDto.GetOotdPostResponseDto> getAllMemberPost(String memberId,Integer page, Integer size){
+        Member member = postService.getMember(memberId);
+        // 둘다 0일때 => 변수 입력 안받음
+        if(page==0 && size==0){
+            List<Post> postList = postRepository.findAllByMemberAndPostType(member,PostType.OOTD);
+            return PostDtoConverter.convertToOOTDListResponseDto(postList);
+        }
+        else {
+            Pageable pageable = PageRequest.of(page, size);
+            List<Post> postList = postRepository.findAllByMemberAndPostType(member,PostType.OOTD, pageable).getContent();
+            return PostDtoConverter.convertToOOTDListResponseDto(postList);
+        }
+
+    }
+
+    // PATCH api/ootd
+    public OotdReqResDto.OotdBasicResponseDto updateOotd(String memberId, OotdReqResDto.UpdateOOTDRequestDto updateOOTDRequestDto){
+        Optional<Ootd> ootd = ootdRepository.findById(updateOOTDRequestDto.getId());
+        if(ootd.isPresent()){
+            if(Objects.equals(ootd.get().getPost().getMember().getMemberId(), memberId)){
+                ootd.get().updateOotd(updateOOTDRequestDto);
+                return convertToOotdBasicResponseDto(ootd.get());
+            }
+            else {
+                throw new ErrorHandler(ErrorStatus.NO_PERMISSION__FOR_POST);
+            }
+        }
+        else {
+            throw new ErrorHandler(ErrorStatus.OOTD_NOT_FOUND);
+        }
     }
 
     @Transactional

@@ -85,4 +85,11 @@ public class PostDtoConverter {
                 .collect(Collectors.toList());
         return postDtos;
     }
+
+    public static  List<PostResponseDto.GetOotdPostResponseDto> convertToOOTDListResponseDto(List<Post> posts) {
+        List<PostResponseDto.GetOotdPostResponseDto> postDtos = posts.stream()
+                .map(post -> convertToOotdResponseDto(post))
+                .collect(Collectors.toList());
+        return postDtos;
+    }
 }
