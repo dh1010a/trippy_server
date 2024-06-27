@@ -26,7 +26,7 @@ public class PostController {
     @PostMapping("")
     public ApiResponse<?> uploadPost(@RequestBody PostRequestDto.UploadPostRequestDto uploadPostRequestDto) {
         String memberId = getLoginMemberId();
-        uploadPostRequestDto.setMemberId(memberId);
+        uploadPostRequestDto.getPostRequest().setMemberId(memberId);
         log.info("게시물 업로드 요청 : memberId = {}", memberId);
         return ApiResponse.onSuccess(postService.uploadPost(uploadPostRequestDto));
     }

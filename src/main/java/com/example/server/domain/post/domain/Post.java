@@ -69,6 +69,25 @@ public class Post extends BaseTimeEntity {
     @JoinColumn(name = "ticket_id")
     private Ticket ticket;
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "ootd_id")
+    private Ootd ootd;
+
+    // POST 유효성 검사 - ootd, ticket 과의 관계가 있어야함
+    @PrePersist
+    @PreUpdate
+    private void validateAssociations() {
+        if (this.postType == PostType.POST) {
+            if (this.ticket == null) {
+                throw new IllegalStateException("POST type must have a ticket");
+            }
+        } else if (this.postType == PostType.OOTD) {
+            if (this.ootd == null) {
+                throw new IllegalStateException("OOTD type must have an ootd");
+            }
+        }
+    }
+
     public void updatePost(PostRequestDto.UpdatePostRequestDto requestDto){
         this.title = requestDto.getTitle();
         this.body = requestDto.getBody();
@@ -90,6 +109,10 @@ public class Post extends BaseTimeEntity {
     public void updateTicket(Ticket ticket){
         this.ticket = ticket;
         ticket.getImage().setPost(this);
+    }
+
+    public void updateOotd(Ootd ootd){
+        this.ootd = ootd;
     }
 
 }

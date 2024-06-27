@@ -48,14 +48,23 @@ public class PostService {
     // POST api/post/
     @Transactional
     public PostResponseDto.GetPostResponseDto uploadPost(PostRequestDto.UploadPostRequestDto requestDto) {
-        Member member = getMember(requestDto.getMemberId());
+        PostRequestDto.CommonPostRequestDto postRequestDto = requestDto.getPostRequest();
+        Member member = getMember(postRequestDto.getMemberId());
         if (member == null) throw new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND);
         TicketRequestDto.UploadTicketRequestDto ticketRequestDto = requestDto.getTicketRequest();
-        Post post = savePost(requestDto);
+        Post post = savePost(postRequestDto);
+        System.out.println(requestDto.toString());
+        if (postRequestDto.getImages() != null) {
+            List<Image> images = saveImages(postRequestDto,post);
+            post.updateImages(images);
+        }
+        if(postRequestDto.getTags() != null) {
+            List<Tag> tags = saveTags(postRequestDto, post);
+            post.updateTags(tags);
+        }
+
         Ticket ticket = saveTicket(ticketRequestDto);
-        List<Tag> tags = saveTags(requestDto, post);
-        List<Image> images = saveImages(requestDto,post);
-        savePostAndTicketAndAll(post, tags, images,ticket);
+        savePostAndTicketAndAll(post,ticket);
         return PostDtoConverter.convertToGetResponseDto(post);
     }
 
@@ -124,7 +133,7 @@ public class PostService {
     }
 
     // POST 빌드 메서드
-    public Post savePost(PostRequestDto.UploadPostRequestDto requestDto){
+    public Post savePost(PostRequestDto.CommonPostRequestDto requestDto){
         Member member = getMember(requestDto.getMemberId());
         if (member == null) throw new ErrorHandler(ErrorStatus.MEMBER_EMAIL_ALREADY_EXIST);
 
@@ -164,7 +173,7 @@ public class PostService {
     }
 
     // TAG 엔티티 저장 메서드
-    public List<Tag> saveTags(PostRequestDto.UploadPostRequestDto requestDto,Post post) {
+    public List<Tag> saveTags(PostRequestDto.CommonPostRequestDto requestDto,Post post) {
         return requestDto.getTags().stream()
                 .map(tagName -> {
 
@@ -178,7 +187,7 @@ public class PostService {
     }
 
     // IMAGE 저장 메서드 for [POST api/post/]
-    public List<Image> saveImages(PostRequestDto.UploadPostRequestDto requestDto,Post post) {
+    public List<Image> saveImages(PostRequestDto.CommonPostRequestDto requestDto,Post post) {
 
         return requestDto.getImages().stream()
                 .map(imageDto -> {
@@ -196,11 +205,7 @@ public class PostService {
 
     // POST 저장 메서드 for [POST api/post/]
     @Transactional
-    public void savePostAndTicketAndAll(Post post, List<Tag> tags, List<Image> images, Ticket ticket) {
-
-        post.updateTags(tags);
-        post.updateImages(images);
-
+    public void savePostAndTicketAndAll(Post post, Ticket ticket) {
         ticketRepository.save(ticket);
         post.updateTicket(ticket);
         postRepository.save(post);
