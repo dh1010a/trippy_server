@@ -12,6 +12,7 @@ import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PostRequestDto {
@@ -20,6 +21,20 @@ public class PostRequestDto {
     @Builder
     @Data
     public static class UploadPostRequestDto{
+        private CommonPostRequestDto postRequest;
+        private TicketRequestDto.UploadTicketRequestDto ticketRequest;
+    }
+
+    @Builder
+    @Data
+    public static class UploadOOTDPostRequestDto{
+        private CommonPostRequestDto postRequest;
+        private OotdReqResDto.UploadOOTDRequestDto ootdRequest;
+    }
+
+    @Builder
+    @Data
+    public static class CommonPostRequestDto{
         private String memberId;
         private String title;
         private String body;
@@ -27,8 +42,8 @@ public class PostRequestDto {
         private String location;
         private List<ImageDto> images;
         private List<String> tags;
-        private TicketRequestDto.UploadTicketRequestDto ticketRequest;
     }
+
 
     public static class UploadTagRequestDto{
         private String name;

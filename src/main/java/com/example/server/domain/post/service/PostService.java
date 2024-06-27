@@ -11,6 +11,7 @@ import com.example.server.domain.post.domain.Tag;
 import com.example.server.domain.post.dto.PostDtoConverter;
 import com.example.server.domain.post.dto.PostRequestDto;
 import com.example.server.domain.post.dto.PostResponseDto;
+import com.example.server.domain.post.model.PostType;
 import com.example.server.domain.post.repository.PostRepository;
 import com.example.server.domain.post.repository.TagRepository;
 import com.example.server.domain.ticket.domain.Ticket;
@@ -48,20 +49,32 @@ public class PostService {
     // POST api/post/
     @Transactional
     public PostResponseDto.GetPostResponseDto uploadPost(PostRequestDto.UploadPostRequestDto requestDto) {
-        Member member = getMember(requestDto.getMemberId());
+        PostRequestDto.CommonPostRequestDto postRequestDto = requestDto.getPostRequest();
+        Member member = getMember(postRequestDto.getMemberId());
         if (member == null) throw new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND);
         TicketRequestDto.UploadTicketRequestDto ticketRequestDto = requestDto.getTicketRequest();
-        Post post = savePost(requestDto);
+        Post post = savePost(postRequestDto);
+        System.out.println(requestDto.toString());
+        if (postRequestDto.getImages() != null) {
+            List<Image> images = saveImages(postRequestDto,post);
+            post.updateImages(images);
+        }
+        if(postRequestDto.getTags() != null) {
+            List<Tag> tags = saveTags(postRequestDto, post);
+            post.updateTags(tags);
+        }
+
         Ticket ticket = saveTicket(ticketRequestDto);
-        List<Tag> tags = saveTags(requestDto, post);
-        List<Image> images = saveImages(requestDto,post);
-        savePostAndTicketAndAll(post, tags, images,ticket);
+        savePostAndTicketAndAll(post,ticket);
         return PostDtoConverter.convertToGetResponseDto(post);
     }
 
     // GET api/post
     public PostResponseDto.GetPostResponseDto getPost(Long postId){
         Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND));
+        if(post.getPostType() == PostType.OOTD) {
+            throw new ErrorHandler(ErrorStatus.POST_TYPE_ERROR);
+        }
         return PostDtoConverter.convertToGetResponseDto(post);
     }
 
@@ -69,12 +82,12 @@ public class PostService {
     public List<PostResponseDto.GetPostResponseDto> getAllPost(Integer page, Integer size){
         // 둘다 0일때 => 변수 입력 안받음
         if(page==0 && size==0){
-            List<Post> postList = postRepository.findAll();
+            List<Post> postList = postRepository.findAllByPostType(PostType.POST);
             return PostDtoConverter.convertToPostListResponseDto(postList);
         }
         else {
             PageRequest pageable = PageRequest.of(page, size);
-            List<Post> postList = postRepository.findAll(pageable).getContent();
+            List<Post> postList = postRepository.findAllByPostType(PostType.POST,pageable).getContent();
             return PostDtoConverter.convertToPostListResponseDto(postList);
         }
     }
@@ -83,12 +96,12 @@ public class PostService {
         Optional<Member> member = memberRepository.findByMemberId(memberId);
         // 둘다 0일때 => 변수 입력 안받음
         if(page==0 && size==0){
-            List<Post> postList = postRepository.findAllByMember(member.get());
+            List<Post> postList = postRepository.findAllByMemberAndPostType(member.get(),PostType.POST);
             return PostDtoConverter.convertToPostListResponseDto(postList);
         }
         else {
             Pageable pageable = PageRequest.of(page, size);
-            List<Post> postList = postRepository.findAllByMember(member.get(), pageable).getContent();
+            List<Post> postList = postRepository.findAllByMemberAndPostType(member.get(),PostType.POST, pageable).getContent();
             return PostDtoConverter.convertToPostListResponseDto(postList);
         }
 
@@ -124,7 +137,7 @@ public class PostService {
     }
 
     // POST 빌드 메서드
-    public Post savePost(PostRequestDto.UploadPostRequestDto requestDto){
+    public Post savePost(PostRequestDto.CommonPostRequestDto requestDto){
         Member member = getMember(requestDto.getMemberId());
         if (member == null) throw new ErrorHandler(ErrorStatus.MEMBER_EMAIL_ALREADY_EXIST);
 
@@ -164,7 +177,7 @@ public class PostService {
     }
 
     // TAG 엔티티 저장 메서드
-    public List<Tag> saveTags(PostRequestDto.UploadPostRequestDto requestDto,Post post) {
+    public List<Tag> saveTags(PostRequestDto.CommonPostRequestDto requestDto,Post post) {
         return requestDto.getTags().stream()
                 .map(tagName -> {
 
@@ -178,7 +191,7 @@ public class PostService {
     }
 
     // IMAGE 저장 메서드 for [POST api/post/]
-    public List<Image> saveImages(PostRequestDto.UploadPostRequestDto requestDto,Post post) {
+    public List<Image> saveImages(PostRequestDto.CommonPostRequestDto requestDto,Post post) {
 
         return requestDto.getImages().stream()
                 .map(imageDto -> {
@@ -196,11 +209,7 @@ public class PostService {
 
     // POST 저장 메서드 for [POST api/post/]
     @Transactional
-    public void savePostAndTicketAndAll(Post post, List<Tag> tags, List<Image> images, Ticket ticket) {
-
-        post.updateTags(tags);
-        post.updateImages(images);
-
+    public void savePostAndTicketAndAll(Post post, Ticket ticket) {
         ticketRepository.save(ticket);
         post.updateTicket(ticket);
         postRepository.save(post);

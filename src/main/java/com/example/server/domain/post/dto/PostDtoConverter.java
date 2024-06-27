@@ -2,9 +2,11 @@ package com.example.server.domain.post.dto;
 
 import com.example.server.domain.image.dto.ImageResponseDto;
 import com.example.server.domain.image.model.ImageType;
+import com.example.server.domain.post.domain.Ootd;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.domain.ticket.dto.TicketResponseDto;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,20 +17,16 @@ import static com.example.server.domain.ticket.dto.TicketDtoConverter.convertToT
 public class PostDtoConverter {
 
     public static PostResponseDto.PostBasicResponseDto convertToPostBasicDto(Post post) {
-//        List<TagResponseDto.TagBasicResponseDto> convertTag = post.getTag().stream()
-//                .map(tag -> convertToTagBasicResponseDto(tag))
-//                .collect(Collectors.toList());
 
-        List<String> tagNames = post.getTag().stream()
+        List<String> tagNames = post.getTag() != null ? post.getTag().stream()
                 .map(tag -> tag.getName())
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()) : Collections.emptyList();
 
-        List<ImageResponseDto.ImageBasicResponseDto> convertImage = post.getImages().stream()
+        List<ImageResponseDto.ImageBasicResponseDto> convertImage = post.getImages() != null ? post.getImages().stream()
                 .filter(image -> image.getImageType() == ImageType.POST)
-                .map(image -> convertToImageBasicDto(image)).collect(Collectors.toList());
-
+                .map(image -> convertToImageBasicDto(image))
+                .collect(Collectors.toList()) : Collections.emptyList();
         int likeCount = post.getLikes() != null ? post.getLikes().size() : 0;
-//        TicketResponseDto.TicketBasicResponseDto ticket = convertToTicketResponseDto(post.getTicket());
         return PostResponseDto.PostBasicResponseDto.builder()
                 .id(post.getId())
                 .email(post.getMember().getEmail())
@@ -42,14 +40,6 @@ public class PostDtoConverter {
     }
 
     public static PostResponseDto.GetPostResponseDto convertToGetResponseDto(Post post) {
-//        List<TagResponseDto.TagBasicResponseDto> convertTag = post.getTag().stream()
-//                .map(tag -> convertToTagBasicResponseDto(tag))
-//                .collect(Collectors.toList());
-//
-//        List<ImageResponseDto.ImageBasicResponseDto> convertImage = post.getImages().stream()
-//                .map(image -> convertToImageBasicDto(image)).collect(Collectors.toList());
-//        int likeCount = post.getLikes() != null ? post.getLikes().size() : 0;
-
         TicketResponseDto.TicketBasicResponseDto ticket = convertToTicketResponseDto(post.getTicket());
         PostResponseDto.PostBasicResponseDto postDto = convertToPostBasicDto(post);
 
@@ -58,6 +48,28 @@ public class PostDtoConverter {
                 .ticket(ticket)
                 .isSuccess(true)
                 .build();
+    }
+
+    public static PostResponseDto.GetOotdPostResponseDto convertToOotdResponseDto(Post post){
+        OotdReqResDto.OotdBasicResponseDto ootdDto = convertToOotdBasicResponseDto(post.getOotd());
+        PostResponseDto.PostBasicResponseDto postDto = convertToPostBasicDto(post);
+        return PostResponseDto.GetOotdPostResponseDto.builder()
+                .post(postDto)
+                .ootd(ootdDto)
+                .isSuccess(true)
+                .build();
+    }
+
+    public static OotdReqResDto.OotdBasicResponseDto convertToOotdBasicResponseDto(Ootd ootd){
+        OotdReqResDto.OotdBasicResponseDto ootdBasicResponseDto = OotdReqResDto.OotdBasicResponseDto.builder()
+                .id(ootd.getId())
+                .area(ootd.getArea())
+                .date(ootd.getDate())
+                .detailLocation(ootd.getDetailLocation())
+                .weatherTemp(ootd.getWeatherTemp())
+                .weatherStatus(ootd.getWeatherStatus())
+                .build();
+        return ootdBasicResponseDto;
     }
 
     public static PostResponseDto.DeletePostResultResponseDto convertToDeletePostDto(Long id) {
@@ -70,6 +82,13 @@ public class PostDtoConverter {
     public static  List<PostResponseDto.GetPostResponseDto> convertToPostListResponseDto(List<Post> posts) {
         List<PostResponseDto.GetPostResponseDto> postDtos = posts.stream()
                 .map(post -> convertToGetResponseDto(post))
+                .collect(Collectors.toList());
+        return postDtos;
+    }
+
+    public static  List<PostResponseDto.GetOotdPostResponseDto> convertToOOTDListResponseDto(List<Post> posts) {
+        List<PostResponseDto.GetOotdPostResponseDto> postDtos = posts.stream()
+                .map(post -> convertToOotdResponseDto(post))
                 .collect(Collectors.toList());
         return postDtos;
     }
