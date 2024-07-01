@@ -134,18 +134,27 @@ public class OotdService {
 
         // GET 요청 보내기
         String response = restTemplate.getForObject(url, String.class).replace("\"", "");
-        String[] responseArray = response.split(",");
+        if(response == "500") {
+            throw new ErrorHandler(ErrorStatus.ERROR_WHILE_GET_WEATHER);
+        }
+        else if(response == "4001"){
+            throw new ErrorHandler(ErrorStatus.NO_PERMISSION_NATION);
+        }
+        else {
+            String[] responseArray = response.split(",");
 
-        // 순서 : avg, max, min, status, date,area
-        OotdReqResDto.WeatherResponseDto weatherResponseDto = OotdReqResDto.WeatherResponseDto.builder()
-                .avgTemp(responseArray[0])
-                .maxTemp(responseArray[1])
-                .minTemp(responseArray[2])
-                .status(responseArray[3])
-                .area(responseArray[4])
-                .build();
+            // 순서 : avg, max, min, status, date,area
+            OotdReqResDto.WeatherResponseDto weatherResponseDto = OotdReqResDto.WeatherResponseDto.builder()
+                    .avgTemp(responseArray[0])
+                    .maxTemp(responseArray[1])
+                    .minTemp(responseArray[2])
+                    .status(responseArray[3])
+                    .area(responseArray[4])
+                    .build();
 
-        return weatherResponseDto;
+            return weatherResponseDto;
+        }
+
     }
 
     @Transactional
