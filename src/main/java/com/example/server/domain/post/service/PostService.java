@@ -127,8 +127,8 @@ public class PostService {
     }
 
     // GET member 메서드
-    public Member getMember(String email) {
-        Optional<Member> memberOptional = memberRepository.findByEmail(email);
+    public Member getMember(String memberId) {
+        Optional<Member> memberOptional = memberRepository.findByMemberId(memberId);
         Member member = null;
         if (memberOptional.isPresent()) {
             member = memberOptional.get();
