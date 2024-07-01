@@ -124,7 +124,7 @@ public class OotdService {
 
     public OotdReqResDto.WeatherResponseDto callFlaskGetWeather(OotdReqResDto.WeatherRequestDto weatherRequestDto) {
         // URL 빌더 생성
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("http://127.0.0.1:5000/api/weather")
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("http://flask-app:5000/api/weather")
                 .queryParam("latitude", weatherRequestDto.getLatitude())
                 .queryParam("longitude", weatherRequestDto.getLongitude())
                 .queryParam("date", weatherRequestDto.getDate());
