@@ -58,13 +58,6 @@ jobs:
           echo "${{ secrets.OAUTH }}" > ./application-oauth.yaml
       shell: bash
 
-    ## deploy.sh 파일 생성
-    - name: Make deploy.sh
-      run: |
-          echo "${{ secrets.DEPLOY }}" > ./deploy.sh
-          chmod +x ./deploy.sh
-      shell: bash
-
     - name: Build with Gradle Wrapper
       run: |
           chmod +x gradlew 
