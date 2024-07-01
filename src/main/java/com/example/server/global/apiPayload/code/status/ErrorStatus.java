@@ -60,6 +60,9 @@ public enum ErrorStatus implements BaseErrorCode {
     // OOTD 응답
     OOTD_TYPE_ERROR(HttpStatus.BAD_REQUEST, "OOTD4001", "OOTD 타입이 아닙니다."),
     OOTD_NOT_FOUND(HttpStatus.BAD_REQUEST, "OOTD4002", "존재하지 않는 OOTD 정보입니다."),
+    NO_PERMISSION_NATION(HttpStatus.BAD_REQUEST, "OOTD4003", "날씨 정보를 불러올 수 없는 국가입니다."),
+    ERROR_WHILE_GET_WEATHER(HttpStatus.BAD_REQUEST, "OOTD4004", "날씨 정보를 불러오는데에 실패하였습니다."),
+
 
     // 댓글 응답
     PARENT_COMMENT_AND_POST_NOT_FOUND(HttpStatus.BAD_REQUEST, "COMMENT4001", "존재하지 않는 댓글이거나 부모 댓글이 게시글과 일치하지 않습니다."),
