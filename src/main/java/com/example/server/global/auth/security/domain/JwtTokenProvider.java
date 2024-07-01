@@ -166,22 +166,22 @@ public class JwtTokenProvider {
 					.parseClaimsJws(token);
 			return true;
 		} catch (SecurityException | MalformedJwtException e) {
-			log.info("Invalid JWT Token", e);
+			log.info("Invalid JWT Token : " +  e.getMessage());
 			return false;
 		} catch (SignatureException exception) {
 			log.error("JWT signature validation fails");
 			return false;
 		} catch (ExpiredJwtException e) {
-			log.info("Expired JWT Token", e);
+			log.info("Expired JWT Token: " +  e.getMessage());
 			return false;
 		} catch (UnsupportedJwtException e) {
-			log.info("Unsupported JWT Token", e);
+			log.info("Unsupported JWT Token: " +  e.getMessage());
 			return false;
 		} catch (IllegalArgumentException e) {
-			log.info("JWT claims string is empty.", e);
+			log.info("JWT claims string is empty.: " +  e.getMessage());
 			return false;
 		} catch (Exception exception) {
-			log.error("JWT validation fails", exception);
+			log.error("JWT validation fails: " +  exception.getMessage());
 			return false;
 		}
 	}
