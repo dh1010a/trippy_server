@@ -111,7 +111,7 @@ public class PostService {
     // DELETE api/post
     public PostResponseDto.DeletePostResultResponseDto deletePost(Long postId, String memberId) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND));
-        if(!((post.getMember().getEmail()).equals(memberId))) throw new ErrorHandler(ErrorStatus.NO_PERMISSION__FOR_POST);
+        if(!((post.getMember().getMemberId()).equals(memberId))) throw new ErrorHandler(ErrorStatus.NO_PERMISSION__FOR_POST);
         postRepository.delete(post);
         return PostDtoConverter.convertToDeletePostDto(postId);
     }
