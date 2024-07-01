@@ -22,7 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -37,6 +38,9 @@ public class OotdService {
     private final OotdRepository ootdRepository;
     private final PostService postService;
     private final PostRepository postRepository;
+
+    private final RestTemplate restTemplate;
+
 
     // POST /api/ootd
     @Transactional
@@ -116,6 +120,32 @@ public class OotdService {
         else {
             throw new ErrorHandler(ErrorStatus.OOTD_NOT_FOUND);
         }
+    }
+
+    public OotdReqResDto.WeatherResponseDto callFlaskGetWeather(OotdReqResDto.WeatherRequestDto weatherRequestDto) {
+        // URL 빌더 생성
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("http://127.0.0.1:5000/api/weather")
+                .queryParam("latitude", weatherRequestDto.getLatitude())
+                .queryParam("longitude", weatherRequestDto.getLongitude())
+                .queryParam("date", weatherRequestDto.getDate());
+
+        // 완성된 URL 문자열
+        String url = builder.toUriString();
+
+        // GET 요청 보내기
+        String response = restTemplate.getForObject(url, String.class).replace("\"", "");
+        String[] responseArray = response.split(",");
+
+        // 순서 : avg, max, min, status, date,area
+        OotdReqResDto.WeatherResponseDto weatherResponseDto = OotdReqResDto.WeatherResponseDto.builder()
+                .avgTemp(responseArray[0])
+                .maxTemp(responseArray[1])
+                .minTemp(responseArray[2])
+                .status(responseArray[3])
+                .area(responseArray[4])
+                .build();
+
+        return weatherResponseDto;
     }
 
     @Transactional

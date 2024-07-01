@@ -7,9 +7,12 @@ import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import com.example.server.global.util.SecurityUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import java.text.ParseException;
 
 @Slf4j
 @RestController
@@ -62,6 +65,13 @@ public class OotdController {
         log.info("회원별 OOTD 게시물 조회 요청 : memberId = {}", memberId );
         return ApiResponse.onSuccess(ootdService.getAllMemberPost(memberId,page,size));
     }
+
+    @GetMapping("/weather")
+    public ApiResponse<?> getPost(@RequestBody OotdReqResDto.WeatherRequestDto weatherRequestDto) {
+        log.info("OOTD 날씨 조회 요청");
+        return ApiResponse.onSuccess(ootdService.callFlaskGetWeather(weatherRequestDto));
+    }
+
 
     private String getLoginMemberId() {
         return SecurityUtil.getLoginMemberId().orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
