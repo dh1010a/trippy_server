@@ -134,10 +134,11 @@ public class OotdService {
 
         // GET 요청 보내기
         String response = restTemplate.getForObject(url, String.class).replace("\"", "");
-        if(response == "500") {
+        System.out.println(response);
+        if(response.equals("500")) {
             throw new ErrorHandler(ErrorStatus.ERROR_WHILE_GET_WEATHER);
         }
-        else if(response == "4001"){
+        else if(response.equals("4001")){
             throw new ErrorHandler(ErrorStatus.NO_PERMISSION_NATION);
         }
         else {
