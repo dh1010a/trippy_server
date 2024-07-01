@@ -39,3 +39,4 @@ out/
 /resources/
 *.yml
 docker-compose.yml
+deploy.sh

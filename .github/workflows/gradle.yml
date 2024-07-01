@@ -58,6 +58,14 @@ jobs:
           echo "${{ secrets.OAUTH }}" > ./application-oauth.yaml
       shell: bash
 
+    ## deploy.sh 파일 생성
+    - name: Make deploy.sh
+      run: |
+          touch ./deploy.sh
+          echo "${{ secrets.DEPLOY }}" > ./deploy.sh
+          chmod +x ./deploy.sh
+      shell: bash
+
     - name: Build with Gradle Wrapper
       run: |
           chmod +x gradlew 
@@ -88,4 +96,6 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
             cd ~
             sudo docker-compose up -d
+            ./deploy.sh
             sudo docker image prune -f
+          
