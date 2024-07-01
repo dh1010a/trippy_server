@@ -87,7 +87,6 @@ jobs:
             sudo docker rm -f $(docker ps -qa)
             docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
             cd ~
-#            sudo docker-compose up -d database redis flask-app nginx certbot
             sudo bash deploy.sh
             sudo docker image prune -f
           
