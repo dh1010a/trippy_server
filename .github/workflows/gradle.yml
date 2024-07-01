@@ -61,7 +61,7 @@ jobs:
     ## deploy.sh 파일 생성
     - name: Make deploy.sh
       run: |
-          touch ./deploy.sh
+          sudo touch ./deploy.sh
           echo "${{ secrets.DEPLOY }}" > ./deploy.sh
           chmod +x ./deploy.sh
       shell: bash
