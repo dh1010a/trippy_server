@@ -67,9 +67,11 @@ public class OotdController {
     }
 
     @GetMapping("/weather")
-    public ApiResponse<?> getPost(@RequestBody OotdReqResDto.WeatherRequestDto weatherRequestDto) {
+    public ApiResponse<?> getPost(@RequestParam double latitude,
+                                  @RequestParam double longitude,
+                                  @RequestParam String date) {
         log.info("OOTD 날씨 조회 요청");
-        return ApiResponse.onSuccess(ootdService.callFlaskGetWeather(weatherRequestDto));
+        return ApiResponse.onSuccess(ootdService.callFlaskGetWeather(latitude, longitude, date));
     }
 
 

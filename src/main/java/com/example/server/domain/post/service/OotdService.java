@@ -122,12 +122,12 @@ public class OotdService {
         }
     }
 
-    public OotdReqResDto.WeatherResponseDto callFlaskGetWeather(OotdReqResDto.WeatherRequestDto weatherRequestDto) {
+    public OotdReqResDto.WeatherResponseDto callFlaskGetWeather(double latitude, double longitude, String date) {
         // URL 빌더 생성
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("http://flask-app:5000/api/weather")
-                .queryParam("latitude", weatherRequestDto.getLatitude())
-                .queryParam("longitude", weatherRequestDto.getLongitude())
-                .queryParam("date", weatherRequestDto.getDate());
+                .queryParam("latitude", latitude)
+                .queryParam("longitude",longitude)
+                .queryParam("date", date);
 
         // 완성된 URL 문자열
         String url = builder.toUriString();
