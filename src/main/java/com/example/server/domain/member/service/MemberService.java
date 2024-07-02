@@ -117,6 +117,42 @@ public class MemberService {
 
     }
 
+    public MemberTaskResultResponseDto updateMyInfo(String memberId, MemberRequestDto.UpdateMemberRequestDto requestDto) throws Exception{
+        Member member = memberRepository.getMemberById(memberId);
+
+        checkProfileImageExistsAndDelete(member);
+        Image image = Image.builder()
+                .accessUri(requestDto.getBlogImage().getAccessUri())
+                .authenticateId(requestDto.getBlogImage().getAuthenticateId())
+                .imgUrl(requestDto.getBlogImage().getImgUrl())
+                .imageType(ImageType.BLOG)
+                .member(member)
+                .build();
+        imageRepository.save(image);
+
+        checkBlogImageExistsAndDelete(member);
+        Image profileImage = Image.builder()
+                .accessUri(requestDto.getProfileImage().getAccessUri())
+                .authenticateId(requestDto.getProfileImage().getAuthenticateId())
+                .imgUrl(requestDto.getProfileImage().getImgUrl())
+                .imageType(ImageType.PROFILE)
+                .member(member)
+                .build();
+        imageRepository.save(profileImage);
+
+        member.updateNickName(requestDto.getNickName());
+        member.updateBlogName(requestDto.getBlogName());
+        member.updateBlogIntroduce(requestDto.getBlogIntroduce());
+//        member.updateLikeAlert(requestDto.isLikeAlert());
+//        member.updateCommentAlert(requestDto.isCommentAlert());
+//        member.updateTicketScope(requestDto.getTicketScope());
+//        member.updateOotdScope(requestDto.getOotdScope());
+//        member.updateBadgeScope(requestDto.getBadgeScope());
+//        member.updateFollowerScope(requestDto.getFollowerScope());
+        log.info("내 정보 수정이 완료되었습니다. memberId = {}, nickName = {}, blogName = {}, blogIntroduce = {}", member.getMemberId(), member.getNickName(), member.getBlogName(), member.getBlogIntroduce());
+        return MemberDtoConverter.convertToMemberTaskDto(member);
+    }
+
     public IsNewMemberResponseDto isNewMember(String memberId) {
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
         boolean isNewMember = member.getRole() == Role.ROLE_GUEST;
@@ -185,7 +221,7 @@ public class MemberService {
     }
 
     public MemberTaskSuccessResponseDto deleteFollower(String memberId, String followerMemberId) {
-        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member member = memberRepository.getMemberById(memberId);
         Member followerMember = memberRepository.findByMemberId(followerMemberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_FOLLOW_MEMBER_NOT_EXIST));
 
         if (!memberFollowRepository.existsByMemberAndFollowingMemberIdx(followerMember, member.getIdx())) {
@@ -200,7 +236,7 @@ public class MemberService {
     }
 
     public MemberTaskSuccessResponseDto unFollow(String memberId, String followingMemberId) {
-        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member member = memberRepository.getMemberById(memberId);
         Member followingMember = memberRepository.findByMemberId(followingMemberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_FOLLOW_MEMBER_NOT_EXIST));
 
         if (!memberFollowRepository.existsByMemberAndFollowingMemberIdx(member, followingMember.getIdx())) {
@@ -241,8 +277,18 @@ public class MemberService {
         }
     }
 
-    public MemberTaskSuccessResponseDto updateInterestedTypes(String memberId, MemberRequestDto.UpdateInterestedTypesRequestDto requestDto) {
+    public void checkBlogImageExistsAndDelete(Member member) throws Exception{
+        List<Image> images = member.getImages();
+        if (!images.isEmpty()) {
+            Image profileImage = images.stream().filter(Image::isBlogTitleImage).findAny().orElse(null);
+            if (profileImage != null) {
+                oracleImageService.deleteImg(profileImage.getId());
+                imageRepository.delete(profileImage);
+            }
+        }
+    }
 
+    public MemberTaskSuccessResponseDto updateInterestedTypes(String memberId, MemberRequestDto.UpdateInterestedTypesRequestDto requestDto) {
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
         List<InterestedType> interestedTypes = new ArrayList<>();
         for (String x : requestDto.getKoreanInterestedTypes()) {

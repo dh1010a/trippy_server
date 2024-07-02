@@ -24,6 +24,26 @@ public class MemberRequestDto {
         private String blogIntroduce;
     }
 
+    @Builder
+    @Data
+    public static class UpdateMemberRequestDto {
+        private ImageDto blogImage;
+        private ImageDto profileImage;
+        private String nickName;
+        private String blogName;
+        private String blogIntroduce;
+        private List<String> koreanInterestedTypes;
+        private boolean likeAlert;
+        private boolean commentAlert;
+        private String ticketScope;
+        private String ootdScope;
+        private String badgeScope;
+        private String followerScope;
+    }
+
+
+
+
 
     @Builder
     @Data

@@ -51,6 +51,13 @@ public class MemberController {
         return ApiResponse.onSuccess(memberService.getMyInfo(memberId));
     }
 
+    @PatchMapping
+    public ApiResponse<?> updateMyInfo(@RequestBody MemberRequestDto.UpdateMemberRequestDto updateMemberRequestDto) throws Exception {
+        String memberId = getLoginMemberId();
+        log.info("내 정보 수정 요청 : memberId = {}", memberId);
+        return ApiResponse.onSuccess(memberService.updateMyInfo(memberId, updateMemberRequestDto));
+    }
+
     @GetMapping("/isNewMember")
     public ApiResponse<?> isNewMember() {
         String memberId = getLoginMemberId();
