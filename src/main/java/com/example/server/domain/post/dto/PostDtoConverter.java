@@ -29,7 +29,9 @@ public class PostDtoConverter {
         int likeCount = post.getLikes() != null ? post.getLikes().size() : 0;
         return PostResponseDto.PostBasicResponseDto.builder()
                 .id(post.getId())
-                .email(post.getMember().getEmail())
+                .memberId(post.getMember().getMemberId())
+                .createDate(post.getCreateDate())
+                .nickName(post.getMember().getNickName())
                 .title(post.getTitle())
                 .body(post.getBody())
                 .postType(post.getPostType())
