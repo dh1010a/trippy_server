@@ -30,7 +30,7 @@ public class PostDtoConverter {
         return PostResponseDto.PostBasicResponseDto.builder()
                 .id(post.getId())
                 .memberId(post.getMember().getMemberId())
-                .createDate(post.getCreateDate())
+                .createDateTime(post.getCreateDate())
                 .nickName(post.getMember().getNickName())
                 .title(post.getTitle())
                 .body(post.getBody())
