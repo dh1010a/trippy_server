@@ -6,6 +6,8 @@ import com.example.server.domain.ticket.dto.TicketResponseDto;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class PostResponseDto {
@@ -30,7 +32,9 @@ public class PostResponseDto {
     @Data
     public static class PostBasicResponseDto{
         private Long id;
-        private String email;
+        private String createDate;
+        private String nickName;
+        private String memberId;
         private String title;
         private String body;
         private PostType postType;

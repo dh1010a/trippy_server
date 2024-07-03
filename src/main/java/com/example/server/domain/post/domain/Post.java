@@ -13,6 +13,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -113,6 +115,12 @@ public class Post extends BaseTimeEntity {
 
     public void updateOotd(Ootd ootd){
         this.ootd = ootd;
+    }
+
+    public String getCreateDate() {
+        LocalDateTime createdAt = this.getCreatedAt().toLocalDate().atStartOfDay();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        return createdAt.format(formatter);
     }
 
 }
