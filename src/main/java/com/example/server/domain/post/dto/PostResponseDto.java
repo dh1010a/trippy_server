@@ -32,7 +32,7 @@ public class PostResponseDto {
     @Data
     public static class PostBasicResponseDto{
         private Long id;
-        private String createDate;
+        private LocalDateTime createDateTime;
         private String nickName;
         private String memberId;
         private String title;

@@ -117,10 +117,8 @@ public class Post extends BaseTimeEntity {
         this.ootd = ootd;
     }
 
-    public String getCreateDate() {
-        LocalDateTime createdAt = this.getCreatedAt().toLocalDate().atStartOfDay();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        return createdAt.format(formatter);
+    public LocalDateTime getCreateDate() {
+        return this.getCreatedAt();
     }
 
 }
