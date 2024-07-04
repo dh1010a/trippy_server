@@ -54,6 +54,11 @@ public class MemberController {
     @GetMapping("/{nickName}")
     public ApiResponse<?> getMemberInfo(@PathVariable("nickName") String nickName) {
         log.info("요청 대상 memberId = {}", nickName);
+        // 추후 비활성 유저도 접근하지 못하도록 로직 구성해야함
+        if (memberService.isGuestRole(nickName)) {
+            return ApiResponse.onFailure(ErrorStatus.MEMBER_PROFILE_ACCESS_DENY.getCode(), ErrorStatus.MEMBER_PROFILE_ACCESS_DENY.getMessage(),
+                    "프로필을 읽어올 수 없는 유저입니다.");
+        }
         return ApiResponse.onSuccess(memberService.getMemberInfo(nickName));
     }
 

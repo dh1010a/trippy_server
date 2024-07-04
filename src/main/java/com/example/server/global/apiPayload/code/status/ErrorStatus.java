@@ -35,6 +35,7 @@ public enum ErrorStatus implements BaseErrorCode {
     MEMBER_COOKIE_NOT_FOUND(HttpStatus.UNAUTHORIZED, "MEMBER4014", "쿠키 정보가 존재하지 않습니다."),
     MEMBER_LOGIN_NOT_SUPPORT(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "MEMBER4015", "지원되지 않는 로그인 형식입니다."),
     MEMBER_CANNOT_ACCESS_FOLLOW(HttpStatus.BAD_REQUEST, "MEMBER4016", "해당 유저의 팔로우/팔로잉 목록에 접근할 수 없습니다."),
+    MEMBER_PROFILE_ACCESS_DENY(HttpStatus.FORBIDDEN, "MEMBER4017", "프로필에 접근할 수 없는 유저입니다."),
 
     //사진 응답
     IMAGE_UPLOAD_FAIL(HttpStatus.BAD_REQUEST, "IMG4001", "사진 업로드에 실패하였습니다."),

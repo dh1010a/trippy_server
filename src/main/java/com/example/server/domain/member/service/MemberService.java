@@ -179,8 +179,13 @@ public class MemberService {
 
     // GET /api/member?memberId={memberId}
     public MemberInfoResponseDto getMemberInfo(String nickName) {
-        Member member = memberRepository.findByNickName(nickName).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member member = memberRepository.getMemberByNickName(nickName);
         return MemberDtoConverter.convertToMemberInfoResponseDto(member);
+    }
+
+    public boolean isGuestRole(String nickName) {
+        Member member = memberRepository.getMemberByNickName(nickName);
+        return member.getRole() == Role.ROLE_GUEST;
     }
 
     public MemberFollowResponseDto followMember(String memberId, String followingMemberId) {
