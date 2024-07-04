@@ -81,26 +81,27 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
 	}
 
 	private void setCookieForLocal(HttpServletResponse response, JwtToken jwtToken) {
+		Cookie cookie = new Cookie(REFRESH_TOKEN, jwtToken.getRefreshToken());
+		cookie.setHttpOnly(true);  //httponly 옵션 설정
+//		cookie.setSecure(false); //https 옵션 설정
+		cookie.setPath("/"); // 모든 곳에서 쿠키열람이 가능하도록 설정
+		cookie.setDomain(jwtService.getDomain());
+		cookie.setMaxAge(60 * 60 * 24); //쿠키 만료시간 24시간 * 10일
+
+		response.addCookie(cookie);
+	}
+
+	private void setCookieForProd(HttpServletResponse response, JwtToken jwtToken) {
 //		Cookie cookie = new Cookie(REFRESH_TOKEN, jwtToken.getRefreshToken());
 //		cookie.setHttpOnly(true);  //httponly 옵션 설정
 //		cookie.setSecure(true); //https 옵션 설정
 //		cookie.setPath("/"); // 모든 곳에서 쿠키열람이 가능하도록 설정
-//		cookie.setDomain(jwtService.getDomain());
-//		cookie.setMaxAge(60 * 60 * 24 * 10); //쿠키 만료시간 24시간 * 10일
-		String cookieValue = "refreshToken="+ jwtToken.getRefreshToken() +"; "+"Path=/; "+"Domain="+jwtService.getDomain()+"; "+"Max-Age=1800; HttpOnly; SameSite=None; Secure";
-		response.addHeader("Set-Cookie",cookieValue);
-
+//		cookie.setMaxAge(60 * 60 * 24); //쿠키 만료시간 24시간
+//
 //		response.addCookie(cookie);
-	}
 
-	private void setCookieForProd(HttpServletResponse response, JwtToken jwtToken) {
-		Cookie cookie = new Cookie(REFRESH_TOKEN, jwtToken.getRefreshToken());
-		cookie.setHttpOnly(true);  //httponly 옵션 설정
-		cookie.setSecure(true); //https 옵션 설정
-		cookie.setPath("/"); // 모든 곳에서 쿠키열람이 가능하도록 설정
-		cookie.setMaxAge(60 * 60 * 24); //쿠키 만료시간 24시간
-
-		response.addCookie(cookie);
+		String cookieValue = "refreshToken="+ jwtToken.getRefreshToken() +"; "+"Path=/; "+"Domain="+jwtService.getDomain()+"; "+"Max-Age=604800; HttpOnly; SameSite=None; Secure";
+		response.addHeader("Set-Cookie",cookieValue);
 	}
 
 
