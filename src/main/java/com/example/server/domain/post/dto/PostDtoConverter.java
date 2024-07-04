@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.example.server.domain.image.dto.ImageDtoConverter.convertToImageBasicDto;
-import static com.example.server.domain.post.dto.TagDtoConverter.convertToTagBasicResponseDto;
 import static com.example.server.domain.ticket.dto.TicketDtoConverter.convertToTicketResponseDto;
 
 public class PostDtoConverter {
@@ -46,21 +45,21 @@ public class PostDtoConverter {
                 .build();
     }
 
-    public static PostResponseDto.GetPostResponseDto convertToGetResponseDto(Post post) {
+    public static PostResponseDto.PostDto convertToGetResponseDto(Post post) {
         TicketResponseDto.TicketBasicResponseDto ticket = convertToTicketResponseDto(post.getTicket());
         PostResponseDto.PostBasicResponseDto postDto = convertToPostBasicDto(post);
 
-        return PostResponseDto.GetPostResponseDto.builder()
+        return PostResponseDto.PostDto.builder()
                 .post(postDto)
                 .ticket(ticket)
                 .isSuccess(true)
                 .build();
     }
 
-    public static PostResponseDto.GetOotdPostResponseDto convertToOotdResponseDto(Post post){
+    public static PostResponseDto.OotdDto convertToOotdResponseDto(Post post){
         OotdReqResDto.OotdBasicResponseDto ootdDto = convertToOotdBasicResponseDto(post.getOotd());
         PostResponseDto.PostBasicResponseDto postDto = convertToPostBasicDto(post);
-        return PostResponseDto.GetOotdPostResponseDto.builder()
+        return PostResponseDto.OotdDto.builder()
                 .post(postDto)
                 .ootd(ootdDto)
                 .isSuccess(true)
@@ -86,15 +85,15 @@ public class PostDtoConverter {
                 .build();
     }
 
-    public static  List<PostResponseDto.GetPostResponseDto> convertToPostListResponseDto(List<Post> posts) {
-        List<PostResponseDto.GetPostResponseDto> postDtos = posts.stream()
+    public static  List<PostResponseDto.PostDto> convertToPostListResponseDto(List<Post> posts) {
+        List<PostResponseDto.PostDto> postDtos = posts.stream()
                 .map(post -> convertToGetResponseDto(post))
                 .collect(Collectors.toList());
         return postDtos;
     }
 
-    public static  List<PostResponseDto.GetOotdPostResponseDto> convertToOOTDListResponseDto(List<Post> posts) {
-        List<PostResponseDto.GetOotdPostResponseDto> postDtos = posts.stream()
+    public static  List<PostResponseDto.OotdDto> convertToOOTDListResponseDto(List<Post> posts) {
+        List<PostResponseDto.OotdDto> postDtos = posts.stream()
                 .map(post -> convertToOotdResponseDto(post))
                 .collect(Collectors.toList());
         return postDtos;
