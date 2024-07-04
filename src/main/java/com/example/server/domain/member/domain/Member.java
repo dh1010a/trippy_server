@@ -102,9 +102,9 @@ public class Member extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private SocialType socialType;
 
-    private int followerCnt = 0;
+    private int followerCnt;
 
-    private int followingCnt = 0;
+    private int followingCnt;
 
     @ElementCollection
     @Enumerated(EnumType.STRING)
@@ -114,6 +114,15 @@ public class Member extends BaseTimeEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Comment> comments;
+
+    public void initDefaultSetting() {
+        this.TicketScope = Scope.PUBLIC;
+        this.OotdScope = Scope.PUBLIC;
+        this.BadgeScope = Scope.PUBLIC;
+        this.FollowScope = Scope.PUBLIC;
+        this.followerCnt = 0;
+        this.followingCnt = 0;
+    }
 
 
     public void updateRefreshToken(String refreshToken) {
@@ -178,8 +187,12 @@ public class Member extends BaseTimeEntity {
         this.interestedTypes = interestedTypes;
     }
 
-
-
+    public void updateScope(Scope ticketScope, Scope ootdScope, Scope badgeScope, Scope followScope) {
+        this.TicketScope = ticketScope;
+        this.OotdScope = ootdScope;
+        this.BadgeScope = badgeScope;
+        this.FollowScope = followScope;
+    }
 
 
 

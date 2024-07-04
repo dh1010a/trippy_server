@@ -119,18 +119,28 @@ public class MemberController {
         return ApiResponse.onSuccess(memberService.followMember(memberId, followingMemberId));
     }
 
-    @GetMapping("/follow")
-    public ApiResponse<?> getFollow(@RequestParam(value = "type") String type)  {
+    @GetMapping("/{nickName}/following")
+    public ApiResponse<?> getFollowing(@PathVariable("nickName") String nickName){
         // 비활성화된 멤버는 조회 안되게 하는 로직 추가 구현 해야함
         String memberId = getLoginMemberId();
-        log.info("팔로우 조회 요청 : memberId = {}, type = {}", memberId, type);
-        if (type.equals("follower")) {
-            return ApiResponse.onSuccess(memberService.getFollowerList(memberId));
-        } else if (type.equals("following")) {
-            return ApiResponse.onSuccess(memberService.getFollowingList(memberId));
+        log.info("팔로잉 조회 요청 : memberId = {}, nickName = {}", memberId, nickName);
+        if (memberService.isNotValidAccessToFollow(memberId, nickName)) {
+            return ApiResponse.onFailure(ErrorStatus.MEMBER_CANNOT_ACCESS_FOLLOW.getCode(), ErrorStatus.MEMBER_CANNOT_ACCESS_FOLLOW.getMessage(),
+                    "팔로잉 목록에 접근할 수 없습니다.");
         }
+        return ApiResponse.onSuccess(memberService.getFollowingList(nickName));
+    }
 
-        return ApiResponse.onSuccess(ErrorStatus._BAD_REQUEST);
+    @GetMapping("/{nickName}/follower")
+    public ApiResponse<?> getFollower(@PathVariable("nickName") String nickName)  {
+        // 비활성화된 멤버는 조회 안되게 하는 로직 추가 구현 해야함
+        String memberId = getLoginMemberId();
+        log.info("팔로우 조회 요청 : memberId = {}, nickName = {}", memberId, nickName);
+        if (memberService.isNotValidAccessToFollow(memberId, nickName)) {
+            return ApiResponse.onFailure(ErrorStatus.MEMBER_CANNOT_ACCESS_FOLLOW.getCode(), ErrorStatus.MEMBER_CANNOT_ACCESS_FOLLOW.getMessage(),
+                    "팔로잉 목록에 접근할 수 없습니다.");
+        }
+        return ApiResponse.onSuccess(memberService.getFollowerList(nickName));
     }
 
     @DeleteMapping("/follow")
