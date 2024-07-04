@@ -52,8 +52,6 @@ public class MemberDtoConverter {
         Image blogTitleImage = images.stream().filter(Image::isBlogTitleImage).findAny().orElse(null);
 
         return MemberInfoResponseDto.builder()
-                .idx(member.getIdx())
-                .memberId(member.getMemberId())
                 .nickName(member.getNickName())
                 .profileImageUrl(profileImage != null ? profileImage.getAccessUri() : null)
                 .blogName(member.getBlogName())

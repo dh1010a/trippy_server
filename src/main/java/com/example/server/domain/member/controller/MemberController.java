@@ -53,8 +53,7 @@ public class MemberController {
 
     @GetMapping("/{nickName}")
     public ApiResponse<?> getMemberInfo(@PathVariable("nickName") String nickName) {
-        String myId = getLoginMemberId();
-        log.info("회원 정보 조회 요청 : memberId = {}, 요청 대상 memberId = {}", myId, nickName);
+        log.info("요청 대상 memberId = {}", nickName);
         return ApiResponse.onSuccess(memberService.getMemberInfo(nickName));
     }
 

@@ -48,8 +48,6 @@ public class MemberResponseDto {
     @Data
     @Builder
     public static class MemberInfoResponseDto{
-        private Long idx;
-        private String memberId;
         private String nickName;
         private String profileImageUrl;
         private String blogName;
