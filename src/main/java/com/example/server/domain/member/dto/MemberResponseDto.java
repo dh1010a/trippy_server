@@ -27,7 +27,7 @@ public class MemberResponseDto {
 
     @Data
     @Builder
-    public static class MemberInfoResponseDto{
+    public static class MyInfoResponseDto{
         private Long idx;
         private String memberId;
         private String nickName;
@@ -40,7 +40,21 @@ public class MemberResponseDto {
         private String role;
         private String socialType;
         private List<String> interestedTypes;
+        private int followerCnt;
+        private int followingCnt;
 
+    }
+
+    @Data
+    @Builder
+    public static class MemberInfoResponseDto{
+        private String nickName;
+        private String profileImageUrl;
+        private String blogName;
+        private String blogTitleImgUrl;
+        private String blogIntroduce;
+        private int followerCnt;
+        private int followingCnt;
     }
 
     @Data

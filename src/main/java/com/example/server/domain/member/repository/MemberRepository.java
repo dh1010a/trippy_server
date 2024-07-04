@@ -13,10 +13,10 @@ import java.util.Optional;
 public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByIdx(Long idx);
     Optional<Member> findByEmail(String email);
+    Optional<Member> findByNickName(String nickName);
     Optional<Member> findByMemberId(String memberId);
     Optional<Member> findByRefreshToken(String refreshToken);
     Optional<Member> findBySocialTypeAndMemberId(SocialType socialType, String memberId);
-    Optional<Member> findByNickName(String nickName);
 
     boolean existsByBlogName(String blogName);
     boolean existsByNickName(String nickName);
@@ -28,5 +28,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     default Member getMemberById(String memberId) {
         return findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+    }
+    default Member getMemberByNickName(String nickName) {
+        return findByNickName(nickName).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
     }
 }

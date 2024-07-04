@@ -18,6 +18,7 @@ import com.example.server.domain.member.dto.MemberResponseDto.*;
 import com.example.server.domain.member.model.ActiveState;
 import com.example.server.domain.member.model.InterestedType;
 import com.example.server.domain.member.model.Role;
+import com.example.server.domain.member.model.Scope;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
@@ -68,6 +69,7 @@ public class MemberService {
                 .role(Role.ROLE_GUEST)
                 .socialType(SocialType.LOCAL)
                 .build();
+        member.initDefaultSetting();
         memberRepository.save(member);
         log.info("로컬 회원가입에 성공하였습니다. memberIdx = {}, memberId = {}, nickName = {}", member.getIdx(), member.getMemberId(), member.getNickName());
 
@@ -91,6 +93,7 @@ public class MemberService {
                 .activeState(ActiveState.ACTIVE)
                 .socialType(oAuth2User.getSocialType())
                 .build();
+        member.initDefaultSetting();
         log.info("신규 소셜 회원입니다. 등록을 진행합니다. memberId = {}, email = {}, socialType = {}", member.getMemberId(), member.getEmail(), member.getSocialType().getSocialName());
         memberRepository.save(member);
         return member;
@@ -120,35 +123,38 @@ public class MemberService {
     public MemberTaskResultResponseDto updateMyInfo(String memberId, MemberRequestDto.UpdateMemberRequestDto requestDto) throws Exception{
         Member member = memberRepository.getMemberById(memberId);
 
-        checkProfileImageExistsAndDelete(member);
-        Image image = Image.builder()
-                .accessUri(requestDto.getBlogImage().getAccessUri())
-                .authenticateId(requestDto.getBlogImage().getAuthenticateId())
-                .imgUrl(requestDto.getBlogImage().getImgUrl())
-                .imageType(ImageType.BLOG)
-                .member(member)
-                .build();
-        imageRepository.save(image);
+        if (requestDto.getProfileImage() != null) {
+            checkProfileImageExistsAndDelete(member);
+            Image image = Image.builder()
+                    .accessUri(requestDto.getProfileImage().getAccessUri())
+                    .authenticateId(requestDto.getProfileImage().getAuthenticateId())
+                    .imgUrl(requestDto.getProfileImage().getImgUrl())
+                    .imageType(ImageType.PROFILE)
+                    .member(member)
+                    .build();
+            imageRepository.save(image);
 
-        checkBlogImageExistsAndDelete(member);
-        Image profileImage = Image.builder()
-                .accessUri(requestDto.getProfileImage().getAccessUri())
-                .authenticateId(requestDto.getProfileImage().getAuthenticateId())
-                .imgUrl(requestDto.getProfileImage().getImgUrl())
-                .imageType(ImageType.PROFILE)
-                .member(member)
-                .build();
-        imageRepository.save(profileImage);
+        }
+
+        if (requestDto.getBlogImage() != null) {
+            checkBlogImageExistsAndDelete(member);
+            Image image = Image.builder()
+                    .accessUri(requestDto.getBlogImage().getAccessUri())
+                    .authenticateId(requestDto.getBlogImage().getAuthenticateId())
+                    .imgUrl(requestDto.getBlogImage().getImgUrl())
+                    .imageType(ImageType.BLOG)
+                    .member(member)
+                    .build();
+            imageRepository.save(image);
+        }
 
         member.updateNickName(requestDto.getNickName());
         member.updateBlogName(requestDto.getBlogName());
         member.updateBlogIntroduce(requestDto.getBlogIntroduce());
 //        member.updateLikeAlert(requestDto.isLikeAlert());
-//        member.updateCommentAlert(requestDto.isCommentAlert());
-//        member.updateTicketScope(requestDto.getTicketScope());
-//        member.updateOotdScope(requestDto.getOotdScope());
-//        member.updateBadgeScope(requestDto.getBadgeScope());
-//        member.updateFollowerScope(requestDto.getFollowerScope());
+        member.updateScope(Scope.fromName(requestDto.getTicketScope()), Scope.fromName(requestDto.getOotdScope()),
+                Scope.fromName(requestDto.getBadgeScope()), Scope.fromName(requestDto.getFollowScope()));
+
         log.info("내 정보 수정이 완료되었습니다. memberId = {}, nickName = {}, blogName = {}, blogIntroduce = {}", member.getMemberId(), member.getNickName(), member.getBlogName(), member.getBlogIntroduce());
         return MemberDtoConverter.convertToMemberTaskDto(member);
     }
@@ -165,9 +171,21 @@ public class MemberService {
                 .build();
     }
 
-    public MemberInfoResponseDto getMyInfo(String memberId) {
+    // GET /api/member
+    public MyInfoResponseDto getMyInfo(String memberId) {
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
-        return MemberDtoConverter.convertToInfoResponseDto(member);
+        return MemberDtoConverter.convertToMyInfoResponseDto(member);
+    }
+
+    // GET /api/member?memberId={memberId}
+    public MemberInfoResponseDto getMemberInfo(String nickName) {
+        Member member = memberRepository.getMemberByNickName(nickName);
+        return MemberDtoConverter.convertToMemberInfoResponseDto(member);
+    }
+
+    public boolean isGuestRole(String nickName) {
+        Member member = memberRepository.getMemberByNickName(nickName);
+        return member.getRole() == Role.ROLE_GUEST;
     }
 
     public MemberFollowResponseDto followMember(String memberId, String followingMemberId) {
@@ -189,12 +207,14 @@ public class MemberService {
         memberFollowRepository.save(memberFollow);
 
 //        member.updateMemberFollowing(memberFollow);
+        member.increaseFollowingCnt();
+        followingMember.increaseFollowerCnt();
 
         return MemberDtoConverter.convertToFollowResponseDto(member, followingMember);
     }
 
-    public MemberFollowerResponseDto getFollowerList(String memberId) {
-        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+    public MemberFollowerResponseDto getFollowerList(String nickName) {
+        Member member = memberRepository.getMemberByNickName(nickName);
         List<MemberFollow> memberFollows = memberFollowRepository.findByFollowingMemberIdx(member.getIdx());
         List<FollowMemberInfoDto> followers = new ArrayList<>();
 
@@ -206,8 +226,8 @@ public class MemberService {
                 .build();
     }
 
-    public MemberFollowingResponseDto getFollowingList(String memberId) {
-        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+    public MemberFollowingResponseDto getFollowingList(String nickName) {
+        Member member = memberRepository.getMemberByNickName(nickName);
         List<MemberFollow> memberFollows = member.getMemberFollows();
         List<FollowMemberInfoDto> followings = new ArrayList<>();
 
@@ -220,15 +240,34 @@ public class MemberService {
                 .build();
     }
 
+    public boolean isNotValidAccessToFollow(String memberId, String nickName) {
+        Member member = memberRepository.getMemberById(memberId);
+        Member targetMember = memberRepository.getMemberByNickName(nickName);
+        if (memberId.equals(targetMember.getMemberId()) || targetMember.getFollowScope() == Scope.PUBLIC) {
+            return false;
+        }
+        if (targetMember.getFollowScope() == Scope.PROTECTED) {
+            return !isFollower(member, targetMember);
+        }
+        return targetMember.getFollowScope() == Scope.PRIVATE;
+    }
+
+    private boolean isFollower(Member member, Member targetMember) {
+            return memberFollowRepository.existsByMemberAndFollowingMemberIdx(member, targetMember.getIdx());
+    }
+
     public MemberTaskSuccessResponseDto deleteFollower(String memberId, String followerMemberId) {
         Member member = memberRepository.getMemberById(memberId);
         Member followerMember = memberRepository.findByMemberId(followerMemberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_FOLLOW_MEMBER_NOT_EXIST));
+
 
         if (!memberFollowRepository.existsByMemberAndFollowingMemberIdx(followerMember, member.getIdx())) {
             throw new ErrorHandler(ErrorStatus.MEMBER_FOLLOW_MEMBER_NOT_EXIST);
         }
 
         memberFollowRepository.deleteByMemberAndFollowingMemberIdx(followerMember, member.getIdx());
+        member.decreaseFollowerCnt();
+        followerMember.decreaseFollowingCnt();
 
         return MemberTaskSuccessResponseDto.builder()
                 .isSuccess(true)
@@ -244,6 +283,8 @@ public class MemberService {
         }
 
         memberFollowRepository.deleteByMemberAndFollowingMemberIdx(member, followingMember.getIdx());
+        member.decreaseFollowingCnt();
+        followingMember.decreaseFollowerCnt();
 
         return MemberTaskSuccessResponseDto.builder()
                 .isSuccess(true)
@@ -266,7 +307,7 @@ public class MemberService {
 
     }
 
-    public void checkProfileImageExistsAndDelete(Member member) throws Exception{
+    private void checkProfileImageExistsAndDelete(Member member) throws Exception{
         List<Image> images = member.getImages();
         if (!images.isEmpty()) {
             Image profileImage = images.stream().filter(Image::isProfileImage).findAny().orElse(null);
@@ -277,7 +318,7 @@ public class MemberService {
         }
     }
 
-    public void checkBlogImageExistsAndDelete(Member member) throws Exception{
+    private void checkBlogImageExistsAndDelete(Member member) throws Exception{
         List<Image> images = member.getImages();
         if (!images.isEmpty()) {
             Image profileImage = images.stream().filter(Image::isBlogTitleImage).findAny().orElse(null);
@@ -356,7 +397,7 @@ public class MemberService {
 
     public String deleteByMemberId(String memberId) {
         if (!memberRepository.existsByMemberId(memberId)) {
-            return "그런 회원 없어요 씌파!";
+            return "그런 회원 없어요!";
         }
         memberRepository.deleteByMemberId(memberId);
         return "삭제 완료";

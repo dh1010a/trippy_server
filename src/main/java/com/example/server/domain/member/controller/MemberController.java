@@ -46,9 +46,20 @@ public class MemberController {
 
     @GetMapping
     public ApiResponse<?> getMyInfo() {
-        String memberId = getLoginMemberId();
-        log.info("내 정보 조회 요청 : memberId = {}", memberId);
-        return ApiResponse.onSuccess(memberService.getMyInfo(memberId));
+        String myId = getLoginMemberId();
+        log.info("내 정보 조회 요청 : memberId = {}", myId);
+        return ApiResponse.onSuccess(memberService.getMyInfo(myId));
+    }
+
+    @GetMapping("/{nickName}")
+    public ApiResponse<?> getMemberInfo(@PathVariable("nickName") String nickName) {
+        log.info("요청 대상 memberId = {}", nickName);
+        // 추후 비활성 유저도 접근하지 못하도록 로직 구성해야함
+        if (memberService.isGuestRole(nickName)) {
+            return ApiResponse.onFailure(ErrorStatus.MEMBER_PROFILE_ACCESS_DENY.getCode(), ErrorStatus.MEMBER_PROFILE_ACCESS_DENY.getMessage(),
+                    "프로필을 읽어올 수 없는 유저입니다.");
+        }
+        return ApiResponse.onSuccess(memberService.getMemberInfo(nickName));
     }
 
     @PatchMapping
@@ -113,18 +124,28 @@ public class MemberController {
         return ApiResponse.onSuccess(memberService.followMember(memberId, followingMemberId));
     }
 
-    @GetMapping("/follow")
-    public ApiResponse<?> getFollow(@RequestParam(value = "type") String type)  {
+    @GetMapping("/{nickName}/following")
+    public ApiResponse<?> getFollowing(@PathVariable("nickName") String nickName){
         // 비활성화된 멤버는 조회 안되게 하는 로직 추가 구현 해야함
         String memberId = getLoginMemberId();
-        log.info("팔로우 조회 요청 : memberId = {}, type = {}", memberId, type);
-        if (type.equals("follower")) {
-            return ApiResponse.onSuccess(memberService.getFollowerList(memberId));
-        } else if (type.equals("following")) {
-            return ApiResponse.onSuccess(memberService.getFollowingList(memberId));
+        log.info("팔로잉 조회 요청 : memberId = {}, nickName = {}", memberId, nickName);
+        if (memberService.isNotValidAccessToFollow(memberId, nickName)) {
+            return ApiResponse.onFailure(ErrorStatus.MEMBER_CANNOT_ACCESS_FOLLOW.getCode(), ErrorStatus.MEMBER_CANNOT_ACCESS_FOLLOW.getMessage(),
+                    "팔로잉 목록에 접근할 수 없습니다.");
         }
+        return ApiResponse.onSuccess(memberService.getFollowingList(nickName));
+    }
 
-        return ApiResponse.onSuccess(ErrorStatus._BAD_REQUEST);
+    @GetMapping("/{nickName}/follower")
+    public ApiResponse<?> getFollower(@PathVariable("nickName") String nickName)  {
+        // 비활성화된 멤버는 조회 안되게 하는 로직 추가 구현 해야함
+        String memberId = getLoginMemberId();
+        log.info("팔로우 조회 요청 : memberId = {}, nickName = {}", memberId, nickName);
+        if (memberService.isNotValidAccessToFollow(memberId, nickName)) {
+            return ApiResponse.onFailure(ErrorStatus.MEMBER_CANNOT_ACCESS_FOLLOW.getCode(), ErrorStatus.MEMBER_CANNOT_ACCESS_FOLLOW.getMessage(),
+                    "팔로잉 목록에 접근할 수 없습니다.");
+        }
+        return ApiResponse.onSuccess(memberService.getFollowerList(nickName));
     }
 
     @DeleteMapping("/follow")
