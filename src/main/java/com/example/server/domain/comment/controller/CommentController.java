@@ -39,7 +39,8 @@ public class CommentController {
 
     @DeleteMapping("/{id}")
     public ApiResponse<?> deleteComment(@PathVariable("id") Long commentId) {
-        return ApiResponse.onSuccess(commentService.deleteComment(commentId));
+        String memberId = getLoginMemberId();
+        return ApiResponse.onSuccess(commentService.deleteComment(memberId, commentId));
     }
 
     @PatchMapping("")

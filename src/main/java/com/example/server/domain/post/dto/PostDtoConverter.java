@@ -2,6 +2,7 @@ package com.example.server.domain.post.dto;
 
 import com.example.server.domain.image.dto.ImageResponseDto;
 import com.example.server.domain.image.model.ImageType;
+import com.example.server.domain.member.model.Scope;
 import com.example.server.domain.post.domain.Ootd;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.domain.ticket.dto.TicketResponseDto;
@@ -27,6 +28,9 @@ public class PostDtoConverter {
                 .map(image -> convertToImageBasicDto(image))
                 .collect(Collectors.toList()) : Collections.emptyList();
         int likeCount = post.getLikes() != null ? post.getLikes().size() : 0;
+        int commentCount = post.getComments() != null ? (int) post.getComments().stream().filter(
+                comment -> comment.getStatus() != Scope.PRIVATE
+        ).count() :0;
         return PostResponseDto.PostBasicResponseDto.builder()
                 .id(post.getId())
                 .memberId(post.getMember().getMemberId())
@@ -38,6 +42,7 @@ public class PostDtoConverter {
                 .location(post.getLocation())
                 .images(convertImage).tags(tagNames)
                 .likeCount(likeCount)
+                .commentCount(commentCount)
                 .build();
     }
 

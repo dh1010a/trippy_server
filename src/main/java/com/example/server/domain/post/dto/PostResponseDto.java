@@ -42,6 +42,7 @@ public class PostResponseDto {
         private List<ImageResponseDto.ImageBasicResponseDto> images;
         private List<String> tags;
         private Integer likeCount;
+        private Integer commentCount;
     }
 
 

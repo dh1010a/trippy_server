@@ -1,6 +1,8 @@
 package com.example.server.domain.comment.dto;
 
 import com.example.server.domain.comment.model.CommentStatus;
+import com.example.server.domain.comment.model.DeleteStatus;
+import com.example.server.domain.member.model.Scope;
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,7 +17,7 @@ public class CommentResponseDto {
         private String content;
         private Long postId;
         private String memberId;
-        private CommentStatus status;
+        private Scope status;
         // 부모 댓글 id
         private ParentAndChildCommentResDto parentComment;
         // 자식 댓글들
@@ -27,7 +29,7 @@ public class CommentResponseDto {
     public static class ParentAndChildCommentResDto {
         private Long id;
         private String content;
-        private CommentStatus status;
+        private Scope status;
         private String memberId;
     }
 
@@ -38,7 +40,7 @@ public class CommentResponseDto {
         private Long parentId;
         private String memberId;
         private String content;
-        private CommentStatus status;
+        private Scope status;
         private int depth;
         private List<CommentTreeDTO> children;
     }

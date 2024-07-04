@@ -1,5 +1,6 @@
 package com.example.server.domain.comment.dto;
 
+import com.example.server.domain.member.model.Scope;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,6 +13,7 @@ public class CommentRequestDto {
         private String memberId;
         private Long parentId;
         private String content;
+        private Scope status;
     }
 
     @Data

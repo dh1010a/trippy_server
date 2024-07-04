@@ -9,6 +9,7 @@ import com.example.server.domain.comment.model.DeleteStatus;
 import com.example.server.domain.comment.repository.CommentRepository;
 import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.member.domain.Member;
+import com.example.server.domain.member.model.Scope;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.domain.post.domain.Tag;
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.example.server.domain.comment.dto.CommentDtoConverter.converToCommentTreeDTO;
 
@@ -48,6 +50,12 @@ public class CommentService {
 
     // POST api/comment
     public CommentResponseDto.CommentBasicResponse uploadComment(CommentRequestDto.CommentBasicRequest requestDto) {
+        if(requestDto.getParentId()!= null){
+            Comment parent = getComment(requestDto.getParentId());
+            if(parent.getStatus() == Scope.PRIVATE){
+                throw new ErrorHandler(ErrorStatus.PARENT_NOT_FOUND);
+            }
+        }
         Comment comment = saveComment(requestDto);
         return CommentDtoConverter.convertToCommentBasicResponse(comment);
     }
@@ -62,6 +70,9 @@ public class CommentService {
     public CommentResponseDto.CommentTreeDTO getCommentById(Long commentId){
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ErrorHandler(ErrorStatus.COMMENT_NOT_FOUND));
+        if (comment.getStatus() == Scope.PRIVATE) {
+            throw new ErrorHandler(ErrorStatus.COMMENT_IS_DELETED);
+        }
         return converToCommentTreeDTO(comment);
 
     }
@@ -70,35 +81,66 @@ public class CommentService {
     public CommentResponseDto.CommentTreeDTO updateComment(CommentRequestDto.CommentUpdateRequest requestDto){
         Comment comment = commentRepository.findById(requestDto.getCommentId())
                 .orElseThrow(() -> new ErrorHandler(ErrorStatus.COMMENT_NOT_FOUND));
-        if(!((comment.getMember().getEmail()).equals(requestDto.getMemberId()))) throw new ErrorHandler(ErrorStatus.NO_PERMISSION__FOR_POST);
+
+        if(!((comment.getMember().getMemberId()).equals(requestDto.getMemberId()))) throw new ErrorHandler(ErrorStatus.NO_PERMISSION__FOR_POST);
+        if (comment.getStatus() == Scope.PRIVATE) {
+            throw new ErrorHandler(ErrorStatus.COMMENT_IS_DELETED);
+        }
         comment.updateContent(requestDto.getContent());
         return  converToCommentTreeDTO(comment);
     }
 
     // DELETE /api/comment
-    public DeleteStatus deleteComment(Long commentId){
+    public DeleteStatus deleteComment(String memberId, Long commentId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ErrorHandler(ErrorStatus.COMMENT_NOT_FOUND));
 
-        // 자식 댓글이 있으면
-        if(!comment.getChildComments().isEmpty()){
-            comment.updateStatus(CommentStatus.DEAD);
+        if(!(memberId.equals(comment.getMember().getMemberId()))) throw new ErrorHandler(ErrorStatus.NO_PERMISSION__FOR_POST);
+
+        boolean allChildrenPrivate = comment.getChildComments().stream().allMatch(
+                child -> child.getDeleteStatus() == DeleteStatus.DELETE
+        );
+
+        // 자식 댓글이 없거나, 자식 댓글의 DELETE STATUS가 모두 DELETE인 경우
+        if (comment.getChildComments().isEmpty() || allChildrenPrivate) {
+            comment.updateDeleteStatus(DeleteStatus.DELETE);
+            comment.updateStatus(Scope.PRIVATE);
+            commentRepository.save(comment);
+            updateParentDeleteStatus(comment);
+            return DeleteStatus.DELETE;
+        } else {
+            // 자식 댓글이 하나라도 살아있으면
+            comment.updateDeleteStatus(DeleteStatus.DEAD);
+            comment.updateStatus(Scope.PRIVATE);
+            commentRepository.save(comment);
             return DeleteStatus.DEAD;
         }
-        else {
-            commentRepository.delete(getDeletableAncestorComment(comment));
-            return DeleteStatus.DELETE;
-        }
     }
-
-    public Comment getDeletableAncestorComment(Comment comment) {
+    private void updateParentDeleteStatus(Comment comment) {
         Comment parent = comment.getParent();
-        // 1. 부모 댓글이 존재 2. 부모의 자식이 1개 == 나 3. 부모가 상태가 DEAD인 경우
-        if(parent != null && parent.getChildComments().size() == 1 && parent.getStatus() == CommentStatus.DEAD){
-            // 재귀로 삭제할 조상을 모두 리턴
-            return getDeletableAncestorComment(parent);
+        while (parent != null) {
+            List<Comment> childComments = parent.getChildComments();
+
+            List<Comment> aliveChilds = childComments.stream()
+                    .filter(child -> child.getDeleteStatus() != DeleteStatus.DELETE)
+                    .collect(Collectors.toList());
+
+            boolean isChildAlive = childComments.stream()
+                    .allMatch(child -> child.getDeleteStatus() == DeleteStatus.DELETE);
+            System.out.println(aliveChilds);
+
+            // 자식이 다 DELETE, 자기도 DEAD
+            if(isChildAlive &&
+                    parent.getDeleteStatus() == DeleteStatus.DEAD){
+                parent.updateDeleteStatus(DeleteStatus.DELETE);
+                commentRepository.save(parent);
+                comment = parent;
+                parent = comment.getParent();
+            }
+            else {
+                break;
+            }
         }
-        return comment;
     }
 
     // SAVE COMMENT 메서드
@@ -120,7 +162,7 @@ public class CommentService {
         Comment comment = Comment.builder()
                 .member(member)
                 .post(post)
-                .status(CommentStatus.ALIVE)
+                .status(requestDto.getStatus())
                 .content(requestDto.getContent())
                 .build();
         // 자식 댓글인 경우
