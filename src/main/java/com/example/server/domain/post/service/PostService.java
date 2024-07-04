@@ -48,7 +48,7 @@ public class PostService {
 
     // POST api/post/
     @Transactional
-    public PostResponseDto.GetPostResponseDto uploadPost(PostRequestDto.UploadPostRequestDto requestDto) {
+    public PostResponseDto.PostDto uploadPost(PostRequestDto.UploadPostRequestDto requestDto) {
         PostRequestDto.CommonPostRequestDto postRequestDto = requestDto.getPostRequest();
         Member member = getMember(postRequestDto.getMemberId());
         if (member == null) throw new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND);
@@ -70,7 +70,7 @@ public class PostService {
     }
 
     // GET api/post
-    public PostResponseDto.GetPostResponseDto getPost(Long postId){
+    public PostResponseDto.PostDto getPost(Long postId){
         Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND));
         if(post.getPostType() == PostType.OOTD) {
             throw new ErrorHandler(ErrorStatus.POST_TYPE_ERROR);
@@ -79,31 +79,46 @@ public class PostService {
     }
 
     // GET api/post
-    public List<PostResponseDto.GetPostResponseDto> getAllPost(Integer page, Integer size){
+    public PostResponseDto.PostBasicDto getAllPost(Integer page, Integer size){
         // 둘다 0일때 => 변수 입력 안받음
+        List<PostResponseDto.PostDto> postDtos = null;
         if(page==0 && size==0){
             List<Post> postList = postRepository.findAllByPostType(PostType.POST);
-            return PostDtoConverter.convertToPostListResponseDto(postList);
+            postDtos = PostDtoConverter.convertToPostListResponseDto(postList);
         }
         else {
             PageRequest pageable = PageRequest.of(page, size);
             List<Post> postList = postRepository.findAllByPostType(PostType.POST,pageable).getContent();
-            return PostDtoConverter.convertToPostListResponseDto(postList);
+            postDtos = PostDtoConverter.convertToPostListResponseDto(postList);
         }
+        PostResponseDto.PostBasicDto result = PostResponseDto.PostBasicDto.builder()
+                .postList(postDtos)
+                .totalCount(postDtos.size())
+                .isSuccess(true)
+                .build();
+        return result;
     }
 
-    public List<PostResponseDto.GetPostResponseDto> getAllMemberPost(String memberId,Integer page, Integer size){
+    public PostResponseDto.PostBasicDto  getAllMemberPost(String memberId, Integer page, Integer size){
         Optional<Member> member = memberRepository.findByMemberId(memberId);
+        List<PostResponseDto.PostDto> postDtos = null;
         // 둘다 0일때 => 변수 입력 안받음
         if(page==0 && size==0){
             List<Post> postList = postRepository.findAllByMemberAndPostType(member.get(),PostType.POST);
-            return PostDtoConverter.convertToPostListResponseDto(postList);
+            postDtos = PostDtoConverter.convertToPostListResponseDto(postList);
         }
         else {
             Pageable pageable = PageRequest.of(page, size);
             List<Post> postList = postRepository.findAllByMemberAndPostType(member.get(),PostType.POST, pageable).getContent();
-            return PostDtoConverter.convertToPostListResponseDto(postList);
+            postDtos = PostDtoConverter.convertToPostListResponseDto(postList);
+
         }
+        PostResponseDto.PostBasicDto result = PostResponseDto.PostBasicDto.builder()
+                .postList(postDtos)
+                .totalCount(postDtos.size())
+                .isSuccess(true)
+                .build();
+        return result;
 
     }
 
@@ -112,12 +127,13 @@ public class PostService {
     public PostResponseDto.DeletePostResultResponseDto deletePost(Long postId, String memberId) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND));
         if(!((post.getMember().getMemberId()).equals(memberId))) throw new ErrorHandler(ErrorStatus.NO_PERMISSION__FOR_POST);
+
         postRepository.delete(post);
         return PostDtoConverter.convertToDeletePostDto(postId);
     }
 
     // PATCH api/post
-    public PostResponseDto.GetPostResponseDto updatePost(PostRequestDto.UpdatePostRequestDto requestDto) {
+    public PostResponseDto.PostDto updatePost(PostRequestDto.UpdatePostRequestDto requestDto) {
         Post post = postRepository.findById(requestDto.getId()).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND));
         Member member =  getMember(requestDto.getMemberId());
         if(!((post.getMember().getIdx()).equals(member.getIdx()))) throw new ErrorHandler(ErrorStatus.NO_PERMISSION__FOR_POST);
