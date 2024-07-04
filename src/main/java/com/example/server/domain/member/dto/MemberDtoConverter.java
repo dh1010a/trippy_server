@@ -21,14 +21,14 @@ public class MemberDtoConverter {
 
     }
 
-    public static MemberInfoResponseDto convertToInfoResponseDto (Member member) {
+    public static MyInfoResponseDto convertToMyInfoResponseDto (Member member) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         List<Image> images = member.getImages();
         Image profileImage = images.stream().filter(Image::isProfileImage).findAny().orElse(null);
         Image blogTitleImage = images.stream().filter(Image::isBlogTitleImage).findAny().orElse(null);
 
-        return MemberInfoResponseDto.builder()
+        return MyInfoResponseDto.builder()
                 .idx(member.getIdx())
                 .memberId(member.getMemberId())
                 .nickName(member.getNickName())
@@ -41,6 +41,26 @@ public class MemberDtoConverter {
                 .activeStatus(member.getActiveState().name())
                 .socialType(member.getSocialType().getSocialName())
                 .interestedTypes(member.getInterestedTypes().stream().map(InterestedType::getTitle).toList())
+                .followerCnt(member.getFollowerCnt())
+                .followingCnt(member.getFollowingCnt())
+                .build();
+    }
+
+    public static MemberInfoResponseDto convertToMemberInfoResponseDto (Member member) {
+        List<Image> images = member.getImages();
+        Image profileImage = images.stream().filter(Image::isProfileImage).findAny().orElse(null);
+        Image blogTitleImage = images.stream().filter(Image::isBlogTitleImage).findAny().orElse(null);
+
+        return MemberInfoResponseDto.builder()
+                .idx(member.getIdx())
+                .memberId(member.getMemberId())
+                .nickName(member.getNickName())
+                .profileImageUrl(profileImage != null ? profileImage.getAccessUri() : null)
+                .blogName(member.getBlogName())
+                .blogIntroduce(member.getBlogIntroduce())
+                .blogTitleImgUrl(blogTitleImage != null ? blogTitleImage.getAccessUri() : null)
+                .followerCnt(member.getFollowerCnt())
+                .followingCnt(member.getFollowingCnt())
                 .build();
     }
 

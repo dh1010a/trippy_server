@@ -165,9 +165,16 @@ public class MemberService {
                 .build();
     }
 
-    public MemberInfoResponseDto getMyInfo(String memberId) {
+    // GET /api/member
+    public MyInfoResponseDto getMyInfo(String memberId) {
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
-        return MemberDtoConverter.convertToInfoResponseDto(member);
+        return MemberDtoConverter.convertToMyInfoResponseDto(member);
+    }
+
+    // GET /api/member?memberId={memberId}
+    public MemberInfoResponseDto getMemberInfo(String nickName) {
+        Member member = memberRepository.findByNickName(nickName).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        return MemberDtoConverter.convertToMemberInfoResponseDto(member);
     }
 
     public MemberFollowResponseDto followMember(String memberId, String followingMemberId) {
@@ -189,6 +196,8 @@ public class MemberService {
         memberFollowRepository.save(memberFollow);
 
 //        member.updateMemberFollowing(memberFollow);
+        member.increaseFollowingCnt();
+        followingMember.increaseFollowerCnt();
 
         return MemberDtoConverter.convertToFollowResponseDto(member, followingMember);
     }
@@ -224,11 +233,14 @@ public class MemberService {
         Member member = memberRepository.getMemberById(memberId);
         Member followerMember = memberRepository.findByMemberId(followerMemberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_FOLLOW_MEMBER_NOT_EXIST));
 
+
         if (!memberFollowRepository.existsByMemberAndFollowingMemberIdx(followerMember, member.getIdx())) {
             throw new ErrorHandler(ErrorStatus.MEMBER_FOLLOW_MEMBER_NOT_EXIST);
         }
 
         memberFollowRepository.deleteByMemberAndFollowingMemberIdx(followerMember, member.getIdx());
+        member.decreaseFollowerCnt();
+        followerMember.decreaseFollowingCnt();
 
         return MemberTaskSuccessResponseDto.builder()
                 .isSuccess(true)
@@ -244,6 +256,8 @@ public class MemberService {
         }
 
         memberFollowRepository.deleteByMemberAndFollowingMemberIdx(member, followingMember.getIdx());
+        member.decreaseFollowingCnt();
+        followingMember.decreaseFollowerCnt();
 
         return MemberTaskSuccessResponseDto.builder()
                 .isSuccess(true)
@@ -356,7 +370,7 @@ public class MemberService {
 
     public String deleteByMemberId(String memberId) {
         if (!memberRepository.existsByMemberId(memberId)) {
-            return "그런 회원 없어요 씌파!";
+            return "그런 회원 없어요!";
         }
         memberRepository.deleteByMemberId(memberId);
         return "삭제 완료";

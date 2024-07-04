@@ -12,10 +12,7 @@ import com.example.server.domain.image.domain.Image;
 //import com.example.server.domain.post.domain.Post;
 //import com.example.server.domain.ticket.domain.MemberTicket;
 //import com.example.server.domain.follow.domain.MemberFollow;
-import com.example.server.domain.member.model.ActiveState;
-import com.example.server.domain.member.model.Gender;
-import com.example.server.domain.member.model.InterestedType;
-import com.example.server.domain.member.model.Role;
+import com.example.server.domain.member.model.*;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.global.auth.oauth2.model.SocialType;
 import com.example.server.global.common.BaseTimeEntity;
@@ -43,6 +40,7 @@ public class Member extends BaseTimeEntity {
 
     private String password;
 
+    @Column(nullable = false, unique = true)
     private String nickName;
 
 //    @Column(nullable = false, unique = true)
@@ -74,6 +72,18 @@ public class Member extends BaseTimeEntity {
     @OneToMany(mappedBy = "member")
     @JsonIgnore
     private List<MemberFollow> memberFollows;
+
+    @Enumerated(EnumType.STRING)
+    private Scope TicketScope;
+
+    @Enumerated(EnumType.STRING)
+    private Scope OotdScope;
+
+    @Enumerated(EnumType.STRING)
+    private Scope BadgeScope;
+
+    @Enumerated(EnumType.STRING)
+    private Scope FollowScope;
 //
 //    @OneToMany(mappedBy = "member")
 //    @JsonIgnore
@@ -91,6 +101,10 @@ public class Member extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     private SocialType socialType;
+
+    private int followerCnt = 0;
+
+    private int followingCnt = 0;
 
     @ElementCollection
     @Enumerated(EnumType.STRING)
@@ -142,6 +156,22 @@ public class Member extends BaseTimeEntity {
         this.nickName = nickName;
         this.blogName = blogName;
         this.blogIntroduce = blogIntroduce;
+    }
+
+    public void increaseFollowerCnt() {
+        this.followerCnt++;
+    }
+
+    public void decreaseFollowerCnt() {
+        this.followerCnt--;
+    }
+
+    public void increaseFollowingCnt() {
+        this.followingCnt++;
+    }
+
+    public void decreaseFollowingCnt() {
+        this.followingCnt--;
     }
 
     public void updateInterestedTypes(List<InterestedType> interestedTypes) {

@@ -46,9 +46,16 @@ public class MemberController {
 
     @GetMapping
     public ApiResponse<?> getMyInfo() {
-        String memberId = getLoginMemberId();
-        log.info("내 정보 조회 요청 : memberId = {}", memberId);
-        return ApiResponse.onSuccess(memberService.getMyInfo(memberId));
+        String myId = getLoginMemberId();
+        log.info("내 정보 조회 요청 : memberId = {}", myId);
+        return ApiResponse.onSuccess(memberService.getMyInfo(myId));
+    }
+
+    @GetMapping("/{nickName}")
+    public ApiResponse<?> getMemberInfo(@PathVariable("nickName") String nickName) {
+        String myId = getLoginMemberId();
+        log.info("회원 정보 조회 요청 : memberId = {}, 요청 대상 memberId = {}", myId, nickName);
+        return ApiResponse.onSuccess(memberService.getMemberInfo(nickName));
     }
 
     @PatchMapping
