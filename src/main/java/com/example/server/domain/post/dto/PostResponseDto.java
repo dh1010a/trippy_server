@@ -6,6 +6,7 @@ import com.example.server.domain.ticket.dto.TicketResponseDto;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,7 +14,7 @@ public class PostResponseDto {
 
     @Builder
     @Data
-    public static class PostDto {
+    public static class GetPostResponseDto{
         private TicketResponseDto.TicketBasicResponseDto ticket;
         private PostBasicResponseDto post;
         private Boolean isSuccess;
@@ -21,25 +22,9 @@ public class PostResponseDto {
 
     @Builder
     @Data
-    public static class PostBasicDto{
-        private int totalCount;
-        private List<PostDto> postList;
-        private Boolean isSuccess;
-    }
-
-
-    @Builder
-    @Data
-    public static class OotdDto {
+    public static class GetOotdPostResponseDto{
         private OotdReqResDto.OotdBasicResponseDto ootd;
         private PostBasicResponseDto post;
-        private Boolean isSuccess;
-    }
-    @Builder
-    @Data
-    public static class OotdPostBasicDto {
-        private int totalCount;
-        private List<OotdDto> ootdList;
         private Boolean isSuccess;
     }
 

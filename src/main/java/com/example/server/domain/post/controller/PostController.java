@@ -3,6 +3,7 @@ package com.example.server.domain.post.controller;
 import com.example.server.domain.member.controller.MemberController;
 import com.example.server.domain.member.dto.MemberRequestDto;
 import com.example.server.domain.post.dto.PostRequestDto;
+import com.example.server.domain.post.model.PostType;
 import com.example.server.domain.post.service.PostService;
 import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
@@ -64,8 +65,8 @@ public class PostController {
          return ApiResponse.onSuccess(postService.getAllPost(page, size));
     }
 
-    @GetMapping()
-    public ApiResponse<?> getAllMemberPost(
+    @GetMapping("/my")
+    public ApiResponse<?> getAllLoginMemberPost(
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size
     ) {
@@ -74,6 +75,40 @@ public class PostController {
         String memberId = getLoginMemberId();
         log.info("회원별 게시물 조회 요청 : memberId = {}", memberId );
         return ApiResponse.onSuccess(postService.getAllMemberPost(memberId,page,size));
+    }
+
+    @GetMapping("/by-member")
+    public ApiResponse<?> getAllMemberPost(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam String memberId
+    ) {
+        if(page == null) page = 0;
+        if(size==null) size = 0;
+        log.info("회원별 게시물 조회 요청 : memberId = {}", memberId );
+        return ApiResponse.onSuccess(postService.getAllMemberPost(memberId,page,size));
+    }
+
+    @GetMapping("/all/count")
+    public ApiResponse<?> getTotalCount(@RequestParam PostType type) {
+        log.info("{} 전체 개수 출력", type );
+        return ApiResponse.onSuccess(postService.getTotalCount(type));
+    }
+    // 로그인 된 멤버
+    @GetMapping("/count/my")
+    public ApiResponse<?> getTotalCountByLoginMember(@RequestParam PostType type) {
+        String memberId = getLoginMemberId();
+        log.info("{}의 {} 개수 출력", memberId, type);
+        return ApiResponse.onSuccess(postService.getTotalCountByMember(memberId,type));
+    }
+
+    @GetMapping("/count/by-member")
+    public ApiResponse<?> getTotalCountByMember(
+            @RequestParam PostType type,
+            @RequestParam String memberId
+    ) {
+        log.info("{}의 {} 개수 출력", memberId, type);
+        return ApiResponse.onSuccess(postService.getTotalCountByMember(memberId,type));
     }
 
     private String getLoginMemberId() {

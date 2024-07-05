@@ -12,6 +12,8 @@ import com.example.server.domain.post.dto.PostResponseDto;
 import com.example.server.domain.post.model.PostType;
 import com.example.server.domain.post.repository.OotdRepository;
 import com.example.server.domain.post.repository.PostRepository;
+import com.example.server.domain.ticket.domain.Ticket;
+import com.example.server.domain.ticket.dto.TicketRequestDto;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import jakarta.transaction.Transactional;
@@ -42,7 +44,7 @@ public class OotdService {
 
     // POST /api/ootd
     @Transactional
-    public PostResponseDto.OotdDto uploadOotdPost(PostRequestDto.UploadOOTDPostRequestDto requestDto) {
+    public PostResponseDto.GetOotdPostResponseDto uploadOotdPost(PostRequestDto.UploadOOTDPostRequestDto requestDto) {
         PostRequestDto.CommonPostRequestDto postRequestDto = requestDto.getPostRequest();
         Member member = postService.getMember(postRequestDto.getMemberId());
         if (member == null) throw new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND);
@@ -65,7 +67,7 @@ public class OotdService {
     }
 
     // GET /api/ootd/{id}
-    public PostResponseDto.OotdDto getPost(Long postId){
+    public PostResponseDto.GetOotdPostResponseDto getPost(Long postId){
         Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND));
         if(post.getPostType() == PostType.POST) {
             throw new ErrorHandler(ErrorStatus.OOTD_TYPE_ERROR);
@@ -74,46 +76,33 @@ public class OotdService {
     }
 
     // GET api/ootd/all
-    public PostResponseDto.OotdPostBasicDto getAllPost(Integer page, Integer size){
+    public List<PostResponseDto.GetOotdPostResponseDto> getAllPost(Integer page, Integer size){
         // 둘다 0일때 => 변수 입력 안받음
-        List<PostResponseDto.OotdDto> ootdDtos = null;
         if(page==0 && size==0){
             List<Post> postList = postRepository.findAllByPostType(PostType.OOTD);
-            ootdDtos = PostDtoConverter.convertToOOTDListResponseDto(postList);
+            return PostDtoConverter.convertToOOTDListResponseDto(postList);
         }
         else {
             PageRequest pageable = PageRequest.of(page, size);
             List<Post> postList = postRepository.findAllByPostType(PostType.OOTD,pageable).getContent();
-            ootdDtos = PostDtoConverter.convertToOOTDListResponseDto(postList);
+            return PostDtoConverter.convertToOOTDListResponseDto(postList);
         }
-        PostResponseDto.OotdPostBasicDto result  = PostResponseDto.OotdPostBasicDto.builder()
-                .ootdList(ootdDtos)
-                .totalCount(ootdDtos.size())
-                .isSuccess(true)
-                .build();
-        return result;
     }
 
     // GET api/ootd/
-    public PostResponseDto.OotdPostBasicDto getAllMemberPost(String memberId, Integer page, Integer size){
+    public List<PostResponseDto.GetOotdPostResponseDto> getAllMemberPost(String memberId,Integer page, Integer size){
         Member member = postService.getMember(memberId);
-        List<PostResponseDto.OotdDto> ootdDtos = null;
         // 둘다 0일때 => 변수 입력 안받음
         if(page==0 && size==0){
             List<Post> postList = postRepository.findAllByMemberAndPostType(member,PostType.OOTD);
-            ootdDtos = PostDtoConverter.convertToOOTDListResponseDto(postList);
+            return PostDtoConverter.convertToOOTDListResponseDto(postList);
         }
         else {
             Pageable pageable = PageRequest.of(page, size);
             List<Post> postList = postRepository.findAllByMemberAndPostType(member,PostType.OOTD, pageable).getContent();
-            ootdDtos = PostDtoConverter.convertToOOTDListResponseDto(postList);
+            return PostDtoConverter.convertToOOTDListResponseDto(postList);
         }
-        PostResponseDto.OotdPostBasicDto result  = PostResponseDto.OotdPostBasicDto.builder()
-                .ootdList(ootdDtos)
-                .totalCount(ootdDtos.size())
-                .isSuccess(true)
-                .build();
-        return result;
+
     }
 
     // PATCH api/ootd
