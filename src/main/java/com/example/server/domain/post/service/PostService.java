@@ -240,12 +240,12 @@ public class PostService {
         for (ImageDto newImageDto : newImagesDto) {
             if (originalImages.stream().noneMatch(image -> image.getImgUrl().equals(newImageDto.getImgUrl()))) {
                 Image newImage = Image.builder()
-                                .imgUrl(newImageDto.getImgUrl())
+                        .imgUrl(newImageDto.getImgUrl())
                         .authenticateId(newImageDto.getAuthenticateId())
                         .accessUri(newImageDto.getAccessUri())
                         .imageType(ImageType.POST)
-                                .post(post)
-                                .build();
+                        .post(post)
+                        .build();
                 imageRepository.save(newImage);
             }
             else {
@@ -264,6 +264,15 @@ public class PostService {
         }
         tagRepository.flush();
         imageRepository.flush();
+    }
+
+    public long getTotalCount(PostType type){
+        return postRepository.countByPostType(type);
+    }
+
+    public long getTotalCountByMember(String memberId, PostType type){
+        Member member = getMember(memberId);
+        return postRepository.countByMemberAndPostType(member,type);
     }
 
 

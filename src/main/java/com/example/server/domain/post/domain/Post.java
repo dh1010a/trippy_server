@@ -4,6 +4,7 @@ import com.example.server.domain.comment.domain.Comment;
 import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.member.domain.BookMark;
 import com.example.server.domain.member.domain.Member;
+import com.example.server.domain.member.model.Scope;
 import com.example.server.domain.post.dto.PostRequestDto;
 import com.example.server.domain.post.model.PostType;
 import com.example.server.domain.ticket.domain.MemberTicket;

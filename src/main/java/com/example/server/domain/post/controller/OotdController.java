@@ -54,8 +54,8 @@ public class OotdController {
         return ApiResponse.onSuccess(ootdService.getAllPost(page, size));
     }
 
-    @GetMapping()
-    public ApiResponse<?> getAllMemberPost(
+    @GetMapping("/my")
+    public ApiResponse<?> getAllLoginMemberPost(
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size
     ) {
@@ -63,6 +63,18 @@ public class OotdController {
         if(size==null) size = 0;
         String memberId = getLoginMemberId();
         log.info("회원별 OOTD 게시물 조회 요청 : memberId = {}", memberId );
+        return ApiResponse.onSuccess(ootdService.getAllMemberPost(memberId,page,size));
+    }
+
+    @GetMapping("/by-member")
+    public ApiResponse<?> getAllMemberPost(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam String memberId
+    ) {
+        if(page == null) page = 0;
+        if(size==null) size = 0;
+        log.info("회원별 게시물 조회 요청 : memberId = {}", memberId );
         return ApiResponse.onSuccess(ootdService.getAllMemberPost(memberId,page,size));
     }
 

@@ -19,4 +19,7 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     List<Post> findAllByPostType(PostType type);
 
     Page<Post> findAllByPostType(PostType type,Pageable pageable);
+
+    long countByPostType(PostType postType);
+    long countByMemberAndPostType(Member member, PostType postType);
 }
