@@ -26,6 +26,8 @@ import com.example.server.global.auth.oauth2.model.SocialType;
 import com.example.server.global.auth.security.domain.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -173,18 +175,18 @@ public class MemberService {
 
     // GET /api/member
     public MyInfoResponseDto getMyInfo(String memberId) {
-        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member member = memberRepository.getMemberById(memberId);
         return MemberDtoConverter.convertToMyInfoResponseDto(member);
     }
 
     // GET /api/member?memberId={memberId}
-    public MemberInfoResponseDto getMemberInfo(String nickName) {
-        Member member = memberRepository.getMemberByNickName(nickName);
+    public MemberInfoResponseDto getMemberInfo(String memberId) {
+        Member member = memberRepository.getMemberById(memberId);
         return MemberDtoConverter.convertToMemberInfoResponseDto(member);
     }
 
-    public boolean isGuestRole(String nickName) {
-        Member member = memberRepository.getMemberByNickName(nickName);
+    public boolean isGuestRole(String memberId) {
+        Member member = memberRepository.getMemberById(memberId);
         return member.getRole() == Role.ROLE_GUEST;
     }
 
@@ -213,8 +215,8 @@ public class MemberService {
         return MemberDtoConverter.convertToFollowResponseDto(member, followingMember);
     }
 
-    public MemberFollowerResponseDto getFollowerList(String nickName) {
-        Member member = memberRepository.getMemberByNickName(nickName);
+    public MemberFollowerResponseDto getFollowerList(String targetMemberId) {
+        Member member = memberRepository.getMemberById(targetMemberId);
         List<MemberFollow> memberFollows = memberFollowRepository.findByFollowingMemberIdx(member.getIdx());
         List<FollowMemberInfoDto> followers = new ArrayList<>();
 
@@ -240,9 +242,9 @@ public class MemberService {
                 .build();
     }
 
-    public boolean isNotValidAccessToFollow(String memberId, String nickName) {
+    public boolean isNotValidAccessToFollow(String memberId, String targetMemberId) {
         Member member = memberRepository.getMemberById(memberId);
-        Member targetMember = memberRepository.getMemberByNickName(nickName);
+        Member targetMember = memberRepository.getMemberById(targetMemberId);
         if (memberId.equals(targetMember.getMemberId()) || targetMember.getFollowScope() == Scope.PUBLIC) {
             return false;
         }
