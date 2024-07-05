@@ -38,7 +38,7 @@ public class MemberRequestDto {
         private String ticketScope;
         private String ootdScope;
         private String badgeScope;
-        private String followerScope;
+        private String followScope;
     }
 
 

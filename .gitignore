@@ -40,3 +40,4 @@ out/
 *.yml
 docker-compose.yml
 deploy.sh
+filebase_service_key.json

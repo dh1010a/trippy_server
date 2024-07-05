@@ -12,10 +12,7 @@ import com.example.server.domain.image.domain.Image;
 //import com.example.server.domain.post.domain.Post;
 //import com.example.server.domain.ticket.domain.MemberTicket;
 //import com.example.server.domain.follow.domain.MemberFollow;
-import com.example.server.domain.member.model.ActiveState;
-import com.example.server.domain.member.model.Gender;
-import com.example.server.domain.member.model.InterestedType;
-import com.example.server.domain.member.model.Role;
+import com.example.server.domain.member.model.*;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.global.auth.oauth2.model.SocialType;
 import com.example.server.global.common.BaseTimeEntity;
@@ -43,6 +40,7 @@ public class Member extends BaseTimeEntity {
 
     private String password;
 
+    @Column(nullable = false, unique = true)
     private String nickName;
 
 //    @Column(nullable = false, unique = true)
@@ -74,6 +72,18 @@ public class Member extends BaseTimeEntity {
     @OneToMany(mappedBy = "member")
     @JsonIgnore
     private List<MemberFollow> memberFollows;
+
+    @Enumerated(EnumType.STRING)
+    private Scope TicketScope;
+
+    @Enumerated(EnumType.STRING)
+    private Scope OotdScope;
+
+    @Enumerated(EnumType.STRING)
+    private Scope BadgeScope;
+
+    @Enumerated(EnumType.STRING)
+    private Scope FollowScope;
 //
 //    @OneToMany(mappedBy = "member")
 //    @JsonIgnore
@@ -92,6 +102,10 @@ public class Member extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private SocialType socialType;
 
+    private int followerCnt;
+
+    private int followingCnt;
+
     @ElementCollection
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -100,6 +114,15 @@ public class Member extends BaseTimeEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Comment> comments;
+
+    public void initDefaultSetting() {
+        this.TicketScope = Scope.PUBLIC;
+        this.OotdScope = Scope.PUBLIC;
+        this.BadgeScope = Scope.PUBLIC;
+        this.FollowScope = Scope.PUBLIC;
+        this.followerCnt = 0;
+        this.followingCnt = 0;
+    }
 
 
     public void updateRefreshToken(String refreshToken) {
@@ -144,12 +167,32 @@ public class Member extends BaseTimeEntity {
         this.blogIntroduce = blogIntroduce;
     }
 
+    public void increaseFollowerCnt() {
+        this.followerCnt++;
+    }
+
+    public void decreaseFollowerCnt() {
+        this.followerCnt--;
+    }
+
+    public void increaseFollowingCnt() {
+        this.followingCnt++;
+    }
+
+    public void decreaseFollowingCnt() {
+        this.followingCnt--;
+    }
+
     public void updateInterestedTypes(List<InterestedType> interestedTypes) {
         this.interestedTypes = interestedTypes;
     }
 
-
-
+    public void updateScope(Scope ticketScope, Scope ootdScope, Scope badgeScope, Scope followScope) {
+        this.TicketScope = ticketScope;
+        this.OotdScope = ootdScope;
+        this.BadgeScope = badgeScope;
+        this.FollowScope = followScope;
+    }
 
 
 
