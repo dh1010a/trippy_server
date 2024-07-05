@@ -5,6 +5,7 @@ import com.example.server.domain.member.domain.Member;
 //import com.example.server.domain.post.domain.Post;
 //import com.example.server.domain.ticket.domain.Ticket;
 import com.example.server.domain.post.domain.Post;
+import com.example.server.global.common.BaseTimeEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -15,7 +16,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "Image")
-public class Image {
+public class Image extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy =  GenerationType.IDENTITY)
     @Column(name = "image_id")
