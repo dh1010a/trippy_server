@@ -89,7 +89,7 @@ public class PostController {
         return ApiResponse.onSuccess(postService.getAllMemberPost(memberId,page,size));
     }
 
-    @GetMapping("/all/count")
+    @GetMapping("/count/all")
     public ApiResponse<?> getTotalCount(@RequestParam PostType type) {
         log.info("{} 전체 개수 출력", type );
         return ApiResponse.onSuccess(postService.getTotalCount(type));
