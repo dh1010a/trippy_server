@@ -14,6 +14,9 @@ import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import com.example.server.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -51,8 +54,8 @@ public class MemberController {
         return ApiResponse.onSuccess(memberService.getMyInfo(myId));
     }
 
-    @GetMapping("/{memberId}")
-    public ApiResponse<?> getMemberInfo(@PathVariable("memberId") String memberId) {
+    @GetMapping("/profile")
+    public ApiResponse<?> getMemberInfo(@RequestParam("memberId") String memberId) {
         log.info("요청자 memberId = {}, 요청 대상 memberId = {}", getLoginMemberId() ,memberId);
         // 추후 비활성 유저도 접근하지 못하도록 로직 구성해야함
         if (memberService.isGuestRole(memberId)) {
@@ -117,8 +120,14 @@ public class MemberController {
 
     }
 
+    @PostMapping("/test")
+    public ApiResponse<?> testAuth() {
+//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return ApiResponse.onSuccess("Authenticated as: " + ("Not authenticated"));
+    }
+
     @PostMapping("/follow")
-    public ApiResponse<?> followMember(@RequestParam(value = "memberId", required = false) String followingMemberId) {
+    public ApiResponse<?> followMember(@RequestParam(value = "memberId") String followingMemberId) {
         String memberId = getLoginMemberId();
         log.info("팔로우 요청 : memberId = {}, followingMemberId = {}", memberId, followingMemberId);
         return ApiResponse.onSuccess(memberService.followMember(memberId, followingMemberId));

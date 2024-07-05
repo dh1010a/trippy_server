@@ -67,10 +67,10 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers( "/api/member/signup", "/", "/api/member/isDuplicated", "/api/member/login/oauth").permitAll()
-                        .requestMatchers( "/api/email/send", "/api/member/password", "/api/email/confirm", "/api/member/find", "/api/member/delete").permitAll()
-                        .requestMatchers("/api/member/{memberId}").anonymous()
+                        .requestMatchers( "/api/member/signup", "/api/member/isDuplicated", "/api/member/login/oauth").permitAll()
+                        .requestMatchers( "/api/email/send", "/api/member/password", "/api/email/confirm", "/api/member/find").permitAll()
                         .requestMatchers("/api/post/all", "/api/ootd/all", "/api/post/count/all").permitAll()
+                        .requestMatchers("/api/member/profile").anonymous()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
