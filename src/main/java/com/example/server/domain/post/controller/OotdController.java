@@ -37,7 +37,7 @@ public class OotdController {
         return ApiResponse.onSuccess(ootdService.updateOotd(memberId, updateOOTDRequestDto));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     public ApiResponse<?> getPost(@PathVariable("id") Long postId) {
         log.info("OOTD 게시물 조회 요청 : postId = {}",postId );
         return ApiResponse.onSuccess(ootdService.getPost(postId));

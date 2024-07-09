@@ -48,7 +48,7 @@ public class PostController {
         return ApiResponse.onSuccess(postService.deletePost(postId,memberId));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     public ApiResponse<?> getPost(@PathVariable("id") Long postId) {
         log.info("게시물 조회 요청 : postId = {}",postId );
         return ApiResponse.onSuccess(postService.getPost(postId));
