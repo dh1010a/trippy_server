@@ -118,7 +118,7 @@ public class MemberController {
     }
 
     @PostMapping("/follow")
-    public ApiResponse<?> followMember(@RequestParam(value = "memberId", required = false) String followingMemberId) {
+    public ApiResponse<?> followMember(@RequestParam(value = "memberId") String followingMemberId) {
         String memberId = getLoginMemberId();
         log.info("팔로우 요청 : memberId = {}, followingMemberId = {}", memberId, followingMemberId);
         return ApiResponse.onSuccess(memberService.followMember(memberId, followingMemberId));
