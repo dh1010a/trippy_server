@@ -51,8 +51,8 @@ public class MemberController {
         return ApiResponse.onSuccess(memberService.getMyInfo(myId));
     }
 
-    @GetMapping("/{memberId}")
-    public ApiResponse<?> getMemberInfo(@PathVariable("memberId") String memberId) {
+    @GetMapping("/profile")
+    public ApiResponse<?> getMemberInfo(@RequestParam("memberId") String memberId) {
         log.info("요청자 memberId = {}, 요청 대상 memberId = {}", getLoginMemberId() ,memberId);
         // 추후 비활성 유저도 접근하지 못하도록 로직 구성해야함
         if (memberService.isGuestRole(memberId)) {
@@ -124,8 +124,8 @@ public class MemberController {
         return ApiResponse.onSuccess(memberService.followMember(memberId, followingMemberId));
     }
 
-    @GetMapping("/{memberId}/following")
-    public ApiResponse<?> getFollowing(@PathVariable("memberId") String targetMemberId){
+    @GetMapping("/following")
+    public ApiResponse<?> getFollowing(@RequestParam("memberId") String targetMemberId){
         // 비활성화된 멤버는 조회 안되게 하는 로직 추가 구현 해야함
         String memberId = getLoginMemberId();
         log.info("팔로잉 조회 요청 : memberId = {}, nickName = {}", memberId, targetMemberId);
