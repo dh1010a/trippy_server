@@ -133,8 +133,8 @@ public class MemberController {
         return ApiResponse.onSuccess(memberService.followMember(memberId, followingMemberId));
     }
 
-    @GetMapping("/{memberId}/following")
-    public ApiResponse<?> getFollowing(@PathVariable("memberId") String targetMemberId){
+    @GetMapping("/following")
+    public ApiResponse<?> getFollowing(@RequestParam("memberId") String targetMemberId){
         // 비활성화된 멤버는 조회 안되게 하는 로직 추가 구현 해야함
         String memberId = getLoginMemberId();
         log.info("팔로잉 조회 요청 : memberId = {}, nickName = {}", memberId, targetMemberId);
