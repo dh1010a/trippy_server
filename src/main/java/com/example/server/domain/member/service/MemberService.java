@@ -228,8 +228,8 @@ public class MemberService {
                 .build();
     }
 
-    public MemberFollowingResponseDto getFollowingList(String nickName) {
-        Member member = memberRepository.getMemberByNickName(nickName);
+    public MemberFollowingResponseDto getFollowingList(String targetMemberId) {
+        Member member = memberRepository.getMemberById(targetMemberId);
         List<MemberFollow> memberFollows = member.getMemberFollows();
         List<FollowMemberInfoDto> followings = new ArrayList<>();
 
