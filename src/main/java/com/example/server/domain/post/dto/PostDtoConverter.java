@@ -1,7 +1,9 @@
 package com.example.server.domain.post.dto;
 
+import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.image.dto.ImageResponseDto;
 import com.example.server.domain.image.model.ImageType;
+import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.model.Scope;
 import com.example.server.domain.post.domain.Ootd;
 import com.example.server.domain.post.domain.Post;
@@ -19,23 +21,27 @@ public class PostDtoConverter {
 
     public static PostResponseDto.PostBasicResponseDto convertToPostBasicDto(Post post) {
 
+        // 태그
         List<String> tagNames = post.getTag() != null ? post.getTag().stream()
                 .map(tag -> tag.getName())
                 .collect(Collectors.toList()) : Collections.emptyList();
 
+        // 이미지
         List<ImageResponseDto.ImageBasicResponseDto> convertImage = post.getImages() != null ? post.getImages().stream()
                 .filter(image -> image.getImageType() == ImageType.POST)
                 .map(image -> convertToImageBasicDto(image))
                 .collect(Collectors.toList()) : Collections.emptyList();
+
+        // 좋아요
         int likeCount = post.getLikes() != null ? post.getLikes().size() : 0;
+
+        // 댓글
         int commentCount = post.getComments() != null ? (int) post.getComments().stream().filter(
                 comment -> comment.getStatus() != Scope.PRIVATE
         ).count() :0;
         return PostResponseDto.PostBasicResponseDto.builder()
                 .id(post.getId())
-                .memberId(post.getMember().getMemberId())
                 .createDateTime(post.getCreateDate())
-                .nickName(post.getMember().getNickName())
                 .title(post.getTitle())
                 .body(post.getBody())
                 .postType(post.getPostType())
@@ -49,10 +55,12 @@ public class PostDtoConverter {
     public static PostResponseDto.GetPostResponseDto convertToGetResponseDto(Post post) {
         TicketResponseDto.TicketBasicResponseDto ticket = convertToTicketResponseDto(post.getTicket());
         PostResponseDto.PostBasicResponseDto postDto = convertToPostBasicDto(post);
+        PostResponseDto.PostMemberResponseDto memberDto = convertToPostMemberResponseDto(post.getMember());
 
         return PostResponseDto.GetPostResponseDto.builder()
                 .post(postDto)
                 .ticket(ticket)
+                .member(memberDto)
                 .isSuccess(true)
                 .build();
     }
@@ -60,9 +68,11 @@ public class PostDtoConverter {
     public static PostResponseDto.GetOotdPostResponseDto convertToOotdResponseDto(Post post){
         OotdReqResDto.OotdBasicResponseDto ootdDto = convertToOotdBasicResponseDto(post.getOotd());
         PostResponseDto.PostBasicResponseDto postDto = convertToPostBasicDto(post);
+        PostResponseDto.PostMemberResponseDto memberDto = convertToPostMemberResponseDto(post.getMember());
         return PostResponseDto.GetOotdPostResponseDto.builder()
                 .post(postDto)
                 .ootd(ootdDto)
+                .member(memberDto)
                 .isSuccess(true)
                 .build();
     }
@@ -99,4 +109,16 @@ public class PostDtoConverter {
                 .collect(Collectors.toList());
         return postDtos;
     }
+
+    public static PostResponseDto.PostMemberResponseDto convertToPostMemberResponseDto(Member member){
+        Image profileImage = member.getImages().stream().filter(Image::isProfileImage).findAny().orElse(null);
+        PostResponseDto.PostMemberResponseDto memberDto = PostResponseDto.PostMemberResponseDto.builder()
+                .memberId(member.getMemberId())
+                .nickName(member.getNickName())
+                .blogName(member.getBlogName())
+                .profileUrl(profileImage != null ? profileImage.getAccessUri() : null)
+                .build();
+        return memberDto;
+    }
+
 }

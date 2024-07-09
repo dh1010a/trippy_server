@@ -15,6 +15,7 @@ public class PostResponseDto {
     @Builder
     @Data
     public static class GetPostResponseDto{
+        private PostMemberResponseDto member;
         private TicketResponseDto.TicketBasicResponseDto ticket;
         private PostBasicResponseDto post;
         private Boolean isSuccess;
@@ -23,6 +24,7 @@ public class PostResponseDto {
     @Builder
     @Data
     public static class GetOotdPostResponseDto{
+        private PostMemberResponseDto member;
         private OotdReqResDto.OotdBasicResponseDto ootd;
         private PostBasicResponseDto post;
         private Boolean isSuccess;
@@ -33,8 +35,6 @@ public class PostResponseDto {
     public static class PostBasicResponseDto{
         private Long id;
         private LocalDateTime createDateTime;
-        private String nickName;
-        private String memberId;
         private String title;
         private String body;
         private PostType postType;
@@ -51,6 +51,14 @@ public class PostResponseDto {
     public static class DeletePostResultResponseDto{
         private Long id;
         private Boolean isSuccess;
+    }
+    @Builder
+    @Data
+    public static class PostMemberResponseDto{
+        private String memberId;
+        private String nickName;
+        private String profileUrl;
+        private String blogName;
     }
 
 
