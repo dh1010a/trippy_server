@@ -12,7 +12,7 @@ public class NotifyDto {
     public static class NotifyRequestDto {
         Member receiver;
         String content;
-        String senderProfileImgAccessUri;
+        String senderProfileImgUri;
         String senderNickName;
         String senderMemberId;
         String postId;
@@ -27,7 +27,7 @@ public class NotifyDto {
         Long notifyId;
         String title;
         String content;
-        String senderProfileImgAccessUri;
+        String senderProfileImgUri;
         String senderNickName;
         String senderMemberId;
         String postId;

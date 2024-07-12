@@ -30,7 +30,8 @@ public class Notify extends BaseTimeEntity {
 
     private String content;
 
-    private String senderProfileImgAccessUri;
+    @Column(length = 1000)
+    private String senderProfileImgUri;
 
     private String senderNickName;
 

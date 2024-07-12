@@ -9,7 +9,7 @@ public class NotifyDtoConverter {
     public static NotifyDto.NotifyRequestDto convertToFollowNotifyRequestDto(Member member, Member followingMember) {
         return NotifyDto.NotifyRequestDto.builder()
                 .receiver(followingMember)
-                .senderProfileImgAccessUri(member.getProfileImageAccessUri())
+                .senderProfileImgUri(member.getProfileImageAccessUri())
                 .senderNickName(member.getNickName())
                 .senderMemberId(member.getMemberId())
                 .notificationType(NotificationType.FOLLOW)
@@ -21,7 +21,7 @@ public class NotifyDtoConverter {
                 .notifyId(notify.getId())
                 .title(notify.getTitle())
                 .content(notify.getContent())
-                .senderProfileImgAccessUri(notify.getSenderProfileImgAccessUri())
+                .senderProfileImgUri(notify.getSenderProfileImgUri())
                 .senderNickName(notify.getSenderNickName())
                 .senderMemberId(notify.getSenderMemberId())
                 .postId(notify.getPostId())

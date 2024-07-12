@@ -15,7 +15,7 @@ public class NotifyListener {
 
     private final NotifyService notifyService;
 
-    @TransactionalEventListener(phase = AFTER_COMMIT)
+    @TransactionalEventListener
     @Async
     public void handleNotification(NotifyDto.NotifyRequestDto requestDto) {
         notifyService.sendNotify(requestDto.getReceiver(), requestDto);

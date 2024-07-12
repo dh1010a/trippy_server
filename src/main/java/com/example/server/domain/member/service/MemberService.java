@@ -216,7 +216,7 @@ public class MemberService {
         member.increaseFollowingCnt();
         followingMember.increaseFollowerCnt();
 
-        publishEvent(followingMember, member);
+        publishEvent(member, followingMember);
 
         return MemberDtoConverter.convertToFollowResponseDto(member, followingMember);
     }
