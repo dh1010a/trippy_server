@@ -124,6 +124,16 @@ public class Member extends BaseTimeEntity {
         this.followingCnt = 0;
     }
 
+    public String getProfileImageAccessUri() {
+        Image image = images.stream().filter(Image::isProfileImage).findAny().orElse(null);
+        return image != null ? image.getAccessUri() : null;
+    }
+
+    public String getBlogTitleImageAccessUri() {
+        Image image = images.stream().filter(Image::isBlogTitleImage).findAny().orElse(null);
+        return image != null ? image.getAccessUri() : null;
+    }
+
 
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
