@@ -6,6 +6,7 @@ import com.example.server.domain.member.model.Scope;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class CommentResponseDto {
@@ -16,8 +17,9 @@ public class CommentResponseDto {
         private Long id;
         private String content;
         private Long postId;
-        private String memberId;
         private Scope status;
+        private LocalDateTime createDateTime;
+        private CommentMemberDto member;
         // 부모 댓글 id
         private ParentAndChildCommentResDto parentComment;
         // 자식 댓글들
@@ -30,7 +32,8 @@ public class CommentResponseDto {
         private Long id;
         private String content;
         private Scope status;
-        private String memberId;
+        private LocalDateTime createDateTime;
+        private CommentMemberDto member;
     }
 
     @Data
@@ -38,10 +41,20 @@ public class CommentResponseDto {
     public static class CommentTreeDTO {
         private Long id;
         private Long parentId;
-        private String memberId;
         private String content;
         private Scope status;
         private int depth;
+        private LocalDateTime createDateTime;
+        private CommentMemberDto member;
         private List<CommentTreeDTO> children;
+    }
+
+    @Data
+    @Builder
+    public static class CommentMemberDto{
+        private String memberId;
+        private String nickName;
+        private String profileUrl;
+
     }
 }
