@@ -39,9 +39,14 @@ public class MemberResponseDto {
         private String activeStatus;
         private String role;
         private String socialType;
-        private List<String> interestedTypes;
+        private List<String> koreanInterestedTypes;
         private int followerCnt;
         private int followingCnt;
+        private String ticketScope;
+        private String ootdScope;
+        private String badgeScope;
+        private String followScope;
+        private String createdAt;
 
     }
 

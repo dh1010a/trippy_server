@@ -39,9 +39,14 @@ public class MemberDtoConverter {
                 .role(member.getRole().getTitle())
                 .activeStatus(member.getActiveState().name())
                 .socialType(member.getSocialType().getSocialName())
-                .interestedTypes(member.getInterestedTypes().stream().map(InterestedType::getTitle).toList())
+                .koreanInterestedTypes(member.getInterestedTypes().stream().map(InterestedType::getTitle).toList())
                 .followerCnt(member.getFollowerCnt())
                 .followingCnt(member.getFollowingCnt())
+                .ticketScope(member.getTicketScope().getKey())
+                .ootdScope(member.getOotdScope().getKey())
+                .badgeScope(member.getBadgeScope().getKey())
+                .followScope(member.getFollowScope().getKey())
+                .createdAt(member.getCreatedAt().format(formatter))
                 .build();
     }
 
