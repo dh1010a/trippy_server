@@ -12,6 +12,7 @@ import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.sql.Delete;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,6 +66,10 @@ public class Comment extends BaseTimeEntity {
 
     public void updateContent(String content){
         this.content = content;
+    }
+
+    public LocalDateTime getCreateDate() {
+        return this.getCreatedAt();
     }
 
 

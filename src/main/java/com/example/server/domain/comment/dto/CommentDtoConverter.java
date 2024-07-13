@@ -2,6 +2,7 @@ package com.example.server.domain.comment.dto;
 
 import com.example.server.domain.comment.domain.Comment;
 import com.example.server.domain.comment.model.DeleteStatus;
+import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.member.model.Scope;
 import org.springframework.stereotype.Component;
 
@@ -27,12 +28,19 @@ public class CommentDtoConverter {
                 childCommentResponses.add(childCommentResponse);
             }
         }
+        Image profileImage = comment.getMember().getImages().stream().filter(Image::isProfileImage).findAny().orElse(null);
+        CommentResponseDto.CommentMemberDto memberDto = CommentResponseDto.CommentMemberDto.builder()
+                .memberId(comment.getMember().getMemberId())
+                .nickName(comment.getMember().getNickName())
+                .profileUrl(profileImage != null ? profileImage.getAccessUri() : null)
+                .build();
 
         return CommentResponseDto.CommentBasicResponse.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
                 .postId(comment.getPost().getId())
-                .memberId(comment.getMember().getMemberId())
+                .member(memberDto)
+                .createDateTime(comment.getCreateDate())
                  .status(comment.getStatus())
                 .parentComment(parentResponse)
                 .childComments(childCommentResponses).build();
@@ -40,10 +48,18 @@ public class CommentDtoConverter {
     }
 
     public static CommentResponseDto.ParentAndChildCommentResDto convertToParentAndChildCommentRes(Comment comment){
+        Image profileImage = comment.getMember().getImages().stream().filter(Image::isProfileImage).findAny().orElse(null);
+        CommentResponseDto.CommentMemberDto memberDto = CommentResponseDto.CommentMemberDto.builder()
+                .memberId(comment.getMember().getMemberId())
+                .nickName(comment.getMember().getNickName())
+                .profileUrl(profileImage != null ? profileImage.getAccessUri() : null)
+                .build();
+
         return CommentResponseDto.ParentAndChildCommentResDto.builder()
                 .content(comment.getContent())
                 .id(comment.getId())
-                .memberId(comment.getMember().getMemberId())
+                .member(memberDto)
+                .createDateTime(comment.getCreateDate())
                 .status(comment.getStatus())
                 .build();
 
@@ -61,12 +77,21 @@ public class CommentDtoConverter {
                 childList.add(converToCommentTreeDTO(childComment));
             }
         }
+
+        Image profileImage = comment.getMember().getImages().stream().filter(Image::isProfileImage).findAny().orElse(null);
+        CommentResponseDto.CommentMemberDto memberDto = CommentResponseDto.CommentMemberDto.builder()
+                .memberId(comment.getMember().getMemberId())
+                .nickName(comment.getMember().getNickName())
+                .profileUrl(profileImage != null ? profileImage.getAccessUri() : null)
+                .build();
+
         return CommentResponseDto.CommentTreeDTO.builder()
                 .parentId(parentId)
                 .depth(getDepth(comment))
                 .id(comment.getId())
                 .children(childList)
-                .memberId(comment.getMember().getMemberId())
+                .member(memberDto)
+                .createDateTime(comment.getCreateDate())
                 .status(comment.getStatus())
                 .content(comment.getContent()).build();
     }
