@@ -20,20 +20,18 @@ import com.example.server.domain.member.model.InterestedType;
 import com.example.server.domain.member.model.Role;
 import com.example.server.domain.member.model.Scope;
 import com.example.server.domain.member.repository.MemberRepository;
+import com.example.server.domain.notify.dto.NotifyDtoConverter;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import com.example.server.global.auth.oauth2.model.SocialType;
 import com.example.server.global.auth.security.domain.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -49,6 +47,7 @@ public class MemberService {
     private final MailService mailService;
     private final ImageRepository imageRepository;
     private final OracleImageService oracleImageService;
+    private final ApplicationEventPublisher eventPublisher;
 
     private static final String DEFAULT_BLOG_SUFFIX = ".blog";
 
@@ -190,6 +189,7 @@ public class MemberService {
         return member.getRole() == Role.ROLE_GUEST;
     }
 
+    // memberFollower, memberFollowing 두개로 분리?
     public MemberFollowResponseDto followMember(String memberId, String followingMemberId) {
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
         Member followingMember = memberRepository.findByMemberId(followingMemberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_FOLLOWING_MEMBER_NOT_FOUND));
@@ -211,6 +211,8 @@ public class MemberService {
 //        member.updateMemberFollowing(memberFollow);
         member.increaseFollowingCnt();
         followingMember.increaseFollowerCnt();
+
+        publishEvent(member, followingMember);
 
         return MemberDtoConverter.convertToFollowResponseDto(member, followingMember);
     }
@@ -240,6 +242,11 @@ public class MemberService {
         return MemberResponseDto.MemberFollowingResponseDto.builder()
                 .followings(followings)
                 .build();
+    }
+
+    //== 알림을 보내는 기능 ==//
+    public void publishEvent(Member member, Member followingMember) {
+        eventPublisher.publishEvent(NotifyDtoConverter.convertToFollowNotifyRequestDto(member, followingMember));
     }
 
     public boolean isNotValidAccessToFollow(String memberId, String targetMemberId) {

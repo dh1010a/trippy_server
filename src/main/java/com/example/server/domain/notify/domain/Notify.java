@@ -21,15 +21,25 @@ public class Notify extends BaseTimeEntity {
     @Column(name = "notify_id")
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "member_idx")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Member receiver;
+
+    private String title;
+
     private String content;
 
-   /*@Embedded
-   private NotificationContent content;*/
+    @Column(length = 1000)
+    private String senderProfileImgUri;
 
-    //@Embedded
-    //private RelatedURL url;
+    private String senderNickName;
 
-    private String url;
+    private String senderMemberId;
+
+    private String postId;
+
+    private String postTitle;
 
     @Column(nullable = false)
     private Boolean isRead;
@@ -38,9 +48,5 @@ public class Notify extends BaseTimeEntity {
     @Column(nullable = false)
     private NotificationType notificationType;
 
-    @ManyToOne
-    @JoinColumn(name = "member_idx")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Member receiver;
 
 }
