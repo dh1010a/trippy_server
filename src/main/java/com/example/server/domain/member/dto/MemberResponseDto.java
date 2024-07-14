@@ -42,6 +42,8 @@ public class MemberResponseDto {
         private List<String> koreanInterestedTypes;
         private int followerCnt;
         private int followingCnt;
+        private boolean likeAlert;
+        private boolean commentAlert;
         private String ticketScope;
         private String ootdScope;
         private String badgeScope;

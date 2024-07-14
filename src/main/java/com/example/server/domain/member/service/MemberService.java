@@ -155,7 +155,7 @@ public class MemberService {
 //        member.updateLikeAlert(requestDto.isLikeAlert());
         member.updateScope(Scope.fromName(requestDto.getTicketScope()), Scope.fromName(requestDto.getOotdScope()),
                 Scope.fromName(requestDto.getBadgeScope()), Scope.fromName(requestDto.getFollowScope()));
-
+        member.updateAlert(requestDto.isLikeAlert(), requestDto.isCommentAlert());
         log.info("내 정보 수정이 완료되었습니다. memberId = {}, nickName = {}, blogName = {}, blogIntroduce = {}", member.getMemberId(), member.getNickName(), member.getBlogName(), member.getBlogIntroduce());
         return MemberDtoConverter.convertToMemberTaskDto(member);
     }

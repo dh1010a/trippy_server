@@ -42,6 +42,8 @@ public class MemberDtoConverter {
                 .koreanInterestedTypes(member.getInterestedTypes().stream().map(InterestedType::getTitle).toList())
                 .followerCnt(member.getFollowerCnt())
                 .followingCnt(member.getFollowingCnt())
+                .likeAlert(member.isLikeAlert())
+                .commentAlert(member.isCommentAlert())
                 .ticketScope(member.getTicketScope().getKey())
                 .ootdScope(member.getOotdScope().getKey())
                 .badgeScope(member.getBadgeScope().getKey())

@@ -105,6 +105,10 @@ public class Member extends BaseTimeEntity {
 
     private int followingCnt;
 
+    private boolean likeAlert;
+
+    private boolean commentAlert;
+
     @ElementCollection
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -121,6 +125,8 @@ public class Member extends BaseTimeEntity {
         this.followScope = Scope.PUBLIC;
         this.followerCnt = 0;
         this.followingCnt = 0;
+        this.likeAlert = true;
+        this.commentAlert = true;
     }
 
     public String getProfileImageAccessUri() {
@@ -190,6 +196,11 @@ public class Member extends BaseTimeEntity {
 
     public void decreaseFollowingCnt() {
         this.followingCnt--;
+    }
+
+    public void updateAlert(boolean likeAlert, boolean commentAlert) {
+        this.likeAlert = likeAlert;
+        this.commentAlert = commentAlert;
     }
 
     public void updateInterestedTypes(List<InterestedType> interestedTypes) {
