@@ -7,8 +7,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
-
 @Component
 @RequiredArgsConstructor
 public class NotifyListener {
@@ -17,7 +15,7 @@ public class NotifyListener {
 
     @TransactionalEventListener
     @Async
-    public void handleNotification(NotifyDto.NotifyRequestDto requestDto) {
+    public void handleNotification(NotifyDto.NotifyPublishRequestDto requestDto) {
         notifyService.sendNotify(requestDto.getReceiver(), requestDto);
     }
 }

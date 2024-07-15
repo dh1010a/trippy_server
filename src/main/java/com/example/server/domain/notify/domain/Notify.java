@@ -48,5 +48,8 @@ public class Notify extends BaseTimeEntity {
     @Column(nullable = false)
     private NotificationType notificationType;
 
+    public void readNotify() {
+        this.isRead = true;
+    }
 
 }
