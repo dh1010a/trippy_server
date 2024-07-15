@@ -80,7 +80,8 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //푸시알림 응답
     NOTIFY_SEND_FAIL(HttpStatus.BAD_REQUEST,"NOTIFY4001", "알림 보내기를 실패하였습니다."),
-    NOTIFY_UNSUPPORTED_TYPE(HttpStatus.BAD_REQUEST,"NOTIFY4002", "지원하지 않는 알림 타입입니다.")
+    NOTIFY_UNSUPPORTED_TYPE(HttpStatus.BAD_REQUEST,"NOTIFY4002", "지원하지 않는 알림 타입입니다."),
+    NOTIFY_NOT_FOUND(HttpStatus.BAD_REQUEST,"NOTIFY4003", "알림이 존재하지 않습니다."),
     ;
     private final HttpStatus httpStatus;
     private final String code;

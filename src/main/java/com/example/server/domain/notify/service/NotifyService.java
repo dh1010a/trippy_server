@@ -1,11 +1,12 @@
 package com.example.server.domain.notify.service;
 
 import com.example.server.domain.member.domain.Member;
+import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.domain.notify.domain.Notify;
 import com.example.server.domain.notify.domain.NotifyMessageProvider;
-import com.example.server.domain.notify.dto.NotifyDto;
-import com.example.server.domain.notify.dto.NotifyDto.NotifyRequestDto;
+import com.example.server.domain.notify.dto.NotifyDto.NotifyPublishRequestDto;
 import com.example.server.domain.notify.dto.NotifyDtoConverter;
+import com.example.server.domain.notify.dto.NotifyResponseDto;
 import com.example.server.domain.notify.model.NotificationType;
 import com.example.server.domain.notify.repository.EmitterRepository;
 import com.example.server.domain.notify.repository.NotifyRepository;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
@@ -31,6 +33,7 @@ public class NotifyService {
 
     // 1시간
     private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60;
+    private final MemberRepository memberRepository;
 
     public SseEmitter subscribe(String memberId, String lastEventId) {
         String emitterId = makeTimeIncludeId(memberId);
@@ -50,8 +53,8 @@ public class NotifyService {
         return emitter;
     }
 
-    public void sendNotify(Member receiver, NotifyRequestDto notifyRequestDto) {
-        Notify notification = notifyRepository.save(createNotify(receiver, notifyRequestDto));
+    public void sendNotify(Member receiver, NotifyPublishRequestDto notifyPublishRequestDto) {
+        Notify notification = notifyRepository.save(createNotify(receiver, notifyPublishRequestDto));
 
         String memberId = receiver.getMemberId();
         String eventId = memberId + "_" + System.currentTimeMillis();
@@ -59,9 +62,25 @@ public class NotifyService {
         emitters.forEach(
                 (key, emitter) -> {
                     emitterRepository.saveEventCache(key, notification);
-                    sendNotification(emitter, eventId, key, NotifyDtoConverter.convertToResponseDto(notification));
+                    sendNotification(emitter, eventId, key, NotifyDtoConverter.convertToInfoResponseDto(notification));
                 }
         );
+    }
+
+    // GET /api/notify
+    public NotifyResponseDto.NotifyInfoListDto getAllNotify(String memberId) {
+        Member member = memberRepository.getMemberById(memberId);
+        List<Notify> notifyList = notifyRepository.findByReceiverOrderByCreatedAtDesc(member);
+        return NotifyDtoConverter.convertToInfoListResponseDto(notifyList);
+    }
+
+    // POST /api/notify/read
+    public void readNotify(String memberId, Long notifyId) {
+        Notify notify = notifyRepository.findById(notifyId).orElseThrow(() -> new ErrorHandler(ErrorStatus.NOTIFY_NOT_FOUND));
+        if (!notify.getReceiver().getMemberId().equals(memberId)) {
+            throw new ErrorHandler(ErrorStatus.NOTIFY_NOT_FOUND);
+        }
+        notify.readNotify();
     }
 
     private String makeTimeIncludeId(String memberId) {
@@ -92,38 +111,38 @@ public class NotifyService {
                 .forEach(entry -> sendNotification(emitter, entry.getKey(), emitterId, entry.getValue()));
     }
 
-    private Notify createNotify(Member receiver, NotifyRequestDto notifyRequestDto) {
-        NotificationType notificationType = notifyRequestDto.getNotificationType();
+    private Notify createNotify(Member receiver, NotifyPublishRequestDto notifyPublishRequestDto) {
+        NotificationType notificationType = notifyPublishRequestDto.getNotificationType();
         return switch (notificationType) {
             case FOLLOW -> Notify.builder()
                     .receiver(receiver)
-                    .title(NotifyMessageProvider.getNewFollowerMessage(notifyRequestDto.getSenderNickName()))
-                    .senderProfileImgUri(notifyRequestDto.getSenderProfileImgUri())
-                    .senderNickName(notifyRequestDto.getSenderNickName())
-                    .senderMemberId(notifyRequestDto.getSenderMemberId())
+                    .title(NotifyMessageProvider.getNewFollowerMessage(notifyPublishRequestDto.getSenderNickName()))
+                    .senderProfileImgUri(notifyPublishRequestDto.getSenderProfileImgUri())
+                    .senderNickName(notifyPublishRequestDto.getSenderNickName())
+                    .senderMemberId(notifyPublishRequestDto.getSenderMemberId())
                     .isRead(false)
                     .notificationType(notificationType)
                     .build();
             case LIKE -> Notify.builder()
                     .receiver(receiver)
-                    .title(NotifyMessageProvider.getNewLikeMessage(notifyRequestDto.getSenderNickName()))
-                    .senderProfileImgUri(notifyRequestDto.getSenderProfileImgUri())
-                    .senderNickName(notifyRequestDto.getSenderNickName())
-                    .senderMemberId(notifyRequestDto.getSenderMemberId())
-                    .postId(notifyRequestDto.getPostId())
-                    .postTitle(notifyRequestDto.getPostTitle())
+                    .title(NotifyMessageProvider.getNewLikeMessage(notifyPublishRequestDto.getSenderNickName()))
+                    .senderProfileImgUri(notifyPublishRequestDto.getSenderProfileImgUri())
+                    .senderNickName(notifyPublishRequestDto.getSenderNickName())
+                    .senderMemberId(notifyPublishRequestDto.getSenderMemberId())
+                    .postId(notifyPublishRequestDto.getPostId())
+                    .postTitle(notifyPublishRequestDto.getPostTitle())
                     .isRead(false)
                     .notificationType(notificationType)
                     .build();
             case COMMENT -> Notify.builder()
                     .receiver(receiver)
-                    .title(NotifyMessageProvider.getNewCommentMessage(notifyRequestDto.getSenderNickName()))
-                    .senderProfileImgUri(notifyRequestDto.getSenderProfileImgUri())
-                    .senderNickName(notifyRequestDto.getSenderNickName())
-                    .senderMemberId(notifyRequestDto.getSenderMemberId())
-                    .content(notifyRequestDto.getContent())
-                    .postId(notifyRequestDto.getPostId())
-                    .postTitle(notifyRequestDto.getPostTitle())
+                    .title(NotifyMessageProvider.getNewCommentMessage(notifyPublishRequestDto.getSenderNickName()))
+                    .senderProfileImgUri(notifyPublishRequestDto.getSenderProfileImgUri())
+                    .senderNickName(notifyPublishRequestDto.getSenderNickName())
+                    .senderMemberId(notifyPublishRequestDto.getSenderMemberId())
+                    .content(notifyPublishRequestDto.getContent())
+                    .postId(notifyPublishRequestDto.getPostId())
+                    .postTitle(notifyPublishRequestDto.getPostTitle())
                     .isRead(false)
                     .notificationType(notificationType)
                     .build();

@@ -4,10 +4,12 @@ import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.notify.domain.Notify;
 import com.example.server.domain.notify.model.NotificationType;
 
+import java.util.List;
+
 public class NotifyDtoConverter {
 
-    public static NotifyDto.NotifyRequestDto convertToFollowNotifyRequestDto(Member member, Member followingMember) {
-        return NotifyDto.NotifyRequestDto.builder()
+    public static NotifyDto.NotifyPublishRequestDto convertToFollowNotifyRequestDto(Member member, Member followingMember) {
+        return NotifyDto.NotifyPublishRequestDto.builder()
                 .receiver(followingMember)
                 .senderProfileImgUri(member.getProfileImageAccessUri())
                 .senderNickName(member.getNickName())
@@ -16,8 +18,8 @@ public class NotifyDtoConverter {
                 .build();
     }
 
-    public static NotifyDto.Response convertToResponseDto(Notify notify) {
-        return NotifyDto.Response.builder()
+    public static NotifyResponseDto.NotifyInfoDto convertToInfoResponseDto(Notify notify) {
+        return NotifyResponseDto.NotifyInfoDto.builder()
                 .notifyId(notify.getId())
                 .title(notify.getTitle())
                 .content(notify.getContent())
@@ -30,6 +32,17 @@ public class NotifyDtoConverter {
                 .notificationType(notify.getNotificationType().name())
                 .createdAt(notify.getCreatedAt().toString())
                 .build();
+    }
+
+    public static NotifyResponseDto.NotifyInfoListDto convertToInfoListResponseDto(List<Notify> notifyList) {
+        List<NotifyResponseDto.NotifyInfoDto> list = notifyList.stream()
+                .map(NotifyDtoConverter::convertToInfoResponseDto)
+                .toList();
+        return NotifyResponseDto.NotifyInfoListDto.builder()
+                .notifyCnt(list.size())
+                .notifyInfoList(list)
+                .build();
+
     }
 
 }

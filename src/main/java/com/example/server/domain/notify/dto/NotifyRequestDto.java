@@ -2,16 +2,14 @@ package com.example.server.domain.notify.dto;
 
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.notify.model.NotificationType;
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
 
-public class NotifyDto {
-
-
-    // SSE 알림용 DTO
+public class NotifyRequestDto {
 
     @Data
     @Builder
-    public static class NotifyPublishRequestDto {
+    public static class PublishNotifyRequestDto {
         Member receiver;
         String content;
         String senderProfileImgUri;
