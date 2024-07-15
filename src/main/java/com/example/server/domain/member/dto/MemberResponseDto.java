@@ -40,8 +40,6 @@ public class MemberResponseDto {
         private String role;
         private String socialType;
         private List<String> koreanInterestedTypes;
-        private int followerCnt;
-        private int followingCnt;
         private boolean likeAlert;
         private boolean commentAlert;
         private String ticketScope;
@@ -49,6 +47,10 @@ public class MemberResponseDto {
         private String badgeScope;
         private String followScope;
         private String createdAt;
+        private int followerCnt;
+        private int followingCnt;
+//        private List<FollowMemberInfoDto> followers;
+//        private List<FollowMemberInfoDto> followings;
 
     }
 
@@ -90,18 +92,20 @@ public class MemberResponseDto {
         private Long idx;
         private String memberId;
         private String nickName;
-//        private String profileImageUrl;
+        private String profileImageUrl;
     }
 
     @Data
     @Builder
     public static class MemberFollowerResponseDto {
+        private int followerCnt;
         private List<FollowMemberInfoDto> followers;
     }
 
     @Data
     @Builder
     public static class MemberFollowingResponseDto {
+        private int followingCnt;
         private List<FollowMemberInfoDto> followings;
     }
 

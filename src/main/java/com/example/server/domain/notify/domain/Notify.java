@@ -37,7 +37,7 @@ public class Notify extends BaseTimeEntity {
 
     private String senderMemberId;
 
-    private String postId;
+    private Long postId;
 
     private String postTitle;
 
