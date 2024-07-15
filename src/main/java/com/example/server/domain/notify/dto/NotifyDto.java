@@ -15,7 +15,7 @@ public class NotifyDto {
         String senderProfileImgUri;
         String senderNickName;
         String senderMemberId;
-        String postId;
+        Long postId;
         String postTitle;
         NotificationType notificationType;
     }
@@ -30,7 +30,7 @@ public class NotifyDto {
         String senderProfileImgUri;
         String senderNickName;
         String senderMemberId;
-        String postId;
+        Long postId;
         String postTitle;
         boolean isRead;
         String notificationType;

@@ -155,7 +155,7 @@ public class MemberService {
 //        member.updateLikeAlert(requestDto.isLikeAlert());
         member.updateScope(Scope.fromName(requestDto.getTicketScope()), Scope.fromName(requestDto.getOotdScope()),
                 Scope.fromName(requestDto.getBadgeScope()), Scope.fromName(requestDto.getFollowScope()));
-
+        member.updateAlert(requestDto.isLikeAlert(), requestDto.isCommentAlert());
         log.info("내 정보 수정이 완료되었습니다. memberId = {}, nickName = {}, blogName = {}, blogIntroduce = {}", member.getMemberId(), member.getNickName(), member.getBlogName(), member.getBlogIntroduce());
         return MemberDtoConverter.convertToMemberTaskDto(member);
     }
@@ -217,21 +217,37 @@ public class MemberService {
         return MemberDtoConverter.convertToFollowResponseDto(member, followingMember);
     }
 
+    // GET /api/member/follower?memberId={memberId}
     public MemberFollowerResponseDto getFollowerList(String targetMemberId) {
         Member member = memberRepository.getMemberById(targetMemberId);
+        List<FollowMemberInfoDto> followers = getFollower(member);
+        return MemberResponseDto.MemberFollowerResponseDto.builder()
+                .followerCnt(member.getFollowerCnt())
+                .followers(followers)
+                .build();
+    }
+
+    private List<FollowMemberInfoDto> getFollower(Member member) {
         List<MemberFollow> memberFollows = memberFollowRepository.findByFollowingMemberIdx(member.getIdx());
         List<FollowMemberInfoDto> followers = new ArrayList<>();
 
         for (MemberFollow memberFollow : memberFollows) {
             followers.add(MemberDtoConverter.convertToFollowMemberInfoDto(memberFollow.getMember()));
         }
-        return MemberResponseDto.MemberFollowerResponseDto.builder()
-                .followers(followers)
+        return followers;
+    }
+
+    // GET /api/member/following?memberId={memberId}
+    public MemberFollowingResponseDto getFollowingList(String targetMemberId) {
+        Member member = memberRepository.getMemberById(targetMemberId);
+        List<FollowMemberInfoDto> followings = getFollowing(member);
+        return MemberResponseDto.MemberFollowingResponseDto.builder()
+                .followingCnt(member.getFollowingCnt())
+                .followings(followings)
                 .build();
     }
 
-    public MemberFollowingResponseDto getFollowingList(String targetMemberId) {
-        Member member = memberRepository.getMemberById(targetMemberId);
+    private List<FollowMemberInfoDto> getFollowing(Member member) {
         List<MemberFollow> memberFollows = member.getMemberFollows();
         List<FollowMemberInfoDto> followings = new ArrayList<>();
 
@@ -239,9 +255,7 @@ public class MemberService {
             memberRepository.findByIdx(memberFollow.getFollowingMemberIdx())
                     .ifPresent(followingMember -> followings.add(MemberDtoConverter.convertToFollowMemberInfoDto(followingMember)));
         }
-        return MemberResponseDto.MemberFollowingResponseDto.builder()
-                .followings(followings)
-                .build();
+        return followings;
     }
 
     //== 알림을 보내는 기능 ==//

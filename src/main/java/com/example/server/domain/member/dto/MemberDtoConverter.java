@@ -40,13 +40,15 @@ public class MemberDtoConverter {
                 .activeStatus(member.getActiveState().name())
                 .socialType(member.getSocialType().getSocialName())
                 .koreanInterestedTypes(member.getInterestedTypes().stream().map(InterestedType::getTitle).toList())
-                .followerCnt(member.getFollowerCnt())
-                .followingCnt(member.getFollowingCnt())
+                .likeAlert(member.isLikeAlert())
+                .commentAlert(member.isCommentAlert())
                 .ticketScope(member.getTicketScope().getKey())
                 .ootdScope(member.getOotdScope().getKey())
                 .badgeScope(member.getBadgeScope().getKey())
                 .followScope(member.getFollowScope().getKey())
                 .createdAt(member.getCreatedAt().format(formatter))
+                .followerCnt(member.getFollowerCnt())
+                .followingCnt(member.getFollowingCnt())
                 .build();
     }
 
@@ -83,6 +85,7 @@ public class MemberDtoConverter {
                 .idx(member.getIdx())
                 .memberId(member.getMemberId())
                 .nickName(member.getNickName())
+                .profileImageUrl(member.getProfileImageAccessUri())
                 .build();
     }
 }

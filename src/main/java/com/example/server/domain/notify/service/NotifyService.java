@@ -29,6 +29,7 @@ public class NotifyService {
     private final NotifyRepository notifyRepository;
     private final EmitterRepository emitterRepository;
 
+    // 1시간
     private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60;
 
     public SseEmitter subscribe(String memberId, String lastEventId) {
