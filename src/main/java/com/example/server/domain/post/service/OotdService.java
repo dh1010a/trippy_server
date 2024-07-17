@@ -16,6 +16,8 @@ import com.example.server.domain.ticket.domain.Ticket;
 import com.example.server.domain.ticket.dto.TicketRequestDto;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -67,11 +69,12 @@ public class OotdService {
     }
 
     // GET /api/ootd/{id}
-    public PostResponseDto.GetOotdPostResponseDto getPost(Long postId){
+    public PostResponseDto.GetOotdPostResponseDto getPost(Long postId, HttpServletRequest request, HttpServletResponse response){
         Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND));
         if(post.getPostType() == PostType.POST) {
             throw new ErrorHandler(ErrorStatus.OOTD_TYPE_ERROR);
         }
+        else postService.addViewCount(request,response, postId);
         return PostDtoConverter.convertToOotdResponseDto(post);
     }
 

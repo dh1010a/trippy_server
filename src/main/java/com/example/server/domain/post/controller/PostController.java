@@ -9,6 +9,8 @@ import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import com.example.server.global.util.SecurityUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,9 +51,9 @@ public class PostController {
     }
 
     @GetMapping("/info/{id}")
-    public ApiResponse<?> getPost(@PathVariable("id") Long postId) {
+    public ApiResponse<?> getPost(@PathVariable("id") Long postId, HttpServletRequest request, HttpServletResponse response) {
         log.info("게시물 조회 요청 : postId = {}",postId );
-        return ApiResponse.onSuccess(postService.getPost(postId));
+        return ApiResponse.onSuccess(postService.getPost(postId,request,response));
     }
 
     @GetMapping("/all")
