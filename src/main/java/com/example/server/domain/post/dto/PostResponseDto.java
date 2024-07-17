@@ -43,6 +43,7 @@ public class PostResponseDto {
         private List<String> tags;
         private Integer likeCount;
         private Integer commentCount;
+        private Integer viewCount;
     }
 
 

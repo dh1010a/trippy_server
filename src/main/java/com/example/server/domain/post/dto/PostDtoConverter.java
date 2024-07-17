@@ -49,6 +49,7 @@ public class PostDtoConverter {
                 .images(convertImage).tags(tagNames)
                 .likeCount(likeCount)
                 .commentCount(commentCount)
+                .viewCount(post.getViewCount())
                 .build();
     }
 

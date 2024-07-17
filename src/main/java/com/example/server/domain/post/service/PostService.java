@@ -11,6 +11,7 @@ import com.example.server.domain.post.domain.Tag;
 import com.example.server.domain.post.dto.PostDtoConverter;
 import com.example.server.domain.post.dto.PostRequestDto;
 import com.example.server.domain.post.dto.PostResponseDto;
+import com.example.server.domain.post.model.OrderType;
 import com.example.server.domain.post.model.PostType;
 import com.example.server.domain.post.repository.PostRepository;
 import com.example.server.domain.post.repository.TagRepository;
@@ -29,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -86,33 +88,47 @@ public class PostService {
     }
 
     // GET api/post
-    public List<PostResponseDto.GetPostResponseDto> getAllPost(Integer page, Integer size){
+    public List<PostResponseDto.GetPostResponseDto> getAllPost(Integer page, Integer size, OrderType orderType){
         // 둘다 0일때 => 변수 입력 안받음
+        Sort sort = getSortByOrderType(orderType);
         if(page==0 && size==0){
-            List<Post> postList = postRepository.findAllByPostType(PostType.POST);
+            List<Post> postList = postRepository.findAllByPostType(PostType.POST,sort);
             return PostDtoConverter.convertToPostListResponseDto(postList);
         }
         else {
-            PageRequest pageable = PageRequest.of(page, size);
+            PageRequest pageable = PageRequest.of(page, size,sort);
             List<Post> postList = postRepository.findAllByPostType(PostType.POST,pageable).getContent();
             return PostDtoConverter.convertToPostListResponseDto(postList);
         }
     }
-
-    public List<PostResponseDto.GetPostResponseDto> getAllMemberPost(String memberId,Integer page, Integer size){
+    public List<PostResponseDto.GetPostResponseDto> getAllMemberPost(String memberId,Integer page, Integer size, OrderType orderType){
         Optional<Member> member = memberRepository.findByMemberId(memberId);
+        Sort sort = getSortByOrderType(orderType);
         // 둘다 0일때 => 변수 입력 안받음
         if(page==0 && size==0){
-            List<Post> postList = postRepository.findAllByMemberAndPostType(member.get(),PostType.POST);
+            List<Post> postList = postRepository.findAllByMemberAndPostType(member.get(),PostType.POST,sort);
             return PostDtoConverter.convertToPostListResponseDto(postList);
         }
         else {
-            Pageable pageable = PageRequest.of(page, size);
+            PageRequest pageable = PageRequest.of(page, size,sort);
             List<Post> postList = postRepository.findAllByMemberAndPostType(member.get(),PostType.POST, pageable).getContent();
             return PostDtoConverter.convertToPostListResponseDto(postList);
         }
 
     }
+
+    public Sort getSortByOrderType(OrderType orderType) {
+        switch (orderType) {
+            case LIKE:
+                return Sort.by(Sort.Direction.DESC, "likes.size");
+            case VIEW:
+                return Sort.by(Sort.Direction.DESC, "viewCount");
+            case LATEST:
+            default:
+                return Sort.by(Sort.Direction.DESC, "createdAt");
+        }
+    }
+
 
 
     // DELETE api/post
