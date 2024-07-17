@@ -9,6 +9,7 @@ import com.example.server.domain.post.dto.OotdReqResDto;
 import com.example.server.domain.post.dto.PostDtoConverter;
 import com.example.server.domain.post.dto.PostRequestDto;
 import com.example.server.domain.post.dto.PostResponseDto;
+import com.example.server.domain.post.model.OrderType;
 import com.example.server.domain.post.model.PostType;
 import com.example.server.domain.post.repository.OotdRepository;
 import com.example.server.domain.post.repository.PostRepository;
@@ -16,11 +17,15 @@ import com.example.server.domain.ticket.domain.Ticket;
 import com.example.server.domain.ticket.dto.TicketRequestDto;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.query.Order;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -67,38 +72,41 @@ public class OotdService {
     }
 
     // GET /api/ootd/{id}
-    public PostResponseDto.GetOotdPostResponseDto getPost(Long postId){
+    public PostResponseDto.GetOotdPostResponseDto getPost(Long postId, HttpServletRequest request, HttpServletResponse response){
         Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND));
         if(post.getPostType() == PostType.POST) {
             throw new ErrorHandler(ErrorStatus.OOTD_TYPE_ERROR);
         }
+        else postService.addViewCount(request,response, postId);
         return PostDtoConverter.convertToOotdResponseDto(post);
     }
 
     // GET api/ootd/all
-    public List<PostResponseDto.GetOotdPostResponseDto> getAllPost(Integer page, Integer size){
+    public List<PostResponseDto.GetOotdPostResponseDto> getAllPost(Integer page, Integer size, OrderType orderType){
         // 둘다 0일때 => 변수 입력 안받음
+        Sort sort = postService.getSortByOrderType(orderType);
         if(page==0 && size==0){
-            List<Post> postList = postRepository.findAllByPostType(PostType.OOTD);
+            List<Post> postList = postRepository.findAllByPostType(PostType.OOTD,sort);
             return PostDtoConverter.convertToOOTDListResponseDto(postList);
         }
         else {
-            PageRequest pageable = PageRequest.of(page, size);
+            PageRequest pageable = PageRequest.of(page, size,sort);
             List<Post> postList = postRepository.findAllByPostType(PostType.OOTD,pageable).getContent();
             return PostDtoConverter.convertToOOTDListResponseDto(postList);
         }
     }
 
     // GET api/ootd/
-    public List<PostResponseDto.GetOotdPostResponseDto> getAllMemberPost(String memberId,Integer page, Integer size){
+    public List<PostResponseDto.GetOotdPostResponseDto> getAllMemberPost(String memberId,Integer page, Integer size,OrderType orderType){
         Member member = postService.getMember(memberId);
+        Sort sort = postService.getSortByOrderType(orderType);
         // 둘다 0일때 => 변수 입력 안받음
         if(page==0 && size==0){
-            List<Post> postList = postRepository.findAllByMemberAndPostType(member,PostType.OOTD);
+            List<Post> postList = postRepository.findAllByMemberAndPostType(member,PostType.OOTD,sort);
             return PostDtoConverter.convertToOOTDListResponseDto(postList);
         }
         else {
-            Pageable pageable = PageRequest.of(page, size);
+            Pageable pageable = PageRequest.of(page, size,sort);
             List<Post> postList = postRepository.findAllByMemberAndPostType(member,PostType.OOTD, pageable).getContent();
             return PostDtoConverter.convertToOOTDListResponseDto(postList);
         }

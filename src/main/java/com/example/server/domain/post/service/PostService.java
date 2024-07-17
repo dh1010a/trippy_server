@@ -11,6 +11,7 @@ import com.example.server.domain.post.domain.Tag;
 import com.example.server.domain.post.dto.PostDtoConverter;
 import com.example.server.domain.post.dto.PostRequestDto;
 import com.example.server.domain.post.dto.PostResponseDto;
+import com.example.server.domain.post.model.OrderType;
 import com.example.server.domain.post.model.PostType;
 import com.example.server.domain.post.repository.PostRepository;
 import com.example.server.domain.post.repository.TagRepository;
@@ -19,17 +20,20 @@ import com.example.server.domain.ticket.dto.TicketRequestDto;
 import com.example.server.domain.ticket.repository.TicketRepository;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
+import jakarta.servlet.http.Cookie;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,6 +49,8 @@ public class PostService {
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    private static final String VIEW_COOKIE_NAME= "View_Count";
 
     // POST api/post/
     @Transactional
@@ -70,42 +76,59 @@ public class PostService {
     }
 
     // GET api/post
-    public PostResponseDto.GetPostResponseDto getPost(Long postId){
+    public PostResponseDto.GetPostResponseDto getPost(Long postId, HttpServletRequest request, HttpServletResponse response){
+        // 조회수 증가
+       // response.addCookie(cookie);
         Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND));
         if(post.getPostType() == PostType.OOTD) {
             throw new ErrorHandler(ErrorStatus.POST_TYPE_ERROR);
         }
+        else  addViewCount(request,response, postId);
         return PostDtoConverter.convertToGetResponseDto(post);
     }
 
     // GET api/post
-    public List<PostResponseDto.GetPostResponseDto> getAllPost(Integer page, Integer size){
+    public List<PostResponseDto.GetPostResponseDto> getAllPost(Integer page, Integer size, OrderType orderType){
         // 둘다 0일때 => 변수 입력 안받음
+        Sort sort = getSortByOrderType(orderType);
         if(page==0 && size==0){
-            List<Post> postList = postRepository.findAllByPostType(PostType.POST);
+            List<Post> postList = postRepository.findAllByPostType(PostType.POST,sort);
             return PostDtoConverter.convertToPostListResponseDto(postList);
         }
         else {
-            PageRequest pageable = PageRequest.of(page, size);
+            PageRequest pageable = PageRequest.of(page, size,sort);
             List<Post> postList = postRepository.findAllByPostType(PostType.POST,pageable).getContent();
             return PostDtoConverter.convertToPostListResponseDto(postList);
         }
     }
-
-    public List<PostResponseDto.GetPostResponseDto> getAllMemberPost(String memberId,Integer page, Integer size){
+    public List<PostResponseDto.GetPostResponseDto> getAllMemberPost(String memberId,Integer page, Integer size, OrderType orderType){
         Optional<Member> member = memberRepository.findByMemberId(memberId);
+        Sort sort = getSortByOrderType(orderType);
         // 둘다 0일때 => 변수 입력 안받음
         if(page==0 && size==0){
-            List<Post> postList = postRepository.findAllByMemberAndPostType(member.get(),PostType.POST);
+            List<Post> postList = postRepository.findAllByMemberAndPostType(member.get(),PostType.POST,sort);
             return PostDtoConverter.convertToPostListResponseDto(postList);
         }
         else {
-            Pageable pageable = PageRequest.of(page, size);
+            PageRequest pageable = PageRequest.of(page, size,sort);
             List<Post> postList = postRepository.findAllByMemberAndPostType(member.get(),PostType.POST, pageable).getContent();
             return PostDtoConverter.convertToPostListResponseDto(postList);
         }
 
     }
+
+    public Sort getSortByOrderType(OrderType orderType) {
+        switch (orderType) {
+            case LIKE:
+                return Sort.by(Sort.Direction.DESC, "likes.size");
+            case VIEW:
+                return Sort.by(Sort.Direction.DESC, "viewCount");
+            case LATEST:
+            default:
+                return Sort.by(Sort.Direction.DESC, "createdAt");
+        }
+    }
+
 
 
     // DELETE api/post
@@ -273,6 +296,34 @@ public class PostService {
     public long getTotalCountByMember(String memberId, PostType type){
         Member member = getMember(memberId);
         return postRepository.countByMemberAndPostType(member,type);
+    }
+
+    // 조회수 증가 메서드
+    public void addViewCount(HttpServletRequest request, HttpServletResponse response, Long postId) {
+        Cookie[] cookies = request.getCookies();
+        boolean isNewCookie = true;
+        Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND));
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("visit_cookie".equals(cookie.getName())) {
+                    if ( !cookie.getValue().contains(postId.toString())) {
+                        cookie.setValue(cookie.getValue() + "_" + postId.toString());
+                        cookie.setMaxAge(60 * 60 * 2); // (2시간)
+                        response.addCookie(cookie);
+                        post.addViewCount();
+                    }
+                    isNewCookie = false;
+                    break;
+                }
+            }
+        }
+
+        if (isNewCookie) {
+            Cookie newCookie = new Cookie("visit_cookie", postId.toString());
+            newCookie.setMaxAge(60 * 60 * 2); // 쿠키 시간 설정 (2시간)
+            response.addCookie(newCookie);
+            post.addViewCount();
+        }
     }
 
 

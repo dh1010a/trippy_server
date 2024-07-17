@@ -40,6 +40,8 @@ public class Post extends BaseTimeEntity {
 
     private String location;
 
+    private int viewCount;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_idx")
     private Member member;
@@ -120,6 +122,10 @@ public class Post extends BaseTimeEntity {
 
     public LocalDateTime getCreateDate() {
         return this.getCreatedAt();
+    }
+
+    public void addViewCount(){
+        this.viewCount++;
     }
 
 }
