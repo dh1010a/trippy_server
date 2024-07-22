@@ -58,11 +58,18 @@ public class SilentReAuthenticationFilter extends OncePerRequestFilter {
             response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.onFailure(ErrorStatus.MEMBER_COOKIE_NOT_FOUND.getCode(),
                     ErrorStatus.MEMBER_COOKIE_NOT_FOUND.getMessage(), null)));
             log.info("Access Denied : RefreshToken이 없습니다. serverName : {}", request.getServerName());
+        } else if (!jwtService.isTokenValid(refreshToken)) {
+            response.setStatus(ErrorStatus.MEMBER_TOKEN_NOT_VALID.getHttpStatus().value());
+            response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.onFailure(ErrorStatus.MEMBER_TOKEN_NOT_VALID.getCode(),
+                    ErrorStatus.MEMBER_TOKEN_NOT_VALID.getMessage(), null)));
+            log.info("Access Denied : RefreshToken이 유효하지 않습니다. serverName : {}", request.getServerName());
         }
 
         if (refreshToken != null && jwtService.isTokenValid(refreshToken)) {
             checkRefreshTokenAndReIssueAccessToken(request, response, refreshToken);
         }
+
+
 
     }
 
