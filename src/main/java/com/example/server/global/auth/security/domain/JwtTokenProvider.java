@@ -99,7 +99,6 @@ public class JwtTokenProvider {
 				.collect(Collectors.joining(","));
 
 		Date now = new Date();
-		log.info("현재 토큰이 발급된 시각 = " + now.getTime());
 		Date accessTokenExpiration = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_HOUR * 60 * 60 * 1000);
 //		Date accessTokenExpiration = new Date(now.getTime() +  60 * 1000); // For test 1분
 
