@@ -128,7 +128,7 @@ public class MemberController {
     public ApiResponse<?> getFollowing(@RequestParam("memberId") String targetMemberId){
         // 비활성화된 멤버는 조회 안되게 하는 로직 추가 구현 해야함
         String memberId = getLoginMemberId();
-        log.info("팔로잉 조회 요청 : memberId = {}, nickName = {}", memberId, targetMemberId);
+        log.info("팔로잉 조회 요청 : memberId = {}, targetMemberId = {}", memberId, targetMemberId);
         if (memberService.isNotValidAccessToFollow(memberId, targetMemberId)) {
             return ApiResponse.onFailure(ErrorStatus.MEMBER_CANNOT_ACCESS_FOLLOW.getCode(), ErrorStatus.MEMBER_CANNOT_ACCESS_FOLLOW.getMessage(),
                     "팔로잉 목록에 접근할 수 없습니다.");
@@ -140,7 +140,7 @@ public class MemberController {
     public ApiResponse<?> getFollower(@RequestParam("memberId") String targetMemberId)  {
         // 비활성화된 멤버는 조회 안되게 하는 로직 추가 구현 해야함
         String memberId = getLoginMemberId();
-        log.info("팔로우 조회 요청 : memberId = {}, nickName = {}", memberId, targetMemberId);
+        log.info("팔로우 조회 요청 : memberId = {}, targetMemberId = {}", memberId, targetMemberId);
         if (memberService.isNotValidAccessToFollow(memberId, targetMemberId)) {
             return ApiResponse.onFailure(ErrorStatus.MEMBER_CANNOT_ACCESS_FOLLOW.getCode(), ErrorStatus.MEMBER_CANNOT_ACCESS_FOLLOW.getMessage(),
                     "팔로잉 목록에 접근할 수 없습니다.");

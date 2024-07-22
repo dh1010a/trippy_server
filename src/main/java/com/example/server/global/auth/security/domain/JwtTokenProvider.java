@@ -97,7 +97,8 @@ public class JwtTokenProvider {
 				.collect(Collectors.joining(","));
 
 		Date now = new Date();
-		Date accessTokenExpiration = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_HOUR * 60 * 60 * 1000);
+//		Date accessTokenExpiration = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_HOUR * 60 * 60 * 1000);
+		Date accessTokenExpiration = new Date(now.getTime() +  60 * 1000); // For test 1분
 
 		CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
 
@@ -113,7 +114,8 @@ public class JwtTokenProvider {
 
 	public String reIssueAccessToken(String memberId) {
 		Date now = new Date();
-		Date accessTokenExpiration = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_HOUR * 60 * 60 * 1000);
+//		Date accessTokenExpiration = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_HOUR * 60 * 60 * 1000);
+		Date accessTokenExpiration = new Date(now.getTime() +  60 * 1000); // For test 1분
 
 		Member member = memberRepository.findByMemberId(memberId)
 				.orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
