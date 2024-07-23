@@ -53,8 +53,9 @@ public class PostController {
 
     @GetMapping("/info/{id}")
     public ApiResponse<?> getPost(@PathVariable("id") Long postId, HttpServletRequest request, HttpServletResponse response) {
-        log.info("게시물 조회 요청 : postId = {}",postId );
-        return ApiResponse.onSuccess(postService.getPost(postId,request,response));
+        String loginMemberId = getLoginMemberId();
+        log.info("게시물 조회 요청 : postId = {}, loginMemberId = {}",postId,loginMemberId );
+        return ApiResponse.onSuccess(postService.getPost(postId,loginMemberId,request,response));
     }
 
     @GetMapping("/all")
@@ -66,8 +67,9 @@ public class PostController {
         if(page == null) page = 0;
         if(size==null) size = 0;
         if(orderType == null ) orderType = OrderType.LATEST;
-        log.info("모든 게시물 조회 요청 ");
-         return ApiResponse.onSuccess(postService.getAllPost(page, size,orderType));
+        String loginMemberId = getLoginMemberId();
+        log.info("모든 게시물 조회 요청 : loginMemberId = {}",loginMemberId);
+         return ApiResponse.onSuccess(postService.getAllPost(page,loginMemberId ,size,orderType));
     }
 
     @GetMapping("/my")
@@ -81,7 +83,7 @@ public class PostController {
         String memberId = getLoginMemberId();
         if(orderType == null ) orderType = OrderType.LATEST;
         log.info("로그인 회원 게시물 조회 요청 : memberId = {}", memberId );
-        return ApiResponse.onSuccess(postService.getAllMemberPost(memberId,page,size,orderType));
+        return ApiResponse.onSuccess(postService.getAllMemberPost(memberId,memberId,page,size,orderType));
     }
 
     @GetMapping("/by-member")
@@ -94,8 +96,9 @@ public class PostController {
         if(page == null) page = 0;
         if(size==null) size = 0;
         if(orderType == null ) orderType = OrderType.LATEST;
-        log.info("회원별 게시물 조회 요청 : memberId = {}", memberId );
-        return ApiResponse.onSuccess(postService.getAllMemberPost(memberId,page,size,orderType));
+        String loginMemberId = getLoginMemberId();
+        log.info("회원별 게시물 조회 요청 : memberId = {},loginMemberId = {}", memberId ,loginMemberId);
+        return ApiResponse.onSuccess(postService.getAllMemberPost(memberId,loginMemberId,page,size,orderType));
     }
 
     @GetMapping("/count/all")

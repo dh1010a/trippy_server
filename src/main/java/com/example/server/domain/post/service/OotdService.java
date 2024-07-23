@@ -51,8 +51,7 @@ public class OotdService {
     @Transactional
     public PostResponseDto.GetOotdPostResponseDto uploadOotdPost(PostRequestDto.UploadOOTDPostRequestDto requestDto) {
         PostRequestDto.CommonPostRequestDto postRequestDto = requestDto.getPostRequest();
-        Member member = postService.getMember(postRequestDto.getMemberId());
-        if (member == null) throw new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND);
+        Member member = Optional.ofNullable(postService.getMember(postRequestDto.getMemberId())).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
         Post post = postService.savePost(postRequestDto);
 
         OotdReqResDto.UploadOOTDRequestDto ootdRequestDto = requestDto.getOotdRequest();
@@ -68,47 +67,50 @@ public class OotdService {
 
         Ootd ootd = saveOotd(ootdRequestDto);
         savePostAndOOTDAndAll(post,ootd);
-        return PostDtoConverter.convertToOotdResponseDto(post);
+        return PostDtoConverter.convertToOotdResponseDto(post,member);
     }
 
     // GET /api/ootd/{id}
-    public PostResponseDto.GetOotdPostResponseDto getPost(Long postId, HttpServletRequest request, HttpServletResponse response){
+    public PostResponseDto.GetOotdPostResponseDto getPost(Long postId,String memberId, HttpServletRequest request, HttpServletResponse response){
         Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND));
         if(post.getPostType() == PostType.POST) {
             throw new ErrorHandler(ErrorStatus.OOTD_TYPE_ERROR);
         }
         else postService.addViewCount(request,response, postId);
-        return PostDtoConverter.convertToOotdResponseDto(post);
+        Member member = !memberId.equals("anonymousUser") ? Optional.ofNullable(postService.getMember(memberId)).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND)) : null;
+        return PostDtoConverter.convertToOotdResponseDto(post,member);
     }
 
     // GET api/ootd/all
-    public List<PostResponseDto.GetOotdPostResponseDto> getAllPost(Integer page, Integer size, OrderType orderType){
+    public List<PostResponseDto.GetOotdPostResponseDto> getAllPost(String memberId, Integer page, Integer size, OrderType orderType){
         // 둘다 0일때 => 변수 입력 안받음
         Sort sort = postService.getSortByOrderType(orderType);
+        Member member = !memberId.equals("anonymousUser") ? Optional.ofNullable(postService.getMember(memberId)).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND)) : null;
         if(page==0 && size==0){
             List<Post> postList = postRepository.findAllByPostType(PostType.OOTD,sort);
-            return PostDtoConverter.convertToOOTDListResponseDto(postList);
+            return PostDtoConverter.convertToOOTDListResponseDto(postList,member);
         }
         else {
             PageRequest pageable = PageRequest.of(page, size,sort);
             List<Post> postList = postRepository.findAllByPostType(PostType.OOTD,pageable).getContent();
-            return PostDtoConverter.convertToOOTDListResponseDto(postList);
+            return PostDtoConverter.convertToOOTDListResponseDto(postList,member);
         }
     }
 
     // GET api/ootd/
-    public List<PostResponseDto.GetOotdPostResponseDto> getAllMemberPost(String memberId,Integer page, Integer size,OrderType orderType){
+    public List<PostResponseDto.GetOotdPostResponseDto> getAllMemberPost(String memberId,String loginMemberId, Integer page, Integer size,OrderType orderType){
         Member member = postService.getMember(memberId);
         Sort sort = postService.getSortByOrderType(orderType);
+        Member loginMember = !memberId.equals("anonymousUser") ? Optional.ofNullable(postService.getMember(loginMemberId)).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND)) : null;
         // 둘다 0일때 => 변수 입력 안받음
         if(page==0 && size==0){
             List<Post> postList = postRepository.findAllByMemberAndPostType(member,PostType.OOTD,sort);
-            return PostDtoConverter.convertToOOTDListResponseDto(postList);
+            return PostDtoConverter.convertToOOTDListResponseDto(postList,loginMember);
         }
         else {
             Pageable pageable = PageRequest.of(page, size,sort);
             List<Post> postList = postRepository.findAllByMemberAndPostType(member,PostType.OOTD, pageable).getContent();
-            return PostDtoConverter.convertToOOTDListResponseDto(postList);
+            return PostDtoConverter.convertToOOTDListResponseDto(postList,loginMember);
         }
 
     }
