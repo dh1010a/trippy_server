@@ -5,6 +5,7 @@ import com.example.server.domain.image.dto.ImageDto;
 import com.example.server.domain.image.model.ImageType;
 import com.example.server.domain.image.repository.ImageRepository;
 import com.example.server.domain.member.domain.Member;
+import com.example.server.domain.member.model.Role;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.domain.post.domain.Tag;
@@ -36,6 +37,8 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.example.server.domain.member.model.Role.ROLE_MEMBER;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -56,8 +59,8 @@ public class PostService {
     @Transactional
     public PostResponseDto.GetPostResponseDto uploadPost(PostRequestDto.UploadPostRequestDto requestDto) {
         PostRequestDto.CommonPostRequestDto postRequestDto = requestDto.getPostRequest();
-        Member member = getMember(postRequestDto.getMemberId());
-        if (member == null) throw new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND);
+        Member member = Optional.ofNullable(getMember(postRequestDto.getMemberId())).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+
         TicketRequestDto.UploadTicketRequestDto ticketRequestDto = requestDto.getTicketRequest();
         Post post = savePost(postRequestDto);
         System.out.println(requestDto.toString());
@@ -72,11 +75,11 @@ public class PostService {
 
         Ticket ticket = saveTicket(ticketRequestDto);
         savePostAndTicketAndAll(post,ticket);
-        return PostDtoConverter.convertToGetResponseDto(post);
+        return PostDtoConverter.convertToGetResponseDto(post,member);
     }
 
     // GET api/post
-    public PostResponseDto.GetPostResponseDto getPost(Long postId, HttpServletRequest request, HttpServletResponse response){
+    public PostResponseDto.GetPostResponseDto getPost(Long postId, String memberId, HttpServletRequest request, HttpServletResponse response){
         // 조회수 증가
        // response.addCookie(cookie);
         Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND));
@@ -84,35 +87,43 @@ public class PostService {
             throw new ErrorHandler(ErrorStatus.POST_TYPE_ERROR);
         }
         else  addViewCount(request,response, postId);
-        return PostDtoConverter.convertToGetResponseDto(post);
+
+        Member member = !memberId.equals("anonymousUser") ? Optional.ofNullable(getMember(memberId)).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND)) : null;
+        return PostDtoConverter.convertToGetResponseDto(post,member);
     }
 
     // GET api/post
-    public List<PostResponseDto.GetPostResponseDto> getAllPost(Integer page, Integer size, OrderType orderType){
+    public List<PostResponseDto.GetPostResponseDto> getAllPost(Integer page, String memberId, Integer size, OrderType orderType){
+
+        Member member = !memberId.equals("anonymousUser") ? Optional.ofNullable(getMember(memberId)).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND)) : null;
+
         // 둘다 0일때 => 변수 입력 안받음
         Sort sort = getSortByOrderType(orderType);
+
         if(page==0 && size==0){
             List<Post> postList = postRepository.findAllByPostType(PostType.POST,sort);
-            return PostDtoConverter.convertToPostListResponseDto(postList);
+            return PostDtoConverter.convertToPostListResponseDto(postList, member);
         }
         else {
             PageRequest pageable = PageRequest.of(page, size,sort);
             List<Post> postList = postRepository.findAllByPostType(PostType.POST,pageable).getContent();
-            return PostDtoConverter.convertToPostListResponseDto(postList);
+            return PostDtoConverter.convertToPostListResponseDto(postList,member);
         }
     }
-    public List<PostResponseDto.GetPostResponseDto> getAllMemberPost(String memberId,Integer page, Integer size, OrderType orderType){
-        Optional<Member> member = memberRepository.findByMemberId(memberId);
+    public List<PostResponseDto.GetPostResponseDto> getAllMemberPost(String memberId,String loginMemberId, Integer page, Integer size, OrderType orderType){
+        Member member = Optional.ofNullable(getMember(memberId)).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+
+        Member loginMember = Optional.ofNullable(getMember(loginMemberId)).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
         Sort sort = getSortByOrderType(orderType);
         // 둘다 0일때 => 변수 입력 안받음
         if(page==0 && size==0){
-            List<Post> postList = postRepository.findAllByMemberAndPostType(member.get(),PostType.POST,sort);
-            return PostDtoConverter.convertToPostListResponseDto(postList);
+            List<Post> postList = postRepository.findAllByMemberAndPostType(member,PostType.POST,sort);
+            return PostDtoConverter.convertToPostListResponseDto(postList,loginMember);
         }
         else {
             PageRequest pageable = PageRequest.of(page, size,sort);
-            List<Post> postList = postRepository.findAllByMemberAndPostType(member.get(),PostType.POST, pageable).getContent();
-            return PostDtoConverter.convertToPostListResponseDto(postList);
+            List<Post> postList = postRepository.findAllByMemberAndPostType(member,PostType.POST, pageable).getContent();
+            return PostDtoConverter.convertToPostListResponseDto(postList,loginMember);
         }
 
     }
@@ -146,7 +157,7 @@ public class PostService {
         if(!((post.getMember().getIdx()).equals(member.getIdx()))) throw new ErrorHandler(ErrorStatus.NO_PERMISSION__FOR_POST);
         updateTagsAndImages(post,requestDto.getTags(),requestDto.getImages());
         post.updatePost(requestDto);
-        return PostDtoConverter.convertToGetResponseDto(post);
+        return PostDtoConverter.convertToGetResponseDto(post,member);
     }
 
     // GET member 메서드

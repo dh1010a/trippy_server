@@ -4,10 +4,14 @@ import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.image.dto.ImageResponseDto;
 import com.example.server.domain.image.model.ImageType;
 import com.example.server.domain.member.domain.Member;
+import com.example.server.domain.member.model.Role;
 import com.example.server.domain.member.model.Scope;
 import com.example.server.domain.post.domain.Ootd;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.domain.ticket.dto.TicketResponseDto;
+import com.example.server.global.apiPayload.code.status.ErrorStatus;
+import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
+import com.example.server.global.util.SecurityUtil;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,7 +23,7 @@ import static com.example.server.domain.ticket.dto.TicketDtoConverter.convertToT
 
 public class PostDtoConverter {
 
-    public static PostResponseDto.PostBasicResponseDto convertToPostBasicDto(Post post) {
+    public static PostResponseDto.PostBasicResponseDto convertToPostBasicDto(Post post,Member member) {
 
         // 태그
         List<String> tagNames = post.getTag() != null ? post.getTag().stream()
@@ -35,6 +39,11 @@ public class PostDtoConverter {
         // 좋아요
         int likeCount = post.getLikes() != null ? post.getLikes().size() : 0;
 
+        boolean isLiked = false;
+        if (member != null && member.getRole().equals(Role.ROLE_MEMBER)) {
+            isLiked = post.getLikes().stream().anyMatch(like -> like.getMember().equals(member));
+        }
+
         // 댓글
         int commentCount = post.getComments() != null ? (int) post.getComments().stream().filter(
                 comment -> comment.getStatus() != Scope.PRIVATE
@@ -48,14 +57,15 @@ public class PostDtoConverter {
                 .location(post.getLocation())
                 .images(convertImage).tags(tagNames)
                 .likeCount(likeCount)
+                .isLiked(isLiked)
                 .commentCount(commentCount)
                 .viewCount(post.getViewCount())
                 .build();
     }
 
-    public static PostResponseDto.GetPostResponseDto convertToGetResponseDto(Post post) {
+    public static PostResponseDto.GetPostResponseDto convertToGetResponseDto(Post post, Member member) {
         TicketResponseDto.TicketBasicResponseDto ticket = convertToTicketResponseDto(post.getTicket());
-        PostResponseDto.PostBasicResponseDto postDto = convertToPostBasicDto(post);
+        PostResponseDto.PostBasicResponseDto postDto = convertToPostBasicDto(post,member);
         PostResponseDto.PostMemberResponseDto memberDto = convertToPostMemberResponseDto(post.getMember());
 
         return PostResponseDto.GetPostResponseDto.builder()
@@ -66,9 +76,9 @@ public class PostDtoConverter {
                 .build();
     }
 
-    public static PostResponseDto.GetOotdPostResponseDto convertToOotdResponseDto(Post post){
+    public static PostResponseDto.GetOotdPostResponseDto convertToOotdResponseDto(Post post,Member member){
         OotdReqResDto.OotdBasicResponseDto ootdDto = convertToOotdBasicResponseDto(post.getOotd());
-        PostResponseDto.PostBasicResponseDto postDto = convertToPostBasicDto(post);
+        PostResponseDto.PostBasicResponseDto postDto = convertToPostBasicDto(post,member);
         PostResponseDto.PostMemberResponseDto memberDto = convertToPostMemberResponseDto(post.getMember());
         return PostResponseDto.GetOotdPostResponseDto.builder()
                 .post(postDto)
@@ -97,16 +107,16 @@ public class PostDtoConverter {
                 .build();
     }
 
-    public static  List<PostResponseDto.GetPostResponseDto> convertToPostListResponseDto(List<Post> posts) {
+    public static  List<PostResponseDto.GetPostResponseDto> convertToPostListResponseDto(List<Post> posts, Member member) {
         List<PostResponseDto.GetPostResponseDto> postDtos = posts.stream()
-                .map(post -> convertToGetResponseDto(post))
+                .map(post -> convertToGetResponseDto(post,member))
                 .collect(Collectors.toList());
         return postDtos;
     }
 
-    public static  List<PostResponseDto.GetOotdPostResponseDto> convertToOOTDListResponseDto(List<Post> posts) {
+    public static  List<PostResponseDto.GetOotdPostResponseDto> convertToOOTDListResponseDto(List<Post> posts, Member member) {
         List<PostResponseDto.GetOotdPostResponseDto> postDtos = posts.stream()
-                .map(post -> convertToOotdResponseDto(post))
+                .map(post -> convertToOotdResponseDto(post,member))
                 .collect(Collectors.toList());
         return postDtos;
     }
@@ -121,5 +131,6 @@ public class PostDtoConverter {
                 .build();
         return memberDto;
     }
+
 
 }

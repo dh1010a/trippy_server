@@ -42,8 +42,17 @@ public class PostResponseDto {
         private List<ImageResponseDto.ImageBasicResponseDto> images;
         private List<String> tags;
         private Integer likeCount;
+        private Boolean isLiked;
         private Integer commentCount;
         private Integer viewCount;
+    }
+
+    @Builder
+    @Data
+    public static class GetIsLikedList{
+        private Long postId;
+        private Boolean isLiked;
+        private Boolean isSuccess;
     }
 
 
