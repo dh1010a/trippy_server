@@ -40,7 +40,7 @@ public class PostDtoConverter {
         int likeCount = post.getLikes() != null ? post.getLikes().size() : 0;
 
         boolean isLiked = false;
-        if (member != null && member.getRole().equals(Role.ROLE_MEMBER)) {
+        if (member != null && member.getRole().equals(Role.ROLE_MEMBER) && post.getLikes() != null) {
             isLiked = post.getLikes().stream().anyMatch(like -> like.getMember().equals(member));
         }
 
