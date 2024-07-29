@@ -31,6 +31,8 @@ public class LikeResponseDto {
         private Long likeId;
         private String memberId;
         private String nickName;
+        private String profileUrl;
+        private String blogName;
     }
 
 }

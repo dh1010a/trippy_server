@@ -1,5 +1,6 @@
 package com.example.server.domain.post.dto;
 
+import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.post.domain.Like;
 
 import java.util.ArrayList;
@@ -19,10 +20,13 @@ public class LikeDtoConverter {
     public static LikeResponseDto.LikeListBasicResponseDto convertToLikeBasicListDto(List<Like> likeList, Integer likeCount, Long PostId){
         List<LikeResponseDto.LikeListDto> likeListDtoList = new ArrayList<>();
         for (Like like : likeList){
+            Image profileImage = like.getMember().getImages().stream().filter(Image::isProfileImage).findAny().orElse(null);
             LikeResponseDto.LikeListDto likeDto = LikeResponseDto.LikeListDto.builder()
                     .likeId(like.getId())
                     .memberId(like.getMember().getMemberId())
                     .nickName(like.getMember().getNickName())
+                    .blogName(like.getMember().getBlogName() != null ? like.getMember().getBlogName() : null)
+                    .profileUrl(profileImage != null ? profileImage.getAccessUri() : null)
                     .build();
             likeListDtoList.add(likeDto);
         }
