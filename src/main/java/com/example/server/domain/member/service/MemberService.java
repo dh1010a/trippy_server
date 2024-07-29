@@ -6,7 +6,7 @@ import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.image.model.ImageType;
 import com.example.server.domain.image.repository.ImageRepository;
 import com.example.server.domain.image.service.OracleImageService;
-import com.example.server.domain.mail.application.MailService;
+import com.example.server.domain.mail.service.MailService;
 import com.example.server.domain.member.domain.BookMark;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.dto.MemberDtoConverter;
@@ -152,6 +152,7 @@ public class MemberService {
         member.updateNickName(requestDto.getNickName());
         member.updateBlogName(requestDto.getBlogName());
         member.updateBlogIntroduce(requestDto.getBlogIntroduce());
+        member.updateInterestedTypes(requestDto.getKoreanInterestedTypes());
 //        member.updateLikeAlert(requestDto.isLikeAlert());
         member.updateScope(Scope.fromName(requestDto.getTicketScope()), Scope.fromName(requestDto.getOotdScope()),
                 Scope.fromName(requestDto.getBadgeScope()), Scope.fromName(requestDto.getFollowScope()));
@@ -159,6 +160,9 @@ public class MemberService {
         log.info("내 정보 수정이 완료되었습니다. memberId = {}, nickName = {}, blogName = {}, blogIntroduce = {}", member.getMemberId(), member.getNickName(), member.getBlogName(), member.getBlogIntroduce());
         return MemberDtoConverter.convertToMemberTaskDto(member);
     }
+
+
+
 
     public IsNewMemberResponseDto isNewMember(String memberId) {
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
@@ -352,14 +356,14 @@ public class MemberService {
         }
     }
 
-    public MemberTaskSuccessResponseDto updateInterestedTypes(String memberId, MemberRequestDto.UpdateInterestedTypesRequestDto requestDto) {
+    public MemberTaskSuccessResponseDto setInterestedTypes(String memberId, MemberRequestDto.UpdateInterestedTypesRequestDto requestDto) {
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
         List<InterestedType> interestedTypes = new ArrayList<>();
         for (String x : requestDto.getKoreanInterestedTypes()) {
             interestedTypes.add(InterestedType.fromKoreanName(x));
             log.info("관심사 변경 : memberId = {}, interestedType = {}", memberId, x);
         }
-        member.updateInterestedTypes(interestedTypes);
+        member.setInterestedTypes(interestedTypes);
 
         return MemberTaskSuccessResponseDto.builder()
                 .isSuccess(true)
