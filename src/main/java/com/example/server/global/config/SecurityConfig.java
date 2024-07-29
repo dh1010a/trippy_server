@@ -72,6 +72,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/post/all", "/api/ootd/all", "/api/post/count/all", "/api/post/info/{postId}", "/api/ootd/info/{postId}").permitAll()
                         .requestMatchers("/api/member/profile").anonymous()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/search").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
