@@ -13,6 +13,7 @@ public class LikeResponseDto {
         private Long likeId;
         private Long postId;
         private String memberId;
+        private String nickName;
         private Integer likeCount;
     }
 
@@ -29,6 +30,7 @@ public class LikeResponseDto {
     public static class LikeListDto {
         private Long likeId;
         private String memberId;
+        private String nickName;
     }
 
 }
