@@ -11,6 +11,7 @@ public class LikeDtoConverter {
                 .likeId(like.getId())
                 .postId(like.getPost().getId())
                 .likeCount(likeCount)
+                .nickName(like.getMember().getNickName())
                 .memberId(like.getMember().getMemberId())
                 .build();
     }
@@ -21,6 +22,7 @@ public class LikeDtoConverter {
             LikeResponseDto.LikeListDto likeDto = LikeResponseDto.LikeListDto.builder()
                     .likeId(like.getId())
                     .memberId(like.getMember().getMemberId())
+                    .nickName(like.getMember().getNickName())
                     .build();
             likeListDtoList.add(likeDto);
         }
