@@ -203,7 +203,12 @@ public class Member extends BaseTimeEntity {
         this.commentAlert = commentAlert;
     }
 
-    public void updateInterestedTypes(List<InterestedType> interestedTypes) {
+    public void updateInterestedTypes(List<String> interestedTypes) {
+        this.interestedTypes.clear();
+        interestedTypes.forEach(interestedType -> this.interestedTypes.add(InterestedType.fromKoreanName(interestedType)));
+    }
+
+    public void setInterestedTypes(List<InterestedType> interestedTypes) {
         this.interestedTypes = interestedTypes;
     }
 
