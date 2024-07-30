@@ -21,6 +21,7 @@ import com.example.server.domain.member.model.Role;
 import com.example.server.domain.member.model.Scope;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.domain.notify.dto.NotifyDtoConverter;
+import com.example.server.domain.notify.model.NotificationType;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import com.example.server.global.auth.oauth2.model.SocialType;
@@ -216,7 +217,7 @@ public class MemberService {
         member.increaseFollowingCnt();
         followingMember.increaseFollowerCnt();
 
-        publishEvent(member, followingMember);
+        publishFollowEvent(member, followingMember);
 
         return MemberDtoConverter.convertToFollowResponseDto(member, followingMember);
     }
@@ -260,11 +261,6 @@ public class MemberService {
                     .ifPresent(followingMember -> followings.add(MemberDtoConverter.convertToFollowMemberInfoDto(followingMember)));
         }
         return followings;
-    }
-
-    //== 알림을 보내는 기능 ==//
-    public void publishEvent(Member member, Member followingMember) {
-        eventPublisher.publishEvent(NotifyDtoConverter.convertToFollowNotifyRequestDto(member, followingMember));
     }
 
     public boolean isNotValidAccessToFollow(String memberId, String targetMemberId) {
@@ -434,5 +430,10 @@ public class MemberService {
     public String deleteAllMember() {
         memberRepository.deleteAll();
         return "전체 삭제 완료";
+    }
+
+    //== 알림을 보내는 기능 ==//
+    public void publishFollowEvent(Member member, Member receiver) {
+        eventPublisher.publishEvent(NotifyDtoConverter.convertToNotifyPublishRequestDto(member, receiver, NotificationType.FOLLOW));
     }
 }

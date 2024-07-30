@@ -111,12 +111,6 @@ public class MemberController {
 
     }
 
-    @PostMapping("/test")
-    public ApiResponse<?> testAuth() {
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return ApiResponse.onSuccess("Authenticated as: " + ("Not authenticated"));
-    }
-
     @PostMapping("/follow")
     public ApiResponse<?> followMember(@RequestParam(value = "memberId") String followingMemberId) {
         String memberId = getLoginMemberId();

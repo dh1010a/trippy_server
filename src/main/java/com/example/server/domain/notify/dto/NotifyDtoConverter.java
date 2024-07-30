@@ -8,13 +8,24 @@ import java.util.List;
 
 public class NotifyDtoConverter {
 
-    public static NotifyDto.NotifyPublishRequestDto convertToFollowNotifyRequestDto(Member member, Member followingMember) {
+    public static NotifyDto.NotifyPublishRequestDto convertToNotifyPublishRequestDto(Member member, Member receiver, NotificationType type) {
         return NotifyDto.NotifyPublishRequestDto.builder()
-                .receiver(followingMember)
+                .receiver(receiver)
                 .senderProfileImgUri(member.getProfileImageAccessUri())
                 .senderNickName(member.getNickName())
                 .senderMemberId(member.getMemberId())
-                .notificationType(NotificationType.FOLLOW)
+                .notificationType(type)
+                .build();
+    }
+
+    public static NotifyDto.NotifyPublishRequestDto convertToNotifyPublishRequestDto(Member member, Member receiver, NotificationType type, String content) {
+        return NotifyDto.NotifyPublishRequestDto.builder()
+                .receiver(receiver)
+                .content(content)
+                .senderProfileImgUri(member.getProfileImageAccessUri())
+                .senderNickName(member.getNickName())
+                .senderMemberId(member.getMemberId())
+                .notificationType(type)
                 .build();
     }
 

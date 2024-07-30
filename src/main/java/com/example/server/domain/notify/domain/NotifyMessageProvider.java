@@ -21,11 +21,11 @@ public class NotifyMessageProvider {
         return nickName + NEW_LIKE;
     }
 
-    public String getNewCommentReplyMessage(String nickName) {
+    public static String getNewCommentReplyMessage(String nickName) {
         return nickName + NEW_COMMENT_REPLY;
     }
 
-    public String getNewBadgeMessage() {
+    public static String getNewBadgeMessage() {
         return NEW_BADGE;
     }
 }

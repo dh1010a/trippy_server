@@ -2,6 +2,8 @@ package com.example.server.domain.post.service;
 
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.repository.MemberRepository;
+import com.example.server.domain.notify.dto.NotifyDtoConverter;
+import com.example.server.domain.notify.model.NotificationType;
 import com.example.server.domain.post.domain.Like;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.domain.post.dto.LikeResponseDto;
@@ -12,6 +14,7 @@ import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,10 +30,12 @@ public class LikeService {
     private final LikeRepository likeRepository;
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     // POST /api/like/{postId}
     public LikeResponseDto.LikeBasicResponseDto likeToPost(Long postId, String memberId) {
-        Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND)); Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND));
+        Member member = memberRepository.getMemberById(memberId);
         if(isLiked(postId, memberId)) throw new ErrorHandler(ErrorStatus.ALREADY_LIKED);
         else {
             Like like = Like.builder()
@@ -39,6 +44,7 @@ public class LikeService {
                     .build();
             likeRepository.save(like);
             Integer likeCount = getLikeCount(postId);
+            publishLikeEvent(member, post.getMember());
             return convertToLikeBasicDto(like,likeCount);
         }
 
@@ -74,6 +80,11 @@ public class LikeService {
 
     public Integer getLikeCount(Long postId) {
         return likeRepository.countByPostId(postId);
+    }
+
+    //== 알림을 보내는 기능 ==//
+    public void publishLikeEvent(Member member, Member receiver) {
+        eventPublisher.publishEvent(NotifyDtoConverter.convertToNotifyPublishRequestDto(member, receiver, NotificationType.LIKE));
     }
 
 }

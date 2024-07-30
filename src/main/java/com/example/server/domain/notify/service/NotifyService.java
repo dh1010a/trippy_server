@@ -152,6 +152,18 @@ public class NotifyService {
                     .isRead(false)
                     .notificationType(notificationType)
                     .build();
+            case REPLY -> Notify.builder()
+                    .receiver(receiver)
+                    .title(NotifyMessageProvider.getNewCommentReplyMessage(notifyPublishRequestDto.getSenderNickName()))
+                    .senderProfileImgUri(notifyPublishRequestDto.getSenderProfileImgUri())
+                    .senderNickName(notifyPublishRequestDto.getSenderNickName())
+                    .senderMemberId(notifyPublishRequestDto.getSenderMemberId())
+                    .content(notifyPublishRequestDto.getContent())
+                    .postId(notifyPublishRequestDto.getPostId())
+                    .postTitle(notifyPublishRequestDto.getPostTitle())
+                    .isRead(false)
+                    .notificationType(notificationType)
+                    .build();
             default -> throw new ErrorHandler(ErrorStatus.NOTIFY_UNSUPPORTED_TYPE);
         };
     }
