@@ -3,6 +3,7 @@ package com.example.server.domain.search.controller;
 import com.example.server.domain.post.dto.PostRequestDto;
 import com.example.server.domain.post.model.PostType;
 import com.example.server.domain.search.dto.SearchRequestDto;
+import com.example.server.domain.search.model.SearchType;
 import com.example.server.domain.search.service.SearchRedisService;
 import com.example.server.domain.search.service.SearchService;
 import com.example.server.global.apiPayload.ApiResponse;
@@ -30,7 +31,7 @@ public class SearchController {
     public ApiResponse<?> getSearchPostList(
             @RequestParam String keyword,
             @RequestParam PostType postType,
-            @RequestParam String searchType,
+            @RequestParam SearchType searchType,
             @RequestParam(required = false, defaultValue = "0") Integer page,
             @RequestParam(required = false, defaultValue = "0") Integer size
 

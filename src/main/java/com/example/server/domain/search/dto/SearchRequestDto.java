@@ -1,6 +1,7 @@
 package com.example.server.domain.search.dto;
 
 import com.example.server.domain.post.model.PostType;
+import com.example.server.domain.search.model.SearchType;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,7 +12,7 @@ public class SearchRequestDto {
     public static class SaveSearchRequest{
         private String keyword;
         private PostType postType;
-        private String searchType;
+        private SearchType searchType;
         private Integer page;
         private Integer size;
     }
