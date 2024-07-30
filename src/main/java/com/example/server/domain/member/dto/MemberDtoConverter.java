@@ -89,4 +89,10 @@ public class MemberDtoConverter {
                 .profileImageUrl(member.getProfileImageAccessUri())
                 .build();
     }
+
+    public static MemberGetFollowAvailableResponseDto convertToMemberGetFollowAvailableResponseDto(boolean isAvailable) {
+        return MemberGetFollowAvailableResponseDto.builder()
+                .isAvailable(isAvailable)
+                .build();
+    }
 }

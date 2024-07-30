@@ -1,6 +1,7 @@
 package com.example.server.domain.member.controller;
 
 
+import com.example.server.domain.member.dto.MemberDtoConverter;
 import com.example.server.domain.member.dto.MemberRequestDto;
 import com.example.server.domain.member.dto.MemberRequestDto.CommonCreateMemberRequestDto;
 import com.example.server.domain.member.dto.MemberRequestDto.CreateMemberRequestDto;
@@ -154,6 +155,13 @@ public class MemberController {
         }
         return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(), ErrorStatus._BAD_REQUEST.getMessage(),
                 "type 형식이 잘못되었습니다.");
+    }
+
+    @GetMapping("/follow/available")
+    public ApiResponse<?> isAvailableToGetFollow(@RequestParam(value = "memberId") String targetMemberId) {
+        String memberId = getLoginMemberId();
+        log.info("팔로우 가능 여부 조회 요청 : memberId = {}, targetMemberId = {}", memberId, targetMemberId);
+        return ApiResponse.onSuccess(MemberDtoConverter.convertToMemberGetFollowAvailableResponseDto(!memberService.isNotValidAccessToFollow(memberId, targetMemberId)));
     }
 
     @PatchMapping("/password")

@@ -103,11 +103,19 @@ public class MemberResponseDto {
         private List<FollowMemberInfoDto> followers;
     }
 
+
+
     @Data
     @Builder
     public static class MemberFollowingResponseDto {
         private int followingCnt;
         private List<FollowMemberInfoDto> followings;
+    }
+
+    @Data
+    @Builder
+    public static class MemberGetFollowAvailableResponseDto {
+        private boolean isAvailable;
     }
 
     @Data
