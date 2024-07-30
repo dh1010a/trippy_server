@@ -68,16 +68,16 @@ public class SearchService {
 
     private List<Post> getPostsWithoutPagination(SearchRequestDto.SaveSearchRequest saveSearchRequest) {
         return switch (saveSearchRequest.getSearchType()) {
-            case "title" -> postRepository.findPostByTitle(saveSearchRequest.getKeyword(), saveSearchRequest.getPostType());
-            case "titleAndContent" -> postRepository.findPostBodyAndTitle(saveSearchRequest.getKeyword(), saveSearchRequest.getPostType());
+            case TITLE -> postRepository.findPostByTitle(saveSearchRequest.getKeyword(), saveSearchRequest.getPostType());
+            case TITLE_OR_BODY -> postRepository.findPostBodyAndTitle(saveSearchRequest.getKeyword(), saveSearchRequest.getPostType());
             default -> Collections.emptyList();
         };
     }
 
     private List<Post> getPostsWithPagination(SearchRequestDto.SaveSearchRequest saveSearchRequest, Pageable pageable) {
         Page<Post> resultPage = switch (saveSearchRequest.getSearchType()) {
-            case "title" -> postRepository.findPostByTitle(saveSearchRequest.getKeyword(), saveSearchRequest.getPostType(), pageable);
-            case "titleAndContent" -> postRepository.findPostBodyAndTitle(saveSearchRequest.getKeyword(), saveSearchRequest.getPostType(), pageable);
+            case TITLE -> postRepository.findPostByTitle(saveSearchRequest.getKeyword(), saveSearchRequest.getPostType(), pageable);
+            case TITLE_OR_BODY -> postRepository.findPostBodyAndTitle(saveSearchRequest.getKeyword(), saveSearchRequest.getPostType(), pageable);
             default -> Page.empty(pageable);
         };
         return resultPage.getContent();
