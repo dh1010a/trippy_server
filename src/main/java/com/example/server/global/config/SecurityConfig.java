@@ -69,9 +69,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers( "/api/member/signup", "/api/member/isDuplicated", "/api/member/login/oauth").permitAll()
                         .requestMatchers( "/api/email/send", "/api/member/password", "/api/email/confirm", "/api/member/find").permitAll()
-                        .requestMatchers("/api/post/all", "/api/ootd/all", "/api/post/count/all", "/api/post/info/{postId}", "/api/ootd/info/{postId}","/api/member/profile").permitAll()
+                        .requestMatchers("/api/post/all", "/api/ootd/all", "/api/post/count/all", "/api/post/info/{postId}", "/api/ootd/info/{postId}").permitAll()
+                        .requestMatchers("/api/search/**").permitAll()
+                        .requestMatchers("/api/member/profile").anonymous()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/search").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
