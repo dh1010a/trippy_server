@@ -58,6 +58,7 @@ public class MemberResponseDto {
     @Builder
     public static class MemberInfoResponseDto{
         private String nickName;
+        private String email;
         private String profileImageUrl;
         private String blogName;
         private String blogTitleImgUrl;
