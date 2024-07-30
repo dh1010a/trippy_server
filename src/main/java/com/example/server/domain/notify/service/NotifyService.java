@@ -74,6 +74,12 @@ public class NotifyService {
         return NotifyDtoConverter.convertToInfoListResponseDto(notifyList);
     }
 
+    // GET[ADMIN] /api/admin/notify/all
+    public NotifyResponseDto.NotifyInfoListDto getAllMemberNotify() {
+        List<Notify> notifyList = notifyRepository.findAll();
+        return NotifyDtoConverter.convertToInfoListResponseDto(notifyList);
+    }
+
     // POST /api/notify/read
     public void readNotify(String memberId, Long notifyId) {
         Notify notify = notifyRepository.findById(notifyId).orElseThrow(() -> new ErrorHandler(ErrorStatus.NOTIFY_NOT_FOUND));
@@ -137,6 +143,18 @@ public class NotifyService {
             case COMMENT -> Notify.builder()
                     .receiver(receiver)
                     .title(NotifyMessageProvider.getNewCommentMessage(notifyPublishRequestDto.getSenderNickName()))
+                    .senderProfileImgUri(notifyPublishRequestDto.getSenderProfileImgUri())
+                    .senderNickName(notifyPublishRequestDto.getSenderNickName())
+                    .senderMemberId(notifyPublishRequestDto.getSenderMemberId())
+                    .content(notifyPublishRequestDto.getContent())
+                    .postId(notifyPublishRequestDto.getPostId())
+                    .postTitle(notifyPublishRequestDto.getPostTitle())
+                    .isRead(false)
+                    .notificationType(notificationType)
+                    .build();
+            case REPLY -> Notify.builder()
+                    .receiver(receiver)
+                    .title(NotifyMessageProvider.getNewCommentReplyMessage(notifyPublishRequestDto.getSenderNickName()))
                     .senderProfileImgUri(notifyPublishRequestDto.getSenderProfileImgUri())
                     .senderNickName(notifyPublishRequestDto.getSenderNickName())
                     .senderMemberId(notifyPublishRequestDto.getSenderMemberId())

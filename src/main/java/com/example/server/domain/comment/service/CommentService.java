@@ -11,6 +11,8 @@ import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.model.Scope;
 import com.example.server.domain.member.repository.MemberRepository;
+import com.example.server.domain.notify.dto.NotifyDtoConverter;
+import com.example.server.domain.notify.model.NotificationType;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.domain.post.domain.Tag;
 import com.example.server.domain.post.dto.PostDtoConverter;
@@ -23,11 +25,13 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.shaded.gson.JsonObject;
+import io.github.resilience4j.core.EventPublisher;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
 import org.apache.catalina.Group;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -47,6 +51,7 @@ public class CommentService {
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
     private final CommentDtoConverter commentDtoConverter;
+    private final ApplicationEventPublisher eventPublisher;
 
     // POST api/comment
     public CommentResponseDto.CommentBasicResponse uploadComment(CommentRequestDto.CommentBasicRequest requestDto) {
@@ -170,6 +175,17 @@ public class CommentService {
             comment.updateParent(parentComment);
         }
         commentRepository.save(comment);
+
+        // 알람 전송
+        String content = comment.getContent();
+        if (content.length() >= 30) {
+            content = content.substring(0, 30) + "...";
+        }
+        if(parentComment != null && !member.getMemberId().equals(parentComment.getMember().getMemberId())){
+            publishCommentEvent(member, parentComment.getMember(), NotificationType.REPLY, content);
+        } else if (parentComment == null && !member.getMemberId().equals(post.getMember().getMemberId())) {
+            publishCommentEvent(member, post.getMember(), NotificationType.COMMENT, content);
+        }
        return comment;
     }
 
@@ -203,5 +219,9 @@ public class CommentService {
         return comment;
     }
 
+    //== 알림을 보내는 기능 ==//
+    public void publishCommentEvent(Member member, Member receiver, NotificationType type, String content) {
+        eventPublisher.publishEvent(NotifyDtoConverter.convertToNotifyPublishRequestDto(member, receiver, type, content));
+    }
 
 }

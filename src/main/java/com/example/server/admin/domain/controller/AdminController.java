@@ -5,6 +5,7 @@ import com.example.server.domain.image.service.ImageService;
 import com.example.server.domain.image.service.OracleImageService;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.domain.member.service.MemberService;
+import com.example.server.domain.notify.service.NotifyService;
 import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
@@ -22,6 +23,7 @@ public class AdminController {
     private final OracleImageService oracleImageService;
     private final MemberService memberService;
     private final CountryService countryService;
+    private final NotifyService notifyService;
 
     @GetMapping("/country/init")
     public ApiResponse<?> saveCountryList() {
@@ -52,6 +54,12 @@ public class AdminController {
     public ApiResponse<?> deleteAllMember() {
         log.info("회원 전체 삭제 요청 : AdminId = {}", getLoginMemberId());
         return ApiResponse.onSuccess(memberService.deleteAllMember());
+    }
+
+    @GetMapping("/notify/all")
+    public ApiResponse<?> getAllNotify() {
+        log.info("모든 알림 조회 요청 : AdminId = {}", getLoginMemberId());
+        return ApiResponse.onSuccess(notifyService.getAllMemberNotify());
     }
 
     private String getLoginMemberId() {
