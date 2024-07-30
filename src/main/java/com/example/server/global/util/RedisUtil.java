@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +40,16 @@ public class RedisUtil {
         return listOperations.size(key);
     }
 
+    public List<String> getAllData(String key) {
+        ListOperations<String, String> listOperations = redisTemplate.opsForList();
+        Long size = getSize(key);
+        if (size == null || size == 0L) {
+            return List.of();
+        }
+        return listOperations.range(key, 0, size - 1);
+    }
+
+
     public void deleteOldData(String key){
         redisTemplate.opsForList().rightPop(key);
     }
@@ -46,5 +57,10 @@ public class RedisUtil {
     public void pushSearchLog(String key, String name){
         redisTemplate.opsForList().leftPush(key, name);
     }
+
+    public void deleteValueFromList(String key, String value) {
+        redisTemplate.opsForList().remove(key, 0, value);
+    }
+
 
 }
