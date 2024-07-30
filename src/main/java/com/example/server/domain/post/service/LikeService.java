@@ -44,7 +44,9 @@ public class LikeService {
                     .build();
             likeRepository.save(like);
             Integer likeCount = getLikeCount(postId);
-            publishLikeEvent(member, post.getMember());
+            if (!member.getMemberId().equals(post.getMember().getMemberId())) {
+                publishLikeEvent(member, post.getMember());
+            }
             return convertToLikeBasicDto(like,likeCount);
         }
 

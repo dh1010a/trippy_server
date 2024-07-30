@@ -181,9 +181,9 @@ public class CommentService {
         if (content.length() >= 30) {
             content = content.substring(0, 30) + "...";
         }
-        if(parentComment != null){
+        if(parentComment != null && !member.getMemberId().equals(parentComment.getMember().getMemberId())){
             publishCommentEvent(member, parentComment.getMember(), NotificationType.REPLY, content);
-        } else {
+        } else if (parentComment == null && !member.getMemberId().equals(post.getMember().getMemberId())) {
             publishCommentEvent(member, post.getMember(), NotificationType.COMMENT, content);
         }
        return comment;
