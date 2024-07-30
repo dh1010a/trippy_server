@@ -3,6 +3,7 @@ package com.example.server.domain.search.controller;
 import com.example.server.domain.post.dto.PostRequestDto;
 import com.example.server.domain.post.model.PostType;
 import com.example.server.domain.search.dto.SearchRequestDto;
+import com.example.server.domain.search.service.SearchRedisService;
 import com.example.server.domain.search.service.SearchService;
 import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
@@ -23,6 +24,7 @@ import java.util.List;
 @RequestMapping("/api/search")
 public class SearchController {
     private final SearchService searchService;
+    private final SearchRedisService searchRedisService;
 
     @GetMapping ("")
     public ApiResponse<?> getSearchPostList(
@@ -52,12 +54,26 @@ public class SearchController {
     @GetMapping("/recent")
     public ApiResponse<?> getCurrentSearchLog(@RequestParam  PostType postType){
         String memberId = getLoginMemberId();
+        log.info("최근 검색어 조회 요청 : memberId = {}", memberId);
         List<String> searchLogs;
         if(memberId.equals("anonymousUser")) {
             searchLogs = Collections.emptyList();
         }
-        else searchLogs = searchService.getRecentSearch(memberId,postType);
+        else {
+            String key = "SearchLog" + postType + memberId;
+            searchLogs = searchRedisService.getRecentSearch(key);
+        }
         return ApiResponse.onSuccess(searchLogs);
+    }
+
+    @GetMapping("/popular")
+    public ApiResponse<?> getPopularSearch(@RequestParam  PostType postType) {
+        String memberId = getLoginMemberId();
+        log.info("인기 검색어 조회 요청 : memberId = {}", memberId);
+        String key = "popularSearches" + postType;
+        List<String> searchLogs = searchRedisService.getDESCList(key);
+        return ApiResponse.onSuccess(searchLogs);
+
     }
 
 

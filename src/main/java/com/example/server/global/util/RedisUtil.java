@@ -5,10 +5,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -58,9 +61,27 @@ public class RedisUtil {
         redisTemplate.opsForList().leftPush(key, name);
     }
 
-    public void deleteValueFromList(String key, String value) {
-        redisTemplate.opsForList().remove(key, 0, value);
+    // 검색어 횟수 증가 및 TTL 갱신 및 추가
+    public void incrementCount(String key, String value, long duration) {
+        ZSetOperations<String, String> zSetOperations = redisTemplate.opsForZSet();
+        zSetOperations.incrementScore(key, value, 1);
+
+        // TTL 갱신
+        if (redisTemplate.hasKey(key)) {
+            redisTemplate.expire(key, Duration.ofSeconds(duration));
+        } else {
+            zSetOperations.add(key, value, 1);
+            setDataExpire(key, value, duration);
+        }
     }
+
+    // 인기 검색어 횟수 조회
+    public List<String> getDESCList(String key) {
+        Set<String> resultSet = redisTemplate.opsForZSet().reverseRange(key, 0, 9);
+        return resultSet.stream().collect(Collectors.toList());
+    }
+
+
 
 
 }
