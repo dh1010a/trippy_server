@@ -59,6 +59,7 @@ public class MemberDtoConverter {
 
         return MemberInfoResponseDto.builder()
                 .nickName(member.getNickName())
+                .email(member.getEmail())
                 .profileImageUrl(profileImage != null ? profileImage.getAccessUri() : null)
                 .blogName(member.getBlogName())
                 .blogIntroduce(member.getBlogIntroduce())
