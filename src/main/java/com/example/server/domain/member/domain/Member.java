@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,16 +73,16 @@ public class Member extends BaseTimeEntity {
     private List<MemberFollow> memberFollows;
 
     @Enumerated(EnumType.STRING)
-    private Scope TicketScope;
+    private Scope ticketScope;
 
     @Enumerated(EnumType.STRING)
-    private Scope OotdScope;
+    private Scope ootdScope;
 
     @Enumerated(EnumType.STRING)
-    private Scope BadgeScope;
+    private Scope badgeScope;
 
     @Enumerated(EnumType.STRING)
-    private Scope FollowScope;
+    private Scope followScope;
 //
 //    @OneToMany(mappedBy = "member")
 //    @JsonIgnore
@@ -106,6 +105,10 @@ public class Member extends BaseTimeEntity {
 
     private int followingCnt;
 
+    private boolean likeAlert;
+
+    private boolean commentAlert;
+
     @ElementCollection
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -116,12 +119,24 @@ public class Member extends BaseTimeEntity {
     private List<Comment> comments;
 
     public void initDefaultSetting() {
-        this.TicketScope = Scope.PUBLIC;
-        this.OotdScope = Scope.PUBLIC;
-        this.BadgeScope = Scope.PUBLIC;
-        this.FollowScope = Scope.PUBLIC;
+        this.ticketScope = Scope.PUBLIC;
+        this.ootdScope = Scope.PUBLIC;
+        this.badgeScope = Scope.PUBLIC;
+        this.followScope = Scope.PUBLIC;
         this.followerCnt = 0;
         this.followingCnt = 0;
+        this.likeAlert = true;
+        this.commentAlert = true;
+    }
+
+    public String getProfileImageAccessUri() {
+        Image image = images.stream().filter(Image::isProfileImage).findAny().orElse(null);
+        return image != null ? image.getAccessUri() : null;
+    }
+
+    public String getBlogTitleImageAccessUri() {
+        Image image = images.stream().filter(Image::isBlogTitleImage).findAny().orElse(null);
+        return image != null ? image.getAccessUri() : null;
     }
 
 
@@ -183,15 +198,25 @@ public class Member extends BaseTimeEntity {
         this.followingCnt--;
     }
 
-    public void updateInterestedTypes(List<InterestedType> interestedTypes) {
+    public void updateAlert(boolean likeAlert, boolean commentAlert) {
+        this.likeAlert = likeAlert;
+        this.commentAlert = commentAlert;
+    }
+
+    public void updateInterestedTypes(List<String> interestedTypes) {
+        this.interestedTypes.clear();
+        interestedTypes.forEach(interestedType -> this.interestedTypes.add(InterestedType.fromKoreanName(interestedType)));
+    }
+
+    public void setInterestedTypes(List<InterestedType> interestedTypes) {
         this.interestedTypes = interestedTypes;
     }
 
     public void updateScope(Scope ticketScope, Scope ootdScope, Scope badgeScope, Scope followScope) {
-        this.TicketScope = ticketScope;
-        this.OotdScope = ootdScope;
-        this.BadgeScope = badgeScope;
-        this.FollowScope = followScope;
+        this.ticketScope = ticketScope;
+        this.ootdScope = ootdScope;
+        this.badgeScope = badgeScope;
+        this.followScope = followScope;
     }
 
 

@@ -1,11 +1,8 @@
 package com.example.server.domain.mail.controller;
 
 
-import com.example.server.domain.mail.application.MailService;
+import com.example.server.domain.mail.service.MailService;
 import com.example.server.domain.mail.dto.MailDto;
-import com.example.server.domain.mail.dto.MailResponseDto;
-import com.example.server.domain.mail.dto.MailResponseDto.CheckMailResponseDto;
-import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.domain.member.service.MemberService;
 import com.example.server.global.apiPayload.ApiResponse;

@@ -1,12 +1,9 @@
 package com.example.server.domain.member.controller;
 
 
-import com.example.server.domain.image.dto.ImageResponseDto.UpdateImageResponseDto;
-import com.example.server.domain.image.service.ImageService;
 import com.example.server.domain.member.dto.MemberRequestDto;
 import com.example.server.domain.member.dto.MemberRequestDto.CommonCreateMemberRequestDto;
 import com.example.server.domain.member.dto.MemberRequestDto.CreateMemberRequestDto;
-import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.domain.member.service.MemberService;
 import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
@@ -14,11 +11,7 @@ import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import com.example.server.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import static com.example.server.domain.member.dto.MemberResponseDto.*;
 
@@ -29,8 +22,6 @@ import static com.example.server.domain.member.dto.MemberResponseDto.*;
 public class MemberController {
 
     private final MemberService memberService;
-    private final MemberRepository memberRepository;
-    private final ImageService imageService;
 
     @PostMapping("/signup")
     public ApiResponse<?> signUp(@RequestBody CreateMemberRequestDto createMemberRequestDto) {
@@ -133,11 +124,11 @@ public class MemberController {
         return ApiResponse.onSuccess(memberService.followMember(memberId, followingMemberId));
     }
 
-    @GetMapping("/{memberId}/following")
-    public ApiResponse<?> getFollowing(@PathVariable("memberId") String targetMemberId){
+    @GetMapping("/following")
+    public ApiResponse<?> getFollowing(@RequestParam("memberId") String targetMemberId){
         // 비활성화된 멤버는 조회 안되게 하는 로직 추가 구현 해야함
         String memberId = getLoginMemberId();
-        log.info("팔로잉 조회 요청 : memberId = {}, nickName = {}", memberId, targetMemberId);
+        log.info("팔로잉 조회 요청 : memberId = {}, targetMemberId = {}", memberId, targetMemberId);
         if (memberService.isNotValidAccessToFollow(memberId, targetMemberId)) {
             return ApiResponse.onFailure(ErrorStatus.MEMBER_CANNOT_ACCESS_FOLLOW.getCode(), ErrorStatus.MEMBER_CANNOT_ACCESS_FOLLOW.getMessage(),
                     "팔로잉 목록에 접근할 수 없습니다.");
@@ -145,11 +136,11 @@ public class MemberController {
         return ApiResponse.onSuccess(memberService.getFollowingList(targetMemberId));
     }
 
-    @GetMapping("/{memberId}/follower")
-    public ApiResponse<?> getFollower(@PathVariable("memberId") String targetMemberId)  {
+    @GetMapping("/follower")
+    public ApiResponse<?> getFollower(@RequestParam("memberId") String targetMemberId)  {
         // 비활성화된 멤버는 조회 안되게 하는 로직 추가 구현 해야함
         String memberId = getLoginMemberId();
-        log.info("팔로우 조회 요청 : memberId = {}, nickName = {}", memberId, targetMemberId);
+        log.info("팔로우 조회 요청 : memberId = {}, targetMemberId = {}", memberId, targetMemberId);
         if (memberService.isNotValidAccessToFollow(memberId, targetMemberId)) {
             return ApiResponse.onFailure(ErrorStatus.MEMBER_CANNOT_ACCESS_FOLLOW.getCode(), ErrorStatus.MEMBER_CANNOT_ACCESS_FOLLOW.getMessage(),
                     "팔로잉 목록에 접근할 수 없습니다.");
@@ -182,7 +173,7 @@ public class MemberController {
     public ApiResponse<?> updateInterestedTypes(@RequestBody MemberRequestDto.UpdateInterestedTypesRequestDto requestDto) {
         String memberId = getLoginMemberId();
         log.info("관심사 변경 요청 : memberId = {}", memberId);
-        return ApiResponse.onSuccess(memberService.updateInterestedTypes(memberId, requestDto));
+        return ApiResponse.onSuccess(memberService.setInterestedTypes(memberId, requestDto));
     }
 
     @GetMapping("/find")

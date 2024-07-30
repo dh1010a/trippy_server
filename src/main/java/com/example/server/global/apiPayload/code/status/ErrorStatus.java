@@ -36,6 +36,7 @@ public enum ErrorStatus implements BaseErrorCode {
     MEMBER_LOGIN_NOT_SUPPORT(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "MEMBER4015", "지원되지 않는 로그인 형식입니다."),
     MEMBER_CANNOT_ACCESS_FOLLOW(HttpStatus.BAD_REQUEST, "MEMBER4016", "해당 유저의 팔로우/팔로잉 목록에 접근할 수 없습니다."),
     MEMBER_PROFILE_ACCESS_DENY(HttpStatus.FORBIDDEN, "MEMBER4017", "프로필에 접근할 수 없는 유저입니다."),
+    MEMBER_TOKEN_NOT_VALID(HttpStatus.UNAUTHORIZED, "MEMBER4018", "유효하지 않은 토큰입니다."),
 
     //사진 응답
     IMAGE_UPLOAD_FAIL(HttpStatus.BAD_REQUEST, "IMG4001", "사진 업로드에 실패하였습니다."),
@@ -79,7 +80,10 @@ public enum ErrorStatus implements BaseErrorCode {
 
 
     //푸시알림 응답
-    ALARM_SEND_FAIL(HttpStatus.BAD_REQUEST,"ALARM4001", "알림 보내기를 실패하였습니다.");
+    NOTIFY_SEND_FAIL(HttpStatus.BAD_REQUEST,"NOTIFY4001", "알림 보내기를 실패하였습니다."),
+    NOTIFY_UNSUPPORTED_TYPE(HttpStatus.BAD_REQUEST,"NOTIFY4002", "지원하지 않는 알림 타입입니다."),
+    NOTIFY_NOT_FOUND(HttpStatus.BAD_REQUEST,"NOTIFY4003", "알림이 존재하지 않습니다."),
+    ;
     private final HttpStatus httpStatus;
     private final String code;
     private final String message;

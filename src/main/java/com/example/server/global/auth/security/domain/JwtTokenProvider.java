@@ -66,6 +66,7 @@ public class JwtTokenProvider {
 	public String createRefreshToken(Authentication authentication) {
 		Date now = new Date();
 		Date refreshTokenExpiration = new Date(now.getTime() + REFRESH_TOKEN_EXPIRE_DATE * 24 * 60 * 60 * 1000);
+//		Date refreshTokenExpiration = new Date(now.getTime() +  60 * 1000); // For test 1분
 
 		CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
 
@@ -81,6 +82,7 @@ public class JwtTokenProvider {
 	public String createRefreshToken(String memberId) {
 		Date now = new Date();
 		Date refreshTokenExpiration = new Date(now.getTime() + REFRESH_TOKEN_EXPIRE_DATE * 24 * 60 * 60 * 1000);
+//		Date refreshTokenExpiration = new Date(now.getTime() +  60 * 1000); // For test 1분
 
 		return Jwts.builder()
 				.setSubject(REFRESH_TOKEN_CLAIM)
@@ -98,6 +100,7 @@ public class JwtTokenProvider {
 
 		Date now = new Date();
 		Date accessTokenExpiration = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_HOUR * 60 * 60 * 1000);
+//		Date accessTokenExpiration = new Date(now.getTime() +  60 * 1000); // For test 1분
 
 		CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
 
@@ -114,6 +117,7 @@ public class JwtTokenProvider {
 	public String reIssueAccessToken(String memberId) {
 		Date now = new Date();
 		Date accessTokenExpiration = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_HOUR * 60 * 60 * 1000);
+//		Date accessTokenExpiration = new Date(now.getTime() +  60 * 1000); // For test 1분
 
 		Member member = memberRepository.findByMemberId(memberId)
 				.orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));

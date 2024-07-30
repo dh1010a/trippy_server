@@ -1,9 +1,7 @@
-package com.example.server.domain.mail.application;
+package com.example.server.domain.mail.service;
 
 import com.example.server.domain.mail.converter.MailDtoConverter;
-import com.example.server.domain.mail.dto.MailResponseDto;
 import com.example.server.domain.mail.dto.MailResponseDto.CheckMailResponseDto;
-import com.example.server.domain.member.service.MemberService;
 import com.example.server.global.util.RedisUtil;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

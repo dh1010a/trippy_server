@@ -6,7 +6,7 @@ import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.image.model.ImageType;
 import com.example.server.domain.image.repository.ImageRepository;
 import com.example.server.domain.image.service.OracleImageService;
-import com.example.server.domain.mail.application.MailService;
+import com.example.server.domain.mail.service.MailService;
 import com.example.server.domain.member.domain.BookMark;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.dto.MemberDtoConverter;
@@ -20,20 +20,18 @@ import com.example.server.domain.member.model.InterestedType;
 import com.example.server.domain.member.model.Role;
 import com.example.server.domain.member.model.Scope;
 import com.example.server.domain.member.repository.MemberRepository;
+import com.example.server.domain.notify.dto.NotifyDtoConverter;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import com.example.server.global.auth.oauth2.model.SocialType;
 import com.example.server.global.auth.security.domain.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -49,6 +47,7 @@ public class MemberService {
     private final MailService mailService;
     private final ImageRepository imageRepository;
     private final OracleImageService oracleImageService;
+    private final ApplicationEventPublisher eventPublisher;
 
     private static final String DEFAULT_BLOG_SUFFIX = ".blog";
 
@@ -153,13 +152,17 @@ public class MemberService {
         member.updateNickName(requestDto.getNickName());
         member.updateBlogName(requestDto.getBlogName());
         member.updateBlogIntroduce(requestDto.getBlogIntroduce());
+        member.updateInterestedTypes(requestDto.getKoreanInterestedTypes());
 //        member.updateLikeAlert(requestDto.isLikeAlert());
         member.updateScope(Scope.fromName(requestDto.getTicketScope()), Scope.fromName(requestDto.getOotdScope()),
                 Scope.fromName(requestDto.getBadgeScope()), Scope.fromName(requestDto.getFollowScope()));
-
+        member.updateAlert(requestDto.isLikeAlert(), requestDto.isCommentAlert());
         log.info("내 정보 수정이 완료되었습니다. memberId = {}, nickName = {}, blogName = {}, blogIntroduce = {}", member.getMemberId(), member.getNickName(), member.getBlogName(), member.getBlogIntroduce());
         return MemberDtoConverter.convertToMemberTaskDto(member);
     }
+
+
+
 
     public IsNewMemberResponseDto isNewMember(String memberId) {
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
@@ -190,6 +193,7 @@ public class MemberService {
         return member.getRole() == Role.ROLE_GUEST;
     }
 
+    // memberFollower, memberFollowing 두개로 분리?
     public MemberFollowResponseDto followMember(String memberId, String followingMemberId) {
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
         Member followingMember = memberRepository.findByMemberId(followingMemberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_FOLLOWING_MEMBER_NOT_FOUND));
@@ -212,24 +216,42 @@ public class MemberService {
         member.increaseFollowingCnt();
         followingMember.increaseFollowerCnt();
 
+        publishEvent(member, followingMember);
+
         return MemberDtoConverter.convertToFollowResponseDto(member, followingMember);
     }
 
+    // GET /api/member/follower?memberId={memberId}
     public MemberFollowerResponseDto getFollowerList(String targetMemberId) {
         Member member = memberRepository.getMemberById(targetMemberId);
+        List<FollowMemberInfoDto> followers = getFollower(member);
+        return MemberResponseDto.MemberFollowerResponseDto.builder()
+                .followerCnt(member.getFollowerCnt())
+                .followers(followers)
+                .build();
+    }
+
+    private List<FollowMemberInfoDto> getFollower(Member member) {
         List<MemberFollow> memberFollows = memberFollowRepository.findByFollowingMemberIdx(member.getIdx());
         List<FollowMemberInfoDto> followers = new ArrayList<>();
 
         for (MemberFollow memberFollow : memberFollows) {
             followers.add(MemberDtoConverter.convertToFollowMemberInfoDto(memberFollow.getMember()));
         }
-        return MemberResponseDto.MemberFollowerResponseDto.builder()
-                .followers(followers)
+        return followers;
+    }
+
+    // GET /api/member/following?memberId={memberId}
+    public MemberFollowingResponseDto getFollowingList(String targetMemberId) {
+        Member member = memberRepository.getMemberById(targetMemberId);
+        List<FollowMemberInfoDto> followings = getFollowing(member);
+        return MemberResponseDto.MemberFollowingResponseDto.builder()
+                .followingCnt(member.getFollowingCnt())
+                .followings(followings)
                 .build();
     }
 
-    public MemberFollowingResponseDto getFollowingList(String nickName) {
-        Member member = memberRepository.getMemberByNickName(nickName);
+    private List<FollowMemberInfoDto> getFollowing(Member member) {
         List<MemberFollow> memberFollows = member.getMemberFollows();
         List<FollowMemberInfoDto> followings = new ArrayList<>();
 
@@ -237,9 +259,12 @@ public class MemberService {
             memberRepository.findByIdx(memberFollow.getFollowingMemberIdx())
                     .ifPresent(followingMember -> followings.add(MemberDtoConverter.convertToFollowMemberInfoDto(followingMember)));
         }
-        return MemberResponseDto.MemberFollowingResponseDto.builder()
-                .followings(followings)
-                .build();
+        return followings;
+    }
+
+    //== 알림을 보내는 기능 ==//
+    public void publishEvent(Member member, Member followingMember) {
+        eventPublisher.publishEvent(NotifyDtoConverter.convertToFollowNotifyRequestDto(member, followingMember));
     }
 
     public boolean isNotValidAccessToFollow(String memberId, String targetMemberId) {
@@ -331,14 +356,14 @@ public class MemberService {
         }
     }
 
-    public MemberTaskSuccessResponseDto updateInterestedTypes(String memberId, MemberRequestDto.UpdateInterestedTypesRequestDto requestDto) {
+    public MemberTaskSuccessResponseDto setInterestedTypes(String memberId, MemberRequestDto.UpdateInterestedTypesRequestDto requestDto) {
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
         List<InterestedType> interestedTypes = new ArrayList<>();
         for (String x : requestDto.getKoreanInterestedTypes()) {
             interestedTypes.add(InterestedType.fromKoreanName(x));
             log.info("관심사 변경 : memberId = {}, interestedType = {}", memberId, x);
         }
-        member.updateInterestedTypes(interestedTypes);
+        member.setInterestedTypes(interestedTypes);
 
         return MemberTaskSuccessResponseDto.builder()
                 .isSuccess(true)

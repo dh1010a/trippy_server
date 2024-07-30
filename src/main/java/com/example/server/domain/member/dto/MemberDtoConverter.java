@@ -24,23 +24,29 @@ public class MemberDtoConverter {
     public static MyInfoResponseDto convertToMyInfoResponseDto (Member member) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        List<Image> images = member.getImages();
-        Image profileImage = images.stream().filter(Image::isProfileImage).findAny().orElse(null);
-        Image blogTitleImage = images.stream().filter(Image::isBlogTitleImage).findAny().orElse(null);
+        String profileImageAccessUri = member.getProfileImageAccessUri();
+        String getBlogTitleImageAccessUri = member.getProfileImageAccessUri();
 
         return MyInfoResponseDto.builder()
                 .idx(member.getIdx())
                 .memberId(member.getMemberId())
                 .nickName(member.getNickName())
                 .email(member.getEmail())
-                .profileImageUrl(profileImage != null ? profileImage.getAccessUri() : null)
+                .profileImageUrl(profileImageAccessUri)
                 .blogName(member.getBlogName())
                 .blogIntroduce(member.getBlogIntroduce())
-                .blogTitleImgUrl(blogTitleImage != null ? blogTitleImage.getAccessUri() : null)
+                .blogTitleImgUrl(getBlogTitleImageAccessUri)
                 .role(member.getRole().getTitle())
                 .activeStatus(member.getActiveState().name())
                 .socialType(member.getSocialType().getSocialName())
-                .interestedTypes(member.getInterestedTypes().stream().map(InterestedType::getTitle).toList())
+                .koreanInterestedTypes(member.getInterestedTypes().stream().map(InterestedType::getTitle).toList())
+                .likeAlert(member.isLikeAlert())
+                .commentAlert(member.isCommentAlert())
+                .ticketScope(member.getTicketScope().getKey())
+                .ootdScope(member.getOotdScope().getKey())
+                .badgeScope(member.getBadgeScope().getKey())
+                .followScope(member.getFollowScope().getKey())
+                .createdAt(member.getCreatedAt().format(formatter))
                 .followerCnt(member.getFollowerCnt())
                 .followingCnt(member.getFollowingCnt())
                 .build();
@@ -53,6 +59,7 @@ public class MemberDtoConverter {
 
         return MemberInfoResponseDto.builder()
                 .nickName(member.getNickName())
+                .email(member.getEmail())
                 .profileImageUrl(profileImage != null ? profileImage.getAccessUri() : null)
                 .blogName(member.getBlogName())
                 .blogIntroduce(member.getBlogIntroduce())
@@ -79,6 +86,7 @@ public class MemberDtoConverter {
                 .idx(member.getIdx())
                 .memberId(member.getMemberId())
                 .nickName(member.getNickName())
+                .profileImageUrl(member.getProfileImageAccessUri())
                 .build();
     }
 }
