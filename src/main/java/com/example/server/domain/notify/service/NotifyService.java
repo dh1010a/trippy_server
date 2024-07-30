@@ -74,6 +74,12 @@ public class NotifyService {
         return NotifyDtoConverter.convertToInfoListResponseDto(notifyList);
     }
 
+    // GET[ADMIN] /api/admin/notify/all
+    public NotifyResponseDto.NotifyInfoListDto getAllMemberNotify() {
+        List<Notify> notifyList = notifyRepository.findAll();
+        return NotifyDtoConverter.convertToInfoListResponseDto(notifyList);
+    }
+
     // POST /api/notify/read
     public void readNotify(String memberId, Long notifyId) {
         Notify notify = notifyRepository.findById(notifyId).orElseThrow(() -> new ErrorHandler(ErrorStatus.NOTIFY_NOT_FOUND));
