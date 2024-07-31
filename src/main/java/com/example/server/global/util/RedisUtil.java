@@ -76,9 +76,9 @@ public class RedisUtil {
     }
 
     // 인기 검색어 횟수 조회
-    public List<String> getDESCList(String key) {
-        Set<String> resultSet = redisTemplate.opsForZSet().reverseRange(key, 0, 9);
-        return resultSet.stream().collect(Collectors.toList());
+    public Set<String> getDESCList(String key) {
+        return redisTemplate.opsForZSet().reverseRange(key, 0, 9);
+        //return resultSet.stream().collect(Collectors.toList());
     }
 
 

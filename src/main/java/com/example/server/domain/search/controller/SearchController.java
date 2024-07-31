@@ -68,11 +68,12 @@ public class SearchController {
     }
 
     @GetMapping("/popular")
-    public ApiResponse<?> getPopularSearch(@RequestParam  PostType postType) {
+    public ApiResponse<?> getPopularSearch() {
         String memberId = getLoginMemberId();
         log.info("인기 검색어 조회 요청 : memberId = {}", memberId);
-        String key = "popularSearches" + postType;
-        List<String> searchLogs = searchRedisService.getDESCList(key);
+        String key1 = "popularSearches" + PostType.POST;
+        String key2 = "popularSearches" + PostType.OOTD;
+        List<String> searchLogs = searchRedisService.getPopularList(key1,key2);
         return ApiResponse.onSuccess(searchLogs);
 
     }
