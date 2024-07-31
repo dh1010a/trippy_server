@@ -78,10 +78,25 @@ public class SearchController {
 
     }
 
+    @GetMapping("/tag")
+    public ApiResponse<?> getSearchByTag(
+            @RequestParam String tags,
+            @RequestParam PostType postType,
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "0") Integer size) {
+        String memberId = getLoginMemberId();
+        log.info("태그 필터링 조회 요청 : memberId = {}", memberId);
+        if(postType.equals(PostType.POST)) return ApiResponse.onSuccess(searchService.getPostSearchByTag(tags, memberId, size, page));
+        else return ApiResponse.onSuccess(searchService.getOotdSearchByTag(tags, memberId,size,page));
+
+    }
+
 
     private String getLoginMemberId() {
         return SecurityUtil.getLoginMemberId().orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
     }
+
+
 
 
 }

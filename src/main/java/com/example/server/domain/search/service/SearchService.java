@@ -7,6 +7,7 @@ import com.example.server.domain.post.dto.PostDtoConverter;
 import com.example.server.domain.post.dto.PostResponseDto;
 import com.example.server.domain.post.model.PostType;
 import com.example.server.domain.post.repository.PostRepository;
+import com.example.server.domain.post.repository.TagRepository;
 import com.example.server.domain.search.dto.SearchRequestDto;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -31,6 +33,7 @@ public class SearchService {
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
     private final SearchRedisService searchRedisService;
+    private final TagRepository tagRepository;
 
     public List<PostResponseDto.GetPostResponseDto> getPosts(SearchRequestDto.SaveSearchRequest saveSearchRequest, String memberId) {
         updateSearchLog(memberId, saveSearchRequest);
@@ -83,8 +86,44 @@ public class SearchService {
         return resultPage.getContent();
     }
 
+    public List<PostResponseDto.GetPostResponseDto> getPostSearchByTag(String tag, String memberId, Integer size, Integer page) {
+        return getPostsByTag(tag, memberId, size, page, PostType.POST);
+    }
+
+    public List<PostResponseDto.GetOotdPostResponseDto> getOotdSearchByTag(String tag, String memberId, Integer size, Integer page) {
+        return getPostsByTag(tag, memberId, size, page, PostType.OOTD);
+    }
+
+    private <T> List<T> getPostsByTag(String tag, String memberId, Integer size, Integer page, PostType postType) {
+        Member member = getMember(memberId);
+        List<Post> posts;
+
+        if (size == 0 && page == 0) {
+            posts = tagRepository.findPostsByTag(tag).stream()
+                    .filter(post -> post.getPostType().equals(postType))
+                    .collect(Collectors.toList());
+        } else {
+            Pageable pageable = PageRequest.of(page, size);
+            posts = tagRepository.findPostsByTag(tag, pageable).getContent().stream()
+                    .filter(post -> post.getPostType().equals(postType))
+                    .collect(Collectors.toList());
+        }
+
+        if (postType.equals(PostType.POST)) {
+            return (List<T>) PostDtoConverter.convertToPostListResponseDto(posts, member);
+        } else {
+            return (List<T>) PostDtoConverter.convertToOOTDListResponseDto(posts, member);
+        }
+    }
+
+
     private Member getMember(String memberId) {
+        if ("anonymousUser".equals(memberId)) {
+            return null;
+        }
         return memberRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
     }
+
 }
+
