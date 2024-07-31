@@ -162,12 +162,11 @@ public class PostService {
 
     // GET member 메서드
     public Member getMember(String memberId) {
-        Optional<Member> memberOptional = memberRepository.findByMemberId(memberId);
-        Member member = null;
-        if (memberOptional.isPresent()) {
-            member = memberOptional.get();
+        if ("anonymousUser".equals(memberId)) {
+            return null;
         }
-        return member;
+        return memberRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
     }
 
     // POST 빌드 메서드
