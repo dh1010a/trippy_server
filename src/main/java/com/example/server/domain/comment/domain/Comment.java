@@ -41,10 +41,12 @@ public class Comment extends BaseTimeEntity {
 
     @Enumerated(value = EnumType.STRING)
     @Column(name = "status")
+    @Builder.Default
     private Scope status = Scope.PUBLIC;
 
     @Enumerated(value = EnumType.STRING)
     @Column(name = "deleteStatus")
+    @Builder.Default
     private DeleteStatus deleteStatus = null;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -53,7 +55,9 @@ public class Comment extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     @JsonIgnore
-    private List<Comment> childComments = new ArrayList<>();
+    @Builder.Default
+    private List<Comment> childComments = new ArrayList<>();  // 수정된 부분
+
 
     public void updateParent(Comment parentComment){
         this.parent = parentComment;
