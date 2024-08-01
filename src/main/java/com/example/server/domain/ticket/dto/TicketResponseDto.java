@@ -20,6 +20,8 @@ public class TicketResponseDto {
         private Long id;
         private String departure;
         private String destination;
+        private String departureCode;
+        private String destinationCode;
         private ImageResponseDto.ImageBasicResponseDto image;
         private Integer memberNum;
         private LocalDate startDate;
