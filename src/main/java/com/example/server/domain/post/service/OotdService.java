@@ -33,8 +33,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static com.example.server.domain.post.dto.PostDtoConverter.convertToOOTDListResponseDto;
 import static com.example.server.domain.post.dto.PostDtoConverter.convertToOotdBasicResponseDto;
-
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -43,147 +43,148 @@ public class OotdService {
     private final OotdRepository ootdRepository;
     private final PostService postService;
     private final PostRepository postRepository;
-
     private final RestTemplate restTemplate;
-
 
     // POST /api/ootd
     @Transactional
     public PostResponseDto.GetOotdPostResponseDto uploadOotdPost(PostRequestDto.UploadOOTDPostRequestDto requestDto) {
         PostRequestDto.CommonPostRequestDto postRequestDto = requestDto.getPostRequest();
-        Member member = Optional.ofNullable(postService.getMember(postRequestDto.getMemberId())).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member member = postService.getMemberById(postRequestDto.getMemberId());
         Post post = postService.savePost(postRequestDto);
 
-        OotdReqResDto.UploadOOTDRequestDto ootdRequestDto = requestDto.getOotdRequest();
-
         if (postRequestDto.getImages() != null) {
-            List<Image> images = postService.saveImages(postRequestDto,post);
+            List<Image> images = postService.saveImages(postRequestDto, post);
             post.updateImages(images);
         }
-        if(postRequestDto.getTags() != null) {
+
+        if (postRequestDto.getTags() != null) {
             List<Tag> tags = postService.saveTags(postRequestDto, post);
             post.updateTags(tags);
         }
 
-        Ootd ootd = saveOotd(ootdRequestDto);
-        savePostAndOOTDAndAll(post,ootd);
-        return PostDtoConverter.convertToOotdResponseDto(post,member);
+        Ootd ootd = saveOotd(requestDto.getOotdRequest());
+        savePostAndOotd(post, ootd);
+
+        return PostDtoConverter.convertToOotdResponseDto(post, member);
     }
 
     // GET /api/ootd/{id}
-    public PostResponseDto.GetOotdPostResponseDto getPost(Long postId,String memberId, HttpServletRequest request, HttpServletResponse response){
-        Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND));
-        if(post.getPostType() == PostType.POST) {
+    public PostResponseDto.GetOotdPostResponseDto getPost(Long postId, String memberId, HttpServletRequest request, HttpServletResponse response) {
+        Post post = postService.getPostById(postId);
+        if (post.getPostType() != PostType.OOTD) {
             throw new ErrorHandler(ErrorStatus.OOTD_TYPE_ERROR);
         }
-        else postService.addViewCount(request,response, postId);
-        Member member = !memberId.equals("anonymousUser") ? Optional.ofNullable(postService.getMember(memberId)).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND)) : null;
-        return PostDtoConverter.convertToOotdResponseDto(post,member);
+        postService.addViewCount(request, response, postId);
+
+        Member member = postService.getMemberById(memberId);
+        return PostDtoConverter.convertToOotdResponseDto(post, member);
     }
 
-    // GET api/ootd/all
-    public List<PostResponseDto.GetOotdPostResponseDto> getAllPost(String memberId, Integer page, Integer size, OrderType orderType){
-        // 둘다 0일때 => 변수 입력 안받음
-        Sort sort = postService.getSortByOrderType(orderType);
-        Member member = !memberId.equals("anonymousUser") ? Optional.ofNullable(postService.getMember(memberId)).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND)) : null;
-        if(page==0 && size==0){
-            List<Post> postList = postRepository.findAllByPostType(PostType.OOTD,sort);
-            return PostDtoConverter.convertToOOTDListResponseDto(postList,member);
-        }
-        else {
-            PageRequest pageable = PageRequest.of(page, size,sort);
-            List<Post> postList = postRepository.findAllByPostType(PostType.OOTD,pageable).getContent();
-            return PostDtoConverter.convertToOOTDListResponseDto(postList,member);
-        }
-    }
+    // GET /api/ootd/all
+    public List<PostResponseDto.GetOotdPostResponseDto> getAllPost(Integer page, Integer size, String memberId, OrderType orderType) {
+        Member member = postService.getMemberById(memberId);
+        Pageable pageable = postService.getPageable(page, size, orderType);
+        List<Post> postList = getPostsByOrderType(orderType, pageable);
 
-    // GET api/ootd/
-    public List<PostResponseDto.GetOotdPostResponseDto> getAllMemberPost(String memberId,String loginMemberId, Integer page, Integer size,OrderType orderType){
-        Member member = postService.getMember(memberId);
-        Sort sort = postService.getSortByOrderType(orderType);
-        Member loginMember = !memberId.equals("anonymousUser") ? Optional.ofNullable(postService.getMember(loginMemberId)).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND)) : null;
-        // 둘다 0일때 => 변수 입력 안받음
-        if(page==0 && size==0){
-            List<Post> postList = postRepository.findAllByMemberAndPostType(member,PostType.OOTD,sort);
-            return PostDtoConverter.convertToOOTDListResponseDto(postList,loginMember);
-        }
-        else {
-            Pageable pageable = PageRequest.of(page, size,sort);
-            List<Post> postList = postRepository.findAllByMemberAndPostType(member,PostType.OOTD, pageable).getContent();
-            return PostDtoConverter.convertToOOTDListResponseDto(postList,loginMember);
-        }
+        return convertToOOTDListResponseDto(postList,member);
 
     }
 
-    // PATCH api/ootd
-    public OotdReqResDto.OotdBasicResponseDto updateOotd(String memberId, OotdReqResDto.UpdateOOTDRequestDto updateOOTDRequestDto){
-        Optional<Ootd> ootd = ootdRepository.findById(updateOOTDRequestDto.getId());
-        if(ootd.isPresent()){
-            if(Objects.equals(ootd.get().getPost().getMember().getMemberId(), memberId)){
-                ootd.get().updateOotd(updateOOTDRequestDto);
-                return convertToOotdBasicResponseDto(ootd.get());
-            }
-            else {
-                throw new ErrorHandler(ErrorStatus.NO_PERMISSION__FOR_POST);
-            }
-        }
-        else {
-            throw new ErrorHandler(ErrorStatus.OOTD_NOT_FOUND);
-        }
+    // GET /api/ootd/
+    public List<PostResponseDto.GetOotdPostResponseDto> getAllMemberPost(String memberId, String loginMemberId, Integer page, Integer size, OrderType orderType) {
+        Member member = postService.getMemberById(memberId);
+        Member loginMember = postService.getMemberById(loginMemberId);
+        Pageable pageable = postService.getPageable(page, size, orderType);
+
+        List<Post> postList = getPostsByOrderTypeAndMember(orderType, pageable, member);
+        return convertToOOTDListResponseDto(postList,loginMember);
     }
 
+    // PATCH /api/ootd
+    public OotdReqResDto.OotdBasicResponseDto updateOotd(String memberId, OotdReqResDto.UpdateOOTDRequestDto requestDto) {
+        Ootd ootd = ootdRepository.findById(requestDto.getId())
+                .orElseThrow(() -> new ErrorHandler(ErrorStatus.OOTD_NOT_FOUND));
+
+        if (!ootd.getPost().getMember().getMemberId().equals(memberId)) {
+            throw new ErrorHandler(ErrorStatus.NO_PERMISSION__FOR_POST);
+        }
+
+        ootd.updateOotd(requestDto);
+        return convertToOotdBasicResponseDto(ootd);
+    }
+
+    // Call Flask API to get weather information
     public OotdReqResDto.WeatherResponseDto callFlaskGetWeather(double latitude, double longitude, String date) {
-        // URL 빌더 생성
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("http://flask-app:5000/api/weather")
                 .queryParam("latitude", latitude)
-                .queryParam("longitude",longitude)
+                .queryParam("longitude", longitude)
                 .queryParam("date", date);
 
-        // 완성된 URL 문자열
         String url = builder.toUriString();
-
-        // GET 요청 보내기
         String response = restTemplate.getForObject(url, String.class).replace("\"", "");
-        System.out.println(response);
-        if(response.equals("500")) {
+
+        if (response.equals("500")) {
             throw new ErrorHandler(ErrorStatus.ERROR_WHILE_GET_WEATHER);
-        }
-        else if(response.equals("4001")){
+        } else if (response.equals("4001")) {
             throw new ErrorHandler(ErrorStatus.NO_PERMISSION_NATION);
-        }
-        else {
+        } else {
             String[] responseArray = response.split(",");
 
-            // 순서 : avg, max, min, status, date,area
-            OotdReqResDto.WeatherResponseDto weatherResponseDto = OotdReqResDto.WeatherResponseDto.builder()
+            return OotdReqResDto.WeatherResponseDto.builder()
                     .avgTemp(responseArray[0])
                     .maxTemp(responseArray[1])
                     .minTemp(responseArray[2])
                     .status(responseArray[3])
                     .area(responseArray[4])
                     .build();
-
-            return weatherResponseDto;
         }
-
     }
 
+    // Save OOTD and update post with OOTD
     @Transactional
-    public void savePostAndOOTDAndAll(Post post, Ootd ootd) {
+    public void savePostAndOotd(Post post, Ootd ootd) {
         ootdRepository.save(ootd);
         post.updateOotd(ootd);
         postRepository.save(post);
     }
 
-    public Ootd saveOotd(OotdReqResDto.UploadOOTDRequestDto requestDto){
-        Ootd ootd = Ootd.builder()
+    // Save OOTD entity
+    public Ootd saveOotd(OotdReqResDto.UploadOOTDRequestDto requestDto) {
+        return Ootd.builder()
                 .area(requestDto.getArea())
                 .date(requestDto.getDate())
                 .weatherTemp(requestDto.getWeatherTemp())
                 .weatherStatus(requestDto.getWeatherStatus())
                 .detailLocation(requestDto.getDetailLocation())
                 .build();
-        return ootd;
     }
 
+    // Helper methods to get posts based on order type
+    private List<Post> getPostsByOrderType(OrderType orderType, Pageable pageable) {
+        if (orderType == OrderType.LIKE) {
+            return postRepository.findAllByPostTypeOrderByLikeCountDesc(PostType.OOTD, pageable).getContent();
+        } else {
+            return postRepository.findAllByPostType(PostType.OOTD, pageable).getContent();
+        }
+    }
+
+    private List<Post> getPostsByOrderTypeAndMember(OrderType orderType, Pageable pageable, Member member) {
+        if (orderType == OrderType.LIKE) {
+            return postRepository.findAllByPostTypeAndMemberOrderByLikeCountDesc(PostType.OOTD, member, pageable).getContent();
+        } else {
+            return postRepository.findAllByMemberAndPostType(member, PostType.OOTD, pageable).getContent();
+        }
+    }
+
+    // Convert OOTD entity to DTO
+    private OotdReqResDto.OotdBasicResponseDto convertToOotdBasicResponseDto(Ootd ootd) {
+        return OotdReqResDto.OotdBasicResponseDto.builder()
+                .id(ootd.getId())
+                .area(ootd.getArea())
+                .date(ootd.getDate())
+                .weatherTemp(ootd.getWeatherTemp())
+                .weatherStatus(ootd.getWeatherStatus())
+                .detailLocation(ootd.getDetailLocation())
+                .build();
+    }
 }

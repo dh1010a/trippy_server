@@ -23,6 +23,15 @@ public interface PostRepository extends JpaRepository<Post,Long> {
 
     Page<Post> findAllByPostType(PostType type,Pageable pageable);
 
+    // 좋아요 순 정렬
+    @Query("SELECT p FROM Post p LEFT JOIN p.likes l WHERE p.postType = :postType GROUP BY p.id ORDER BY COUNT(l) DESC")
+    Page<Post> findAllByPostTypeOrderByLikeCountDesc(@Param("postType") PostType postType, Pageable pageable);
+
+    @Query("SELECT p FROM Post p LEFT JOIN p.likes l WHERE p.postType = :postType AND p.member = :member GROUP BY p.id ORDER BY COUNT(l) DESC")
+    Page<Post> findAllByPostTypeAndMemberOrderByLikeCountDesc(@Param("postType") PostType postType, @Param("member") Member member, Pageable pageable);
+
+
+
     @Query("SELECT p FROM Post p WHERE p.title LIKE %:keyword% AND p.postType = :postType")
     Page<Post> findPostByTitle(@Param("keyword") String keyword, @Param("postType") PostType postType, Pageable pageable);
 
