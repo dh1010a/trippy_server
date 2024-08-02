@@ -60,13 +60,10 @@ public class PostController {
 
     @GetMapping("/all")
     public ApiResponse<?> getAllPost(
-            @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer size,
-            @RequestParam(required = false) OrderType orderType
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "0") Integer size,
+            @RequestParam(defaultValue = "LATEST") OrderType orderType
     ) {
-        if(page == null) page = 0;
-        if(size==null) size = 0;
-        if(orderType == null ) orderType = OrderType.LATEST;
         String loginMemberId = getLoginMemberId();
         log.info("모든 게시물 조회 요청 : loginMemberId = {}",loginMemberId);
          return ApiResponse.onSuccess(postService.getAllPost(page,loginMemberId ,size,orderType));
@@ -88,17 +85,30 @@ public class PostController {
 
     @GetMapping("/by-member")
     public ApiResponse<?> getAllMemberPost(
-            @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer size,
-            @RequestParam(required = false) OrderType orderType,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "0") Integer size,
+            @RequestParam(defaultValue = "LATEST") OrderType orderType,
             @RequestParam String memberId
     ) {
-        if(page == null) page = 0;
-        if(size==null) size = 0;
-        if(orderType == null ) orderType = OrderType.LATEST;
         String loginMemberId = getLoginMemberId();
         log.info("회원별 게시물 조회 요청 : memberId = {},loginMemberId = {}", memberId ,loginMemberId);
         return ApiResponse.onSuccess(postService.getAllMemberPost(memberId,loginMemberId,page,size,orderType));
+    }
+
+    @GetMapping("/follow")
+    public ApiResponse<?> getPostsFromFollowedMembers(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "0") Integer size,
+            @RequestParam(defaultValue = "LATEST") OrderType orderType,
+            @RequestParam PostType postType) {
+        String memberId = getLoginMemberId();
+        log.info("팔로잉 게시물 조회 요청 : memberId = {}", memberId);
+        if(postType.equals(PostType.POST)) {
+            return ApiResponse.onSuccess(postService.getPostsFromFollowedMembers(memberId, postType, page, size, orderType));
+        }
+        else {
+            return ApiResponse.onSuccess(postService.getOotdsFromFollowedMembers(memberId, postType, page, size, orderType));
+        }
     }
 
     @GetMapping("/count/all")

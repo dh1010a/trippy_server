@@ -1,5 +1,7 @@
 package com.example.server.domain.post.service;
 
+import com.example.server.domain.follow.domain.MemberFollow;
+import com.example.server.domain.follow.repository.MemberFollowRepository;
 import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.image.dto.ImageDto;
 import com.example.server.domain.image.model.ImageType;
@@ -47,6 +49,7 @@ public class PostService {
     private final TagRepository tagRepository;
     private final ImageRepository imageRepository;
     private final TicketRepository ticketRepository;
+    private final MemberFollowRepository memberFollowRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -164,6 +167,39 @@ public class PostService {
 
         return PostDtoConverter.convertToGetResponseDto(post, member);
     }
+
+    // 팔로잉 게시물 -> POST
+    public List<PostResponseDto.GetPostResponseDto> getPostsFromFollowedMembers(String memberId, PostType postType, Integer page, Integer size, OrderType orderType) {
+        Member member = getMemberById(memberId);
+        Pageable pageable = getPageable(page, size, orderType);
+
+        List<Long> followingMemberIds = getFollowingMemberIds(member.getIdx());
+
+        List<Post> posts = postRepository.findByMemberIdxInAndPostType(followingMemberIds, postType, pageable).getContent();
+
+        return PostDtoConverter.convertToPostListResponseDto(posts, member);
+    }
+
+    // 팔로잉 게시물 -> OOTD
+    public List<PostResponseDto.GetOotdPostResponseDto> getOotdsFromFollowedMembers(String memberId, PostType postType, Integer page, Integer size, OrderType orderType) {
+        Member member = getMemberById(memberId);
+        Pageable pageable = getPageable(page, size, orderType);
+
+        List<Long> followingMemberIds = getFollowingMemberIds(member.getIdx());
+
+        List<Post> posts = postRepository.findByMemberIdxInAndPostType(followingMemberIds, postType, pageable).getContent();
+
+        return PostDtoConverter.convertToOOTDListResponseDto(posts, member);
+    }
+
+    // 내가 팔로우한 회원 리스트
+    private List<Long> getFollowingMemberIds(Long memberIdx) {
+        List<MemberFollow> follows = memberFollowRepository.findByMemberIdx(memberIdx);
+        return follows.stream()
+                .map(MemberFollow::getFollowingMemberIdx)
+                .collect(Collectors.toList());
+    }
+
 
     public Post savePost(PostRequestDto.CommonPostRequestDto requestDto) {
         Member member = getMemberById(requestDto.getMemberId());
