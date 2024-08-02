@@ -10,7 +10,11 @@ public interface MemberFollowRepository extends JpaRepository<MemberFollow, Long
 
     public List<MemberFollow> findByFollowingMemberIdx(Long followingMemberIdx);
 
+    public List<MemberFollow> findByMemberIdx(Long memberIdx);
+
     public boolean existsByMemberAndFollowingMemberIdx(Member member, Long followingMemberIdx);
 
     public void deleteByMemberAndFollowingMemberIdx(Member member, Long followingMemberIdx);
+
+
 }

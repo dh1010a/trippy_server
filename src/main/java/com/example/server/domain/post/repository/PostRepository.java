@@ -31,15 +31,17 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     Page<Post> findAllByPostTypeAndMemberOrderByLikeCountDesc(@Param("postType") PostType postType, @Param("member") Member member, Pageable pageable);
 
 
-
+    // 제목 검색
     @Query("SELECT p FROM Post p WHERE p.title LIKE %:keyword% AND p.postType = :postType")
     Page<Post> findPostByTitle(@Param("keyword") String keyword, @Param("postType") PostType postType, Pageable pageable);
 
+    @Query("SELECT p FROM Post p WHERE p.title LIKE %:keyword% AND p.postType = :postType")
+    List<Post> findPostByTitle(@Param("keyword") String keyword, @Param("postType") PostType postType);
+
+    // 제목+내용 검색
     @Query("SELECT p FROM Post p WHERE (p.title LIKE %:keyword% OR p.body LIKE %:keyword%) AND p.postType = :postType")
     Page<Post> findPostBodyAndTitle(@Param("keyword") String keyword, @Param("postType") PostType postType, Pageable pageable);
 
-    @Query("SELECT p FROM Post p WHERE p.title LIKE %:keyword% AND p.postType = :postType")
-    List<Post> findPostByTitle(@Param("keyword") String keyword, @Param("postType") PostType postType);
 
     @Query("SELECT p FROM Post p WHERE (p.title LIKE %:keyword% OR p.body LIKE %:keyword%) AND p.postType = :postType")
     List<Post> findPostBodyAndTitle(@Param("keyword") String keyword, @Param("postType") PostType postType);
@@ -48,4 +50,7 @@ public interface PostRepository extends JpaRepository<Post,Long> {
 
     long countByPostType(PostType postType);
     long countByMemberAndPostType(Member member, PostType postType);
+
+    // 팔로잉한 게시물
+    Page<Post> findByMemberIdxInAndPostType(List<Long> memberIds, PostType postType, Pageable pageable);
 }

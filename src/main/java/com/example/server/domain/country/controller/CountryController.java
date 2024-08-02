@@ -25,9 +25,9 @@ public class CountryController {
     }
 
     @GetMapping("/location")
-    public ApiResponse<?> getCountryByAddress(@RequestParam("location") String location) {
+    public ApiResponse<?> getCountryByLocation(@RequestParam("location") String location) {
         log.info("주소로 국가 조회 요청 : location = {}", location);
-        return ApiResponse.onSuccess(countryService.getCountryByAddress(location));
+        return ApiResponse.onSuccess(countryService.getCountryByLocation(location));
     }
 
 

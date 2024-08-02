@@ -18,11 +18,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -97,24 +101,29 @@ public class CountryService {
                 .orElse(null);
     }
 
-    public FindCountryResponseDto getCountryByAddress(String address){
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("http://flask-app:5000/api/location")
-                .queryParam("location", address);
-        String url = builder.toUriString();
+    public FindCountryResponseDto getCountryByLocation(String location) {
+        String response = fetchLocationResponse(location).replace("\"", "");
 
-        String response = restTemplate.getForObject(url, String.class).replace("\"", "");
-
-        String IsoAlo2;
         if (response.equals("500")) {
             throw new ErrorHandler(ErrorStatus.ERROR_WHILE_GET_WEATHER);
         } else if (response.equals("4001")) {
             throw new ErrorHandler(ErrorStatus.NO_PERMISSION_NATION);
         } else {
-            IsoAlo2 = response;
-
+            return getCountryByIsoAlp2(response);
         }
+    }
 
-        return getCountryByIsoAlp2(IsoAlo2);
+    private String fetchLocationResponse(String location) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("http://flask-app:5000/api/location")
+                .queryParam("location", location);
+        String url = builder.toUriString();
+
+        try {
+            return restTemplate.getForObject(url, String.class);
+        } catch (RestClientException e) {
+            log.error("Error occurred while calling the API: {}", e.getMessage());
+            throw new ErrorHandler(ErrorStatus.ERROR_WHILE_GET_WEATHER);
+        }
     }
 
 
