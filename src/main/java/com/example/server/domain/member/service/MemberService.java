@@ -316,8 +316,7 @@ public class MemberService {
 
     public MemberTaskSuccessResponseDto changePassword(MemberRequestDto.ChangePasswordRequestDto requestDto, String code) {
         log.info("비밀번호 변경 요청이 들어왔습니다. email = {}", requestDto.getEmail());
-        Member member = memberRepository.findByEmail(requestDto.getEmail())
-                .orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member member = memberRepository.getMemberById(requestDto.getEmail());
         if (mailService.checkEmail(requestDto.getEmail(), code).isSuccess()) {
             member.updatePassword(passwordEncoder.encode(requestDto.getNewPassword()));
             mailService.finishCheckEmail(code);
