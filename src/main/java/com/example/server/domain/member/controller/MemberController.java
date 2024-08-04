@@ -87,9 +87,9 @@ public class MemberController {
                     .message(memberService.isExistByMemberId(memberId)? message : "사용 가능한 아이디입니다.")
                     .build();
         } else if (email != null) {
-            String message = ALREADY_EXIST_MESSAGE + memberService.getSocialTypeByEmail(email);
+            String message = ALREADY_EXIST_MESSAGE + memberService.getSocialTypeByMemberId(email);
             isDuplicatedDto = IsDuplicatedDto.builder()
-                    .isDuplicated(memberService.isExistByEmail(email))
+                    .isDuplicated(memberService.isExistByMemberId(email))
                     .message(memberService.isExistByMemberId(email)? message : "사용 가능한 이메일입니다.")
                     .build();
         } else if (nickName != null) {
