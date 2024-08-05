@@ -74,7 +74,7 @@ public class OotdService {
         if (post.getPostType() != PostType.OOTD) {
             throw new ErrorHandler(ErrorStatus.OOTD_TYPE_ERROR);
         }
-        postService.addViewCount(request, response, postId);
+        postService.addViewCount(request, postId);
 
         Member member = postService.getMemberById(memberId);
         return PostDtoConverter.convertToOotdResponseDto(post, member);
@@ -96,7 +96,13 @@ public class OotdService {
         Member loginMember = postService.getMemberById(loginMemberId);
         Pageable pageable = postService.getPageable(page, size, orderType);
 
-        List<Post> postList = getPostsByOrderTypeAndMember(orderType, pageable, member);
+        Long loginMemberIdx;
+        if(loginMember != null){
+            loginMemberIdx = 0L;
+        }
+        else loginMemberIdx = loginMember.getIdx();
+
+        List<Post> postList = getPostsByOrderTypeAndMember(orderType, pageable, member,loginMemberIdx);
         return convertToOOTDListResponseDto(postList,loginMember);
     }
 
@@ -168,11 +174,11 @@ public class OotdService {
         }
     }
 
-    private List<Post> getPostsByOrderTypeAndMember(OrderType orderType, Pageable pageable, Member member) {
+    private List<Post> getPostsByOrderTypeAndMember(OrderType orderType, Pageable pageable, Member member, Long loginMemberIdx) {
         if (orderType == OrderType.LIKE) {
-            return postRepository.findAllByPostTypeAndMemberOrderByLikeCountDesc(PostType.OOTD, member, pageable).getContent();
+            return postRepository.findAllByPostTypeAndMemberOrderByLikeCountDesc(PostType.OOTD, member, loginMemberIdx, pageable).getContent();
         } else {
-            return postRepository.findAllByMemberAndPostType(member, PostType.OOTD, pageable).getContent();
+            return postRepository.findAllByMemberAndPostType(member, PostType.OOTD,loginMemberIdx,  pageable).getContent();
         }
     }
 

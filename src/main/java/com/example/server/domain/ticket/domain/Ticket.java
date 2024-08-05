@@ -30,6 +30,10 @@ public class Ticket {
 
     private String destination;
 
+    private String departureCode;
+
+    private String destinationCode;
+
     @OneToOne
     @JoinColumn(name = "image_id")
     private Image image;
@@ -69,6 +73,8 @@ public class Ticket {
     public void updateTicket(TicketRequestDto.UpdateTicketRequestDto requestDto){
         this.departure = requestDto.getDeparture();
         this.destination = requestDto.getDestination();
+        this.departureCode = requestDto.getDepartureCode();
+        this.destinationCode = requestDto.getDestinationCode();
         this.memberNum = requestDto.getMemberNum();
         this.ticketColor = requestDto.getTicketColor();
         this.transport = requestDto.getTransport();

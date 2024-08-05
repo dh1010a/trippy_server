@@ -23,6 +23,8 @@ public class TicketDtoConverter {
                 .ticketColor(ticket.getTicketColor())
                 .departure(ticket.getDeparture())
                 .destination(ticket.getDestination())
+                .departureCode(ticket.getDepartureCode() != null ? ticket.getDepartureCode() : null)
+                .destinationCode(ticket.getDestinationCode() != null ? ticket.getDestinationCode() : null)
                 .transport(ticket.getTransport())
                 .memberNum(ticket.getMemberNum())
                 .startDate(ticket.getStartDate())

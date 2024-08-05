@@ -6,6 +6,7 @@ import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import com.example.server.global.util.SecurityUtil;
+import jakarta.servlet.http.HttpSession;
 import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,11 +22,11 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("")
-    public ApiResponse<?> uploadComment(@RequestBody CommentRequestDto.CommentBasicRequest commentBasicRequest) {
+    public ApiResponse<?> uploadComment(@RequestBody CommentRequestDto.CommentBasicRequest commentBasicRequest,  HttpSession session) {
         String memberId = getLoginMemberId();
         commentBasicRequest.setMemberId(memberId);
         log.info("댓글 작성 요청 : postId = {}, memberId = {}",commentBasicRequest.getPostId(),  memberId);
-        return ApiResponse.onSuccess(commentService.uploadComment(commentBasicRequest));
+        return ApiResponse.onSuccess(commentService.uploadComment(commentBasicRequest,session));
     }
 
     @GetMapping("/{id}")
