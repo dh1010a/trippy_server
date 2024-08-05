@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+@Slf4j
 public class JsonUsernamePasswordAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     private static final String DEFAULT_LOGIN_REQUEST_URL = "/api/member/login";  // /login/oauth2/ + ????? 로 오는 요청을 처리할 것이다
@@ -47,6 +49,8 @@ public class JsonUsernamePasswordAuthenticationFilter extends AbstractAuthentica
 
         String memberId = usernamePasswordMap.get(MEMBER_ID_KEY);
         String password = usernamePasswordMap.get(PASSWORD_KEY);
+
+        log.info("로그인 시도 = memberId : {}", memberId);
 
         UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(memberId, password);//principal 과 credentials 전달
 
