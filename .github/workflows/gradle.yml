@@ -58,6 +58,13 @@ jobs:
           echo "${{ secrets.OAUTH }}" > ./application-oauth.yaml
       shell: bash
 
+    - name: Make fcm-private-key.json
+      run: |
+        cd ./src/main/resources
+        touch ./fcm-private-key.json
+        echo "${{ secrets.FCM }}" > ./fcm-private-key.json
+      shell: bash
+
     - name: Build with Gradle Wrapper
       run: |
           chmod +x gradlew 

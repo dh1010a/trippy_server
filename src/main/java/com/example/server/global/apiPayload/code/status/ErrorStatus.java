@@ -17,6 +17,7 @@ public enum ErrorStatus implements BaseErrorCode {
     _LOGIN_FAILURE(HttpStatus.NOT_FOUND, "COMMON404", "요청 리소스를 찾을 수 없습니다."),
     _INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON500", "서버 에러, 관리자에게 문의 바랍니다."),
     _SERVICE_UNAVAILABLE_ERROR(HttpStatus.SERVICE_UNAVAILABLE, "COMMON503", "서버가 일시적으로 사용중지 되었습니다."),
+    _JSON_PROCESSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON500", "JSON 처리 중 오류가 발생하였습니다."),
 
     //유저 응답
     MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER4001", "유저가 존재하지 않습니다."),
@@ -76,6 +77,10 @@ public enum ErrorStatus implements BaseErrorCode {
     // 좋아요 응답
     ALREADY_LIKED(HttpStatus.BAD_REQUEST, "LIKE4001", "이미 좋아요를 누른 게시물입니다."),
     POST_NOT_LIKED(HttpStatus.BAD_REQUEST, "LIKE4002", "좋아요를 누르지 않은 게시물입니다."),
+
+    // FCM 응답
+    FCM_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "FCM4001", "FCM 토큰이 존재하지 않습니다."),
+    FCM_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "FCM4002", "FCM 권한이 없습니다."),
 
 
     // 시간 제한

@@ -434,5 +434,6 @@ public class MemberService {
     //== 알림을 보내는 기능 ==//
     public void publishFollowEvent(Member member, Member receiver) {
         eventPublisher.publishEvent(NotifyDtoConverter.convertToNotifyPublishRequestDto(member, receiver, NotificationType.FOLLOW));
+
     }
 }

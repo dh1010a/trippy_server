@@ -1,11 +1,10 @@
 package com.example.server.admin.domain.controller;
 
 import com.example.server.domain.country.service.CountryService;
-import com.example.server.domain.image.service.ImageService;
 import com.example.server.domain.image.service.OracleImageService;
-import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.domain.member.service.MemberService;
 import com.example.server.domain.notify.service.NotifyService;
+import com.example.server.domain.notify.service.SseNotifyService;
 import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;

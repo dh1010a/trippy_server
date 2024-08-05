@@ -1,22 +1,59 @@
 package com.example.server.global.util;
 
 import com.example.server.domain.search.dto.SearchRequestDto;
+import com.example.server.global.apiPayload.code.status.ErrorStatus;
+import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.ListOperations;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.core.ZSetOperations;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RedisUtil {
     private final StringRedisTemplate redisTemplate;//Redis에 접근하기 위한 Spring의 Redis 템플릿 클래스
+    private final RedisTemplate<String, Object> redisObjectTemplate;
+    private final ObjectMapper objectMapper;
+
+    public <T> Optional<T> get(String key, Class<T> type) {
+        log.info("get data from redis with key: {}, type: {}", key, type.getName());
+        String value = (String) redisObjectTemplate.opsForValue().get(key);
+        try {
+            return Optional.ofNullable(objectMapper.readValue(value, type));
+        } catch (IllegalArgumentException e) {
+            log.warn("value for key does not exist in redis");
+            return Optional.empty();
+        } catch (JsonProcessingException e) {
+            log.error("error occurred while processing JSON", e);
+            throw new ErrorHandler(ErrorStatus._JSON_PROCESSING_ERROR);
+        }
+    }
+
+    public void set(String key, Object data, Long expiration) {
+        log.info("set data in redis with key: {}, data: {}, expiration: {} milliseconds", key, data, expiration);
+        try {
+            String value = objectMapper.writeValueAsString(data);
+            redisObjectTemplate.opsForValue().set(key, value, expiration, TimeUnit.MILLISECONDS);
+        } catch (JsonProcessingException e) {
+            log.error("error occurred while processing JSON", e);
+            throw new ErrorHandler(ErrorStatus._JSON_PROCESSING_ERROR);
+        }
+    }
+
+    public void delete(String key) {
+        log.info("delete data from redis with key: {}", key);
+        redisObjectTemplate.delete(key);
+    }
 
     public String getData(String key){//지정된 키(key)에 해당하는 데이터를 Redis에서 가져오는 메서드
         ValueOperations<String,String> valueOperations=redisTemplate.opsForValue();
