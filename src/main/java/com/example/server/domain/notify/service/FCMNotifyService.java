@@ -136,7 +136,7 @@ public class FCMNotifyService {
     }
 
     @Recover
-    private void recover(RuntimeException exception, String email, Message message) {
+    private void recover(RuntimeException exception, String memberId, Message message) {
         throw new ErrorHandler(ErrorStatus.NOTIFY_SEND_FAIL);
     }
 }

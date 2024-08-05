@@ -27,14 +27,15 @@ public class NotifyListener {
     @Async
     public void handleSseNotification(NotifyDto.NotifyPublishRequestDto requestDto) {
         sseNotifyService.sendNotify(requestDto.getReceiver(), requestDto);
-    }
-
-    @TransactionalEventListener
-//    @TransactionalEventListener(phase = AFTER_COMMIT)
-    @Async
-    public void hadleFcmNotification(NotifyDto.NotifyPublishRequestDto requestDto) {
         sendFCMNotification(requestDto.getReceiver().getMemberId(), fcmNotifyService.createFCMMessage(requestDto.getReceiver(), requestDto));
     }
+
+//    @TransactionalEventListener(phase = AFTER_COMMIT)
+//    @TransactionalEventListener
+//    @Async
+//    public void hadleFcmNotification(NotifyDto.NotifyPublishRequestDto requestDto) {
+//
+//    }
 
 
     private void sendFCMNotification(String memberId, Message message) {
