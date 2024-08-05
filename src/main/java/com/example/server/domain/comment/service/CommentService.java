@@ -26,6 +26,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.shaded.gson.JsonObject;
 import io.github.resilience4j.core.EventPublisher;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +37,9 @@ import org.apache.catalina.Group;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -53,8 +59,12 @@ public class CommentService {
     private final CommentDtoConverter commentDtoConverter;
     private final ApplicationEventPublisher eventPublisher;
 
+    private static final int TIME_LIMIT_SECONDS = 60; // 시간 제한 (60초)
+
     // POST api/comment
-    public CommentResponseDto.CommentBasicResponse uploadComment(CommentRequestDto.CommentBasicRequest requestDto) {
+    public CommentResponseDto.CommentBasicResponse uploadComment(CommentRequestDto.CommentBasicRequest requestDto, HttpSession session) {
+        checkTimeLimit(session, requestDto.getPostId());
+
         if(requestDto.getParentId()!= null){
             Comment parent = getComment(requestDto.getParentId());
             if(parent.getStatus() == Scope.PRIVATE){
@@ -62,7 +72,28 @@ public class CommentService {
             }
         }
         Comment comment = saveComment(requestDto);
+        updateLastCommentTime(session, requestDto.getPostId());
         return CommentDtoConverter.convertToCommentBasicResponse(comment);
+    }
+
+    private void checkTimeLimit(HttpSession session, Long postId) {
+        Map<Long, LocalDateTime> lastCommentTimes = (Map<Long, LocalDateTime>) session.getAttribute("lastCommentTimes");
+        if (lastCommentTimes != null && lastCommentTimes.containsKey(postId)) {
+            LocalDateTime lastCommentTime = lastCommentTimes.get(postId);
+            LocalDateTime now = LocalDateTime.now();
+            if (ChronoUnit.SECONDS.between(lastCommentTime, now) < TIME_LIMIT_SECONDS) {
+                throw new ErrorHandler(ErrorStatus.TIME_LIMIT_EXCEEDED);
+            }
+        }
+    }
+
+    private void updateLastCommentTime(HttpSession session, Long postId) {
+        Map<Long, LocalDateTime> lastCommentTimes = (Map<Long, LocalDateTime>) session.getAttribute("lastCommentTimes");
+        if (lastCommentTimes == null) {
+            lastCommentTimes = new HashMap<>();
+        }
+        lastCommentTimes.put(postId, LocalDateTime.now());
+        session.setAttribute("lastCommentTimes", lastCommentTimes);
     }
 
     // GET /api/comment by postId

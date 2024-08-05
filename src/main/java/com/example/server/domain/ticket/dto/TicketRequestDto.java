@@ -18,6 +18,8 @@ public class TicketRequestDto {
     public static class UploadTicketRequestDto{
         private String departure;
         private String destination;
+        private String departureCode;
+        private String destinationCode;
         private ImageDto image;
         private Integer memberNum;
 //        private String duration;
@@ -33,6 +35,8 @@ public class TicketRequestDto {
         private Long id;
         private String departure;
         private String destination;
+        private String departureCode;
+        private String destinationCode;
         private ImageDto image;
         private Integer memberNum;
         //        private String duration;

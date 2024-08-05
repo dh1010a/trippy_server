@@ -27,6 +27,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -84,18 +86,45 @@ public class PostService {
         if (post.getPostType() == PostType.OOTD) {
             throw new ErrorHandler(ErrorStatus.POST_TYPE_ERROR);
         } else {
-            addViewCount(request, response, postId);
+            addViewCount(request,postId);
         }
 
         Member member = getMemberById(memberId);
         return PostDtoConverter.convertToGetResponseDto(post, member);
     }
 
+    public void addViewCount(HttpServletRequest request, Long postId) {
+        HttpSession session = request.getSession();
+        Post post = getPostById(postId);
+
+        // 세션에서 방문한 게시물 ID 목록 가져오기
+        List<Long> viewedPosts = (List<Long>) session.getAttribute("viewedPosts");
+
+        if (viewedPosts == null) {
+            viewedPosts = new ArrayList<>();
+        }
+
+        // 현재 게시물이 이미 방문한 게시물 목록에 있는지 확인
+        if (!viewedPosts.contains(postId)) {
+            viewedPosts.add(postId);
+            post.addViewCount();
+        }
+
+        // 세션에 방문한 게시물 ID 목록 저장
+        session.setAttribute("viewedPosts", viewedPosts);
+    }
+
+
     // GET api/post < 게시물 전체 불러 오기 >
     public List<PostResponseDto.GetPostResponseDto> getAllPost(Integer page, String memberId, Integer size, OrderType orderType) {
         Member member = getMemberById(memberId);
+        Long loginMemberIdx;
+        if (member != null) {
+            loginMemberIdx = member.getIdx();
+        }
+        else loginMemberIdx = 0L;
         Pageable pageable = getPageable(page, size, orderType);
-        List<Post> postList = getPostsByOrderType(orderType, pageable);
+        List<Post> postList = getPostsByOrderType(orderType, pageable, loginMemberIdx);
 
         return PostDtoConverter.convertToPostListResponseDto(postList, member);
     }
@@ -103,9 +132,14 @@ public class PostService {
     public List<PostResponseDto.GetPostResponseDto> getAllMemberPost(String memberId, String loginMemberId, Integer page, Integer size, OrderType orderType) {
         Member member = getMemberById(memberId);
         Member loginMember = getMemberById(loginMemberId);
+        Long loginMemberIdx;
+        if(loginMember != null){
+            loginMemberIdx = 0L;
+        }
+        else loginMemberIdx = loginMember.getIdx();
         Pageable pageable = getPageable(page, size, orderType);
 
-        List<Post> postList = getPostsByOrderTypeANdMember(orderType, pageable, member);
+        List<Post> postList = getPostsByOrderTypeANdMember(orderType, pageable, member, loginMemberIdx);
         return PostDtoConverter.convertToPostListResponseDto(postList, loginMember);
     }
 
@@ -117,19 +151,19 @@ public class PostService {
         }
     }
 
-    public List<Post> getPostsByOrderType(OrderType orderType, Pageable pageable) {
+    public List<Post> getPostsByOrderType(OrderType orderType, Pageable pageable, Long loginMemberIdx) {
         if (orderType.equals(OrderType.LIKE)) {
-            return postRepository.findAllByPostTypeOrderByLikeCountDesc(PostType.POST, pageable).getContent();
+            return postRepository.findAllByPostTypeWithScopeAndOrderLike(PostType.POST, loginMemberIdx, pageable).getContent();
         } else {
-            return postRepository.findAllByPostType(PostType.POST, pageable).getContent();
+            return postRepository.findAllByPostTypeWithScope(PostType.POST,loginMemberIdx, pageable).getContent();
         }
     }
 
-    public List<Post> getPostsByOrderTypeANdMember(OrderType orderType, Pageable pageable, Member member) {
+    public List<Post> getPostsByOrderTypeANdMember(OrderType orderType, Pageable pageable, Member member, Long loginMemberIdx) {
         if (orderType.equals(OrderType.LIKE)) {
-            return postRepository.findAllByPostTypeAndMemberOrderByLikeCountDesc(PostType.POST, member, pageable).getContent();
+            return postRepository.findAllByPostTypeAndMemberOrderByLikeCountDesc(PostType.POST, member,loginMemberIdx, pageable).getContent();
         } else {
-            return postRepository.findAllByMemberAndPostType(member, PostType.POST, pageable).getContent();
+            return postRepository.findAllByMemberAndPostType(member, PostType.POST, loginMemberIdx, pageable).getContent();
         }
     }
 
@@ -223,6 +257,8 @@ public class PostService {
                 .destination(requestDto.getDestination())
                 .memberNum(requestDto.getMemberNum())
                 .startDate(requestDto.getStartDate())
+                .departureCode(requestDto.getDepartureCode())
+                .destinationCode(requestDto.getDestinationCode())
                 .endDate(requestDto.getEndDate())
                 .ticketColor(requestDto.getTicketColor())
                 .transport(requestDto.getTransport())
@@ -326,33 +362,6 @@ public class PostService {
         return postRepository.countByMemberAndPostType(member, type);
     }
 
-    public void addViewCount(HttpServletRequest request, HttpServletResponse response, Long postId) {
-        Cookie[] cookies = request.getCookies();
-        boolean isNewCookie = true;
-        Post post = getPostById(postId);
-
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("visit_cookie".equals(cookie.getName())) {
-                    if (!cookie.getValue().contains(postId.toString())) {
-                        cookie.setValue(cookie.getValue() + "_" + postId.toString());
-                        cookie.setMaxAge(60 * 60 * 2); // 2 hours
-                        response.addCookie(cookie);
-                        post.addViewCount();
-                    }
-                    isNewCookie = false;
-                    break;
-                }
-            }
-        }
-
-        if (isNewCookie) {
-            Cookie newCookie = new Cookie("visit_cookie", postId.toString());
-            newCookie.setMaxAge(60 * 60 * 2); // 2 hours
-            response.addCookie(newCookie);
-            post.addViewCount();
-        }
-    }
 
 
     public Member getMemberById(String memberId) {
