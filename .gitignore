@@ -40,4 +40,6 @@ out/
 *.yml
 docker-compose.yml
 deploy.sh
-filebase_service_key.json
+fcm-private-key.json
+firebase-snippet.html
+*.json

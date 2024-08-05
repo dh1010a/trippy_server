@@ -1,6 +1,7 @@
 package com.example.server.global.config;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -23,6 +24,28 @@ public class AsyncConfig implements AsyncConfigurer {
         executor.setQueueCapacity(50); // 2) 큐 용량: if(러닝 쓰레드 개수 >= 코어 개수) 큐 용량 다쓸때까지 큐에 쌓음;
         executor.setKeepAliveSeconds(60);
         executor.setThreadNamePrefix("AsyncExecutor-");
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean(name = "taskExecutor")
+    public Executor taskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(3);
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(60);
+        executor.setThreadNamePrefix("Offispace-Thread: ");
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean(name = "callBackTaskExecutor")
+    public Executor callBackTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(3);
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(60);
+        executor.setThreadNamePrefix("Offispace-Call-Back-Thread: ");
         executor.initialize();
         return executor;
     }
