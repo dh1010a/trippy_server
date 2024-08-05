@@ -30,6 +30,11 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request, HttpServletResponse response,
                        AccessDeniedException accessDeniedException) throws IOException {
         Optional<String> accessToken = jwtService.extractAccessToken(request);
+        if (response.isCommitted()) {
+            log.warn("Response has already been committed.");
+            return;
+        }
+
         if (accessToken.isPresent()) {
             Optional<String> memberId = jwtService.extractMemberId(accessToken.get());
             log.info("Access denied: memberId = " + memberId.get());
