@@ -252,16 +252,22 @@ public class OracleImageService implements ImageService {
 
 
     private void deletePreAuth(String parId) throws Exception {
-        ObjectStorage client = getClient();
-        DeletePreauthenticatedRequestRequest request =
-                DeletePreauthenticatedRequestRequest.builder()
-                        .namespaceName(BUCKET_NAME_SPACE)
-                        .bucketName(BUCKET_NAME)
-                        .parId(parId)
-                        .build();
+        try {
 
-        client.deletePreauthenticatedRequest(request);
-        client.close();
+            ObjectStorage client = getClient();
+            DeletePreauthenticatedRequestRequest request =
+                    DeletePreauthenticatedRequestRequest.builder()
+                            .namespaceName(BUCKET_NAME_SPACE)
+                            .bucketName(BUCKET_NAME)
+                            .parId(parId)
+                            .build();
+
+            client.deletePreauthenticatedRequest(request);
+            client.close();
+        } catch (Exception e) {
+            log.error("PreAuth 삭제에 실패하였습니다. PreAuth ID : {}", parId);
+            log.error("Error Message : {}", e.getMessage());
+        }
     }
 
 
