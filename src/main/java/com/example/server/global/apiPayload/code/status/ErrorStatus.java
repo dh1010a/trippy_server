@@ -44,6 +44,7 @@ public enum ErrorStatus implements BaseErrorCode {
     IMAGE_DOWNLOAD_FAIL(HttpStatus.NOT_FOUND, "IMG4002", "사진 다운로드에 실패하였습니다."),
     IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "IMG4003", "사진 조회에 실패하였습니다."),
     IMAGE_DELETE_FAIL(HttpStatus.BAD_REQUEST, "IMG4004", "사진 삭제에 실패하였습니다."),
+    IMAGE_UPLOAD_TIME_COUNT_LIMIT(HttpStatus.BAD_REQUEST, "IMG4005", "사진 업로드 제한 횟수를 초과하였습니다."),
 
     // 신고 응답
     REPORT_NOT_FOUND(HttpStatus.BAD_REQUEST, "REPORT4001", "신고내역이 존재하지 않습니다."),

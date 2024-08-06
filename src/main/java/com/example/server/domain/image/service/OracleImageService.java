@@ -29,6 +29,7 @@ import com.oracle.bmc.objectstorage.transfer.UploadConfiguration;
 import com.oracle.bmc.objectstorage.transfer.UploadManager;
 import com.oracle.bmc.objectstorage.transfer.UploadManager.UploadRequest;
 import com.oracle.bmc.objectstorage.transfer.UploadManager.UploadResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -49,6 +52,12 @@ public class OracleImageService implements ImageService {
     private final MemberRepository memberRepository;
 
     private final ImageRepository imageRepository;
+
+    private static final String SESSION_KEY = "lastUploadTime";
+
+    private static final int FIRST_TIME_LIMIT_MINUTE = 5;
+
+    private static final int SECOND_TIME_LIMIT_MINUTE = 60;
 
 
 
@@ -89,14 +98,63 @@ public class OracleImageService implements ImageService {
 
 
     @Override
-    public UploadResponseDto uploadImg(MultipartFile file, String memberId) throws Exception{
+    public UploadResponseDto uploadImg(MultipartFile file, String memberId, HttpSession session) throws Exception{
+        checkTimeLimit(session, memberId);
         File uploadFile = convert(file)  // 파일 변환할 수 없으면 에러
                 .orElseThrow(() -> new IllegalArgumentException("error: MultipartFile -> File convert fail"));
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
         String fileDir = member.getIdx() + "/" + DEFAULT_IMG_DIR;
         log.info("사진 업로드 요청. MemberId : {}", memberId);
-        return upload(uploadFile, fileDir);
+        return upload(uploadFile, fileDir, memberId, session);
     }
+
+    private void checkTimeLimit(HttpSession session, String memberId) {
+        Map<String, List<LocalDateTime>> lastUploadTimes = (Map<String, List<LocalDateTime>>) session.getAttribute("lastUploadTime");
+        Member member = memberRepository.getMemberById(memberId);
+        LocalDateTime now = LocalDateTime.now();
+        if (member.getLastImageUploadBlockedTime() != null && ChronoUnit.DAYS.between(member.getLastImageUploadBlockedTime(), now) <= 1) {
+            throw new ErrorHandler(ErrorStatus.IMAGE_UPLOAD_TIME_COUNT_LIMIT);
+        }
+        if (lastUploadTimes != null && lastUploadTimes.containsKey(memberId)) {
+
+            if (lastUploadTimes.get(memberId) != null) {
+                int cnt5 = 0;
+                int cnt60 = 0;
+                for (LocalDateTime time : lastUploadTimes.get(memberId)) {
+                    if (ChronoUnit.MINUTES.between(time, now) <= FIRST_TIME_LIMIT_MINUTE) {
+                        cnt5++;
+                    }
+                    if (ChronoUnit.MINUTES.between(time, now) <= SECOND_TIME_LIMIT_MINUTE) {
+                        cnt60++;
+                    }
+                }
+                if (cnt5 >= 5 || cnt60 >= 10) {
+                    member.updateLastImageUploadBlockedTime(now);
+                    throw new ErrorHandler(ErrorStatus.IMAGE_UPLOAD_TIME_COUNT_LIMIT);
+                }
+            }
+        }
+    }
+
+    private void updateLastUploadTime(HttpSession session, String memberId) {
+        Map<String, List<LocalDateTime>> lastUploadTimes = (Map<String, List<LocalDateTime>>) session.getAttribute(SESSION_KEY);
+        if (lastUploadTimes == null) {
+            lastUploadTimes = new HashMap<>();
+        }
+        if (lastUploadTimes.containsKey(memberId)) {
+            if (lastUploadTimes.get(memberId).size() >= 10) {
+                lastUploadTimes.get(memberId).remove(0);
+            }
+            lastUploadTimes.get(memberId).add(LocalDateTime.now());
+        } else {
+            List<LocalDateTime> times = new ArrayList<>();
+            times.add(LocalDateTime.now());
+            lastUploadTimes.put(memberId, times);
+        }
+        session.setAttribute(SESSION_KEY, lastUploadTimes);
+    }
+
+
 
     @Override
     public MultipartFile downloadImg(Long imageIdx, Long memberIdx) throws Exception{
@@ -149,7 +207,7 @@ public class OracleImageService implements ImageService {
     }
 
     // 오라클 버킷으로 파일 업로드
-    public UploadResponseDto upload(File uploadFile, String dirName) throws Exception {
+    public UploadResponseDto upload(File uploadFile, String dirName, String memberId, HttpSession session) throws Exception {
         ObjectStorage client = getClient();
         UploadManager uploadManager = getManager(client);
 
@@ -169,6 +227,7 @@ public class OracleImageService implements ImageService {
         log.info("Upload Success. File : {}", fileName);
 
         removeNewFile(uploadFile);
+        updateLastUploadTime(session, memberId);
         return getPublicImgUrl(fileName);
     }
 
