@@ -118,28 +118,31 @@ public class PostService {
     // GET api/post < 게시물 전체 불러 오기 >
     public List<PostResponseDto.GetPostResponseDto> getAllPost(Integer page, String memberId, Integer size, OrderType orderType) {
         Member member = getMemberById(memberId);
-        Long loginMemberIdx;
-        if (member != null) {
-            loginMemberIdx = member.getIdx();
-        }
-        else loginMemberIdx = 0L;
+
+        List<Long> followingList = memberFollowRepository.findFollowingList(member==null ? 0 : member.getIdx());
+
         Pageable pageable = getPageable(page, size, orderType);
-        List<Post> postList = getPostsByOrderType(orderType, pageable, loginMemberIdx);
+        List<Post> postList = getPostsByOrderType(orderType, pageable, followingList);
 
         return PostDtoConverter.convertToPostListResponseDto(postList, member);
     }
 
+    public List<PostResponseDto.GetPostResponseDto> getAllMyPost(String loginMemberId, Integer page, Integer size, OrderType orderType) {
+        Member loginMember = getMemberById(loginMemberId);
+        Pageable pageable = getPageable(page, size, orderType);
+
+        List<Post> postList = getMyPostsByOrderType(orderType, pageable, loginMember);
+        return PostDtoConverter.convertToPostListResponseDto(postList, loginMember);
+    }
+
+    // 멤버별 게시물
     public List<PostResponseDto.GetPostResponseDto> getAllMemberPost(String memberId, String loginMemberId, Integer page, Integer size, OrderType orderType) {
         Member member = getMemberById(memberId);
         Member loginMember = getMemberById(loginMemberId);
-        Long loginMemberIdx;
-        if(loginMember != null){
-            loginMemberIdx = 0L;
-        }
-        else loginMemberIdx = loginMember.getIdx();
+        List<Long> followingList = memberFollowRepository.findFollowingList(loginMember==null ? 0 : loginMember.getIdx());
         Pageable pageable = getPageable(page, size, orderType);
 
-        List<Post> postList = getPostsByOrderTypeANdMember(orderType, pageable, member, loginMemberIdx);
+        List<Post> postList = getPostsByOrderTypeAndMember(orderType, pageable, member, followingList);
         return PostDtoConverter.convertToPostListResponseDto(postList, loginMember);
     }
 
@@ -151,27 +154,32 @@ public class PostService {
         }
     }
 
-    public List<Post> getPostsByOrderType(OrderType orderType, Pageable pageable, Long loginMemberIdx) {
-        if (orderType.equals(OrderType.LIKE)) {
-            return postRepository.findAllByPostTypeWithScopeAndOrderLike(PostType.POST, loginMemberIdx, pageable).getContent();
-        } else {
-            return postRepository.findAllByPostTypeWithScope(PostType.POST,loginMemberIdx, pageable).getContent();
-        }
+    // 전체 게시물
+    public List<Post> getPostsByOrderType(OrderType orderType, Pageable pageable, List<Long> followingList) {
+        return postRepository.findAllByPostTypeWithScope(PostType.POST,followingList, pageable).getContent();
     }
 
-    public List<Post> getPostsByOrderTypeANdMember(OrderType orderType, Pageable pageable, Member member, Long loginMemberIdx) {
-        if (orderType.equals(OrderType.LIKE)) {
-            return postRepository.findAllByPostTypeAndMemberOrderByLikeCountDesc(PostType.POST, member,loginMemberIdx, pageable).getContent();
-        } else {
-            return postRepository.findAllByMemberAndPostType(member, PostType.POST, loginMemberIdx, pageable).getContent();
-        }
+    // 멤버별 게시물
+    public List<Post> getPostsByOrderTypeANdMember(OrderType orderType, Pageable pageable, Member member, List<Long> followingList) {
+        return postRepository.findAllByMemberAndPostType(PostType.POST, member,followingList, pageable).getContent();
+    }
+
+    // 내 게시물
+    public List<Post> getMyPostsByOrderType(OrderType orderType, Pageable pageable, Member member) {
+        return postRepository.findMyPostsWithScore(member,PostType.POST, pageable).getContent();
+    }
+
+    // 멤버 게시물
+    public List<Post> getPostsByOrderTypeAndMember(OrderType orderType, Pageable pageable, Member member, List<Long> followingList) {
+        return postRepository.findAllByMemberAndPostType( PostType.POST, member, followingList, pageable).getContent();
     }
 
     public Sort getSortByOrderType(OrderType orderType) {
         switch (orderType) {
             case VIEW:
                 return Sort.by(Sort.Direction.DESC, "viewCount");
-            case LATEST:
+            case LIKE:
+                return Sort.by(Sort.Direction.DESC, "score");
             default:
                 return Sort.by(Sort.Direction.DESC, "createdAt");
         }
@@ -207,7 +215,7 @@ public class PostService {
         Member member = getMemberById(memberId);
         Pageable pageable = getPageable(page, size, orderType);
 
-        List<Long> followingMemberIds = getFollowingMemberIds(member.getIdx());
+        List<Long> followingMemberIds = memberFollowRepository.findFollowingList(member.getIdx());
 
         List<Post> posts = postRepository.findByMemberIdxInAndPostType(followingMemberIds, postType, pageable).getContent();
 
@@ -219,7 +227,7 @@ public class PostService {
         Member member = getMemberById(memberId);
         Pageable pageable = getPageable(page, size, orderType);
 
-        List<Long> followingMemberIds = getFollowingMemberIds(member.getIdx());
+        List<Long> followingMemberIds =  memberFollowRepository.findFollowingList(member.getIdx());
 
         List<Post> posts = postRepository.findByMemberIdxInAndPostType(followingMemberIds, postType, pageable).getContent();
 
@@ -227,12 +235,12 @@ public class PostService {
     }
 
     // 내가 팔로우한 회원 리스트
-    private List<Long> getFollowingMemberIds(Long memberIdx) {
-        List<MemberFollow> follows = memberFollowRepository.findByMemberIdx(memberIdx);
-        return follows.stream()
-                .map(MemberFollow::getFollowingMemberIdx)
-                .collect(Collectors.toList());
-    }
+//    private List<Long> getFollowingMemberIds(Long memberIdx) {
+//        List<MemberFollow> follows = memberFollowRepository.findByMemberIdx(memberIdx);
+//        return follows.stream()
+//                .map(MemberFollow::getFollowingMemberIdx)
+//                .collect(Collectors.toList());
+//    }
 
 
     public Post savePost(PostRequestDto.CommonPostRequestDto requestDto) {

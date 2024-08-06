@@ -1,14 +1,18 @@
 package com.example.server.domain.search.service;
 
+import com.example.server.domain.follow.repository.MemberFollowRepository;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.domain.post.dto.PostDtoConverter;
 import com.example.server.domain.post.dto.PostResponseDto;
+import com.example.server.domain.post.model.OrderType;
 import com.example.server.domain.post.model.PostType;
 import com.example.server.domain.post.repository.PostRepository;
 import com.example.server.domain.post.repository.TagRepository;
+import com.example.server.domain.post.service.PostService;
 import com.example.server.domain.search.dto.SearchRequestDto;
+import com.example.server.domain.search.model.SearchType;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import lombok.RequiredArgsConstructor;
@@ -33,19 +37,39 @@ public class SearchService {
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
     private final SearchRedisService searchRedisService;
+    private final MemberFollowRepository memberFollowRepository;
+    private final PostService postService;
     private final TagRepository tagRepository;
 
     public List<PostResponseDto.GetPostResponseDto> getPosts(SearchRequestDto.SaveSearchRequest saveSearchRequest, String memberId) {
         updateSearchLog(memberId, saveSearchRequest);
         Member member = !"anonymousUser".equals(memberId) ? getMember(memberId) : null;
-        List<Post> posts = retrievePosts(saveSearchRequest);
+        List<Long> followingList = memberFollowRepository.findFollowingList(member==null ? 0 : member.getIdx());
+        Pageable pageable = postService.getPageable(saveSearchRequest.getPage(), saveSearchRequest.getSize(), OrderType.LATEST);
+
+        List<Post> posts;
+        if(saveSearchRequest.getSearchType().equals(SearchType.TITLE)) {
+            posts = postRepository.findPostByTitle(saveSearchRequest.getKeyword(), PostType.POST, followingList, pageable).getContent();
+        }
+        else {
+            posts = postRepository.findPostBodyAndTitle(saveSearchRequest.getKeyword(), PostType.POST, followingList, pageable).getContent();
+        }
         return PostDtoConverter.convertToPostListResponseDto(posts, member);
     }
 
     public List<PostResponseDto.GetOotdPostResponseDto> getOotds(SearchRequestDto.SaveSearchRequest saveSearchRequest, String memberId) {
         updateSearchLog(memberId, saveSearchRequest);
         Member member = !"anonymousUser".equals(memberId) ? getMember(memberId) : null;
-        List<Post> posts = retrievePosts(saveSearchRequest);
+        List<Long> followingList = memberFollowRepository.findFollowingList(member==null ? 0 : member.getIdx());
+        Pageable pageable = postService.getPageable(saveSearchRequest.getPage(), saveSearchRequest.getSize(), OrderType.LATEST);
+
+        List<Post> posts;
+        if(saveSearchRequest.getSearchType().equals(SearchType.TITLE)) {
+            posts = postRepository.findPostByTitle(saveSearchRequest.getKeyword(), PostType.OOTD, followingList, pageable).getContent();
+        }
+        else {
+            posts = postRepository.findPostBodyAndTitle(saveSearchRequest.getKeyword(), PostType.OOTD, followingList, pageable).getContent();
+        }
         return PostDtoConverter.convertToOOTDListResponseDto(posts, member);
     }
 
@@ -58,32 +82,6 @@ public class SearchService {
             // 회원별 검색어 count
             searchRedisService.incrementCount("member:" + memberId + ":popularSearches" + saveSearchRequest.getPostType(), saveSearchRequest.getKeyword());
         }
-    }
-
-    private List<Post> retrievePosts(SearchRequestDto.SaveSearchRequest saveSearchRequest) {
-        if (saveSearchRequest.getPage() == 0 && saveSearchRequest.getSize() == 0) {
-            return getPostsWithoutPagination(saveSearchRequest);
-        } else {
-            Pageable pageable = PageRequest.of(saveSearchRequest.getPage(), saveSearchRequest.getSize());
-            return getPostsWithPagination(saveSearchRequest, pageable);
-        }
-    }
-
-    private List<Post> getPostsWithoutPagination(SearchRequestDto.SaveSearchRequest saveSearchRequest) {
-        return switch (saveSearchRequest.getSearchType()) {
-            case TITLE -> postRepository.findPostByTitle(saveSearchRequest.getKeyword(), saveSearchRequest.getPostType());
-            case TITLE_OR_BODY -> postRepository.findPostBodyAndTitle(saveSearchRequest.getKeyword(), saveSearchRequest.getPostType());
-            default -> Collections.emptyList();
-        };
-    }
-
-    private List<Post> getPostsWithPagination(SearchRequestDto.SaveSearchRequest saveSearchRequest, Pageable pageable) {
-        Page<Post> resultPage = switch (saveSearchRequest.getSearchType()) {
-            case TITLE -> postRepository.findPostByTitle(saveSearchRequest.getKeyword(), saveSearchRequest.getPostType(), pageable);
-            case TITLE_OR_BODY -> postRepository.findPostBodyAndTitle(saveSearchRequest.getKeyword(), saveSearchRequest.getPostType(), pageable);
-            default -> Page.empty(pageable);
-        };
-        return resultPage.getContent();
     }
 
     public List<PostResponseDto.GetPostResponseDto> getPostSearchByTag(String tag, String memberId, Integer size, Integer page) {

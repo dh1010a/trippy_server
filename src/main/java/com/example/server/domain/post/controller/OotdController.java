@@ -72,7 +72,7 @@ public class OotdController {
         String memberId = getLoginMemberId();
         if(orderType == null ) orderType = OrderType.LATEST;
         log.info("회원별 OOTD 게시물 조회 요청 : memberId = {}", memberId );
-        return ApiResponse.onSuccess(ootdService.getAllMemberPost(memberId,memberId,page,size,orderType));
+        return ApiResponse.onSuccess(ootdService.getAllMyPost(memberId, page, size, orderType));
     }
 
     @GetMapping("/by-member")
