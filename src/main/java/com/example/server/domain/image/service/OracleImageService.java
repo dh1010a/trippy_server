@@ -127,19 +127,25 @@ public class OracleImageService implements ImageService {
     }
 
     @Override
-    public void deleteImg(ImageDto imageDto) throws Exception {
-        ObjectStorage client = getClient();
-        DeleteObjectRequest request = DeleteObjectRequest.builder()
-                .bucketName(BUCKET_NAME)
-                .namespaceName(BUCKET_NAME_SPACE)
-                .objectName(imageDto.getImgUrl())
-                .build();
+    public void deleteImg(ImageDto imageDto) {
+        ObjectStorage client = null;
+        try {
+            client = getClient();
+            DeleteObjectRequest request = DeleteObjectRequest.builder()
+                    .bucketName(BUCKET_NAME)
+                    .namespaceName(BUCKET_NAME_SPACE)
+                    .objectName(imageDto.getImgUrl())
+                    .build();
 
-        deletePreAuth(imageDto.getAuthenticateId());
+            deletePreAuth(imageDto.getAuthenticateId());
 
-        client.deleteObject(request);
-        client.close();
-        log.info("이미지 삭제에 성공하였습니다. 이미지 URL : {}", imageDto.getImgUrl());
+            client.deleteObject(request);
+            client.close();
+            log.info("이미지 삭제에 성공하였습니다. 이미지 URL : {}", imageDto.getImgUrl());
+        } catch (Exception e) {
+            log.info("이미지 삭제에 실패하였습니다. 이미지 URL : {}", imageDto.getImgUrl());
+        }
+
     }
 
     // 오라클 버킷으로 파일 업로드

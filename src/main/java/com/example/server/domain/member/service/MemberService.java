@@ -333,7 +333,8 @@ public class MemberService {
         if (!images.isEmpty()) {
             Image profileImage = images.stream().filter(Image::isProfileImage).findAny().orElse(null);
             if (profileImage != null) {
-                oracleImageService.deleteImg(profileImage.getId());
+                // 올렸던 사진 자체를 삭제하지 않음
+//                oracleImageService.deleteImg(profileImage.getId());
                 imageRepository.delete(profileImage);
             }
         }
