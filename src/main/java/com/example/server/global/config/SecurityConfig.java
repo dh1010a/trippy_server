@@ -81,8 +81,8 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex
                         .accessDeniedHandler(new CustomAccessDeniedHandler(jwtService))
                         .authenticationEntryPoint(new CustomAuthenticationEntryPoint()))
-                .addFilterAfter(silentReAuthenticationFilter(), LogoutFilter.class)
-                .addFilterAfter(jsonUsernamePasswordLoginFilter(), LogoutFilter.class)
+                .addFilterBefore(silentReAuthenticationFilter(), LogoutFilter.class)
+                .addFilterBefore(jsonUsernamePasswordLoginFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(auth2AccessTokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
