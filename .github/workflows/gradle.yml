@@ -62,7 +62,7 @@ jobs:
       run: |
         cd ./src/main/resources
         touch ./fcm-private-key.json
-        echo "${{ secrets.FCM }}" > ./fcm-private-key.json
+        echo "${{ secrets.FCM }}" | base64 -d > ./fcm-private-key.json
       shell: bash
 
     - name: Build with Gradle Wrapper
