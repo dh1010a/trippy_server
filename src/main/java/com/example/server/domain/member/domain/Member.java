@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -109,6 +110,8 @@ public class Member extends BaseTimeEntity {
 
     private boolean commentAlert;
 
+    private LocalDateTime lastImageUploadBlockedTime;
+
     @ElementCollection
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -142,6 +145,10 @@ public class Member extends BaseTimeEntity {
 
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
+    }
+
+    public void updateLastImageUploadBlockedTime(LocalDateTime lastImageUploadBlockedTime) {
+        this.lastImageUploadBlockedTime = lastImageUploadBlockedTime;
     }
 
     public void destroyRefreshToken() {

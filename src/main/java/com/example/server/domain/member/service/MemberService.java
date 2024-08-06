@@ -33,6 +33,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -70,6 +71,7 @@ public class MemberService {
                 .activeState(ActiveState.ACTIVE)
                 .role(Role.ROLE_GUEST)
                 .socialType(SocialType.LOCAL)
+                .lastImageUploadBlockedTime(LocalDateTime.of(2000, 1, 1, 0, 0))
                 .build();
         member.initDefaultSetting();
         memberRepository.save(member);
@@ -94,6 +96,7 @@ public class MemberService {
                 .role(Role.ROLE_GUEST)
                 .activeState(ActiveState.ACTIVE)
                 .socialType(oAuth2User.getSocialType())
+                .lastImageUploadBlockedTime(LocalDateTime.of(2000, 1, 1, 0, 0))
                 .build();
         member.initDefaultSetting();
         log.info("신규 소셜 회원입니다. 등록을 진행합니다. memberId = {}, email = {}, socialType = {}", member.getMemberId(), member.getEmail(), member.getSocialType().getSocialName());

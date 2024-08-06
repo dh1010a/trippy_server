@@ -58,7 +58,7 @@ public class FcmConfig {
 
             // 디버깅 로그 추가
             String jsonContent = new String(credentialsStream.readAllBytes(), StandardCharsets.UTF_8);
-            log.info("Firebase credentials content: {}", jsonContent);
+//            log.info("Firebase credentials content: {}", jsonContent);
 
             // 스트림을 다시 사용하기 위해 초기화
             credentialsStream = new ByteArrayInputStream(jsonContent.getBytes(StandardCharsets.UTF_8));
