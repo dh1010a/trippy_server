@@ -28,16 +28,16 @@ public class AsyncConfig implements AsyncConfigurer {
         return executor;
     }
 
-    @Bean(name = "taskExecutor")
-    public Executor taskExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(3);
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setAwaitTerminationSeconds(60);
-        executor.setThreadNamePrefix("Offispace-Thread: ");
-        executor.initialize();
-        return executor;
-    }
+//    @Bean(name = "taskExecutor")
+//    public Executor taskExecutor() {
+//        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+//        executor.setCorePoolSize(3);
+//        executor.setWaitForTasksToCompleteOnShutdown(true);
+//        executor.setAwaitTerminationSeconds(60);
+//        executor.setThreadNamePrefix("Offispace-Thread: ");
+//        executor.initialize();
+//        return executor;
+//    }
 
     @Bean(name = "callBackTaskExecutor")
     public Executor callBackTaskExecutor() {
