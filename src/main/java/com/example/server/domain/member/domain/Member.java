@@ -13,6 +13,7 @@ import com.example.server.domain.image.domain.Image;
 //import com.example.server.domain.ticket.domain.MemberTicket;
 //import com.example.server.domain.follow.domain.MemberFollow;
 import com.example.server.domain.member.model.*;
+import com.example.server.domain.notify.domain.Notify;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.global.auth.oauth2.model.SocialType;
 import com.example.server.global.common.BaseTimeEntity;
@@ -120,6 +121,10 @@ public class Member extends BaseTimeEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Comment> comments;
+
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Notify> notifies;
 
     public void initDefaultSetting() {
         this.ticketScope = Scope.PUBLIC;
