@@ -17,115 +17,42 @@ public interface PostRepository extends JpaRepository<Post,Long> {
 
     List<Post> findAllByMemberAndPostType(Member member,PostType type,Sort sort);
 
+    // 특정 멤버의 게시물 -> 공개 범위 적용
     @Query("SELECT p FROM Post p " +
             "LEFT JOIN p.likes l " +
             "LEFT JOIN p.comments c " +
             "LEFT JOIN p.member m " +
-            "LEFT JOIN MemberFollow mf ON m.idx = mf.followingMemberIdx " +
             "WHERE p.member = :member " +
             "AND p.postType = :postType " +
             "AND ( " +
             "      (p.member.ticketScope = 'PUBLIC' AND :postType = 'POST') OR " +
             "      (p.member.ootdScope = 'PUBLIC' AND :postType = 'OOTD') OR " +
-            "      (p.member.ticketScope = 'PROTECTED' AND :postType = 'POST' AND mf.member.idx = :loginMemberId) OR " +
-            "      (p.member.ootdScope = 'PROTECTED' AND :postType = 'OOTD' AND mf.member.idx = :loginMemberId)" +
+            "      (p.member.ticketScope = 'PROTECTED' AND :postType = 'POST' AND p.member.idx IN :followingList) OR " +
+            "      (p.member.ootdScope = 'PROTECTED' AND :postType = 'OOTD' AND p.member.idx IN :followingList)" +
             ") " +
             "AND ( " +
             "      (p.member.ticketScope <> 'PRIVATE' AND :postType = 'POST') OR " +
             "      (p.member.ootdScope <> 'PRIVATE' AND :postType = 'OOTD')" +
             ") " +
             "GROUP BY p.id")
-    Page<Post> findAllByMemberAndPostType(
-            @Param("member") Member member,
-            @Param("postType") PostType postType,
-            @Param("loginMemberId") Long loginMemberId,
-            Pageable pageable);
+    Page<Post> findAllByMemberAndPostType(@Param("postType") PostType postType,
+    @Param("member") Member member,
+    @Param("followingList") List<Long> followingList,
+    Pageable pageable);
 
 
-    List<Post> findAllByPostType(PostType type, Sort sort);
-
-    Page<Post> findAllByPostType(PostType type,Pageable pageable);
-
-    // 좋아요 순 정렬
-    @Query("SELECT p FROM Post p LEFT JOIN p.likes l LEFT JOIN p.comments c WHERE p.postType = :postType GROUP BY p.id ORDER BY COUNT(l) DESC, COUNT(c) DESC")
-    Page<Post> findAllByPostTypeOrderByLikeCountDesc(@Param("postType") PostType postType, Pageable pageable);
-
+    // 게시물 전체 조회 (공개범위 적용)
     @Query("SELECT p FROM Post p " +
             "LEFT JOIN p.likes l " +
             "LEFT JOIN p.comments c " +
             "LEFT JOIN p.member m " +
-            "LEFT JOIN MemberFollow mf ON m.idx = mf.followingMemberIdx " +
-            "WHERE p.postType = :postType " +
-            "AND p.member = :member " +
-            "AND ( " +
-            "      (p.member.ticketScope = 'PUBLIC' AND :postType = 'POST') OR " +
-            "      (p.member.ootdScope = 'PUBLIC' AND :postType = 'OOTD') OR " +
-            "      (p.member.ticketScope = 'PROTECTED' AND :postType = 'POST' AND mf.member.idx = :loginMemberId) OR " +
-            "      (p.member.ootdScope = 'PROTECTED' AND :postType = 'OOTD' AND mf.member.idx = :loginMemberId)" +
-            ") " +
-            "AND ( " +
-            "      (p.member.ticketScope <> 'PRIVATE' AND :postType = 'POST') OR " +
-            "      (p.member.ootdScope <> 'PRIVATE' AND :postType = 'OOTD')" +
-            ") " +
-            "GROUP BY p.id " +
-            "ORDER BY COUNT(l.id) DESC, COUNT(c.id) DESC")
-    Page<Post> findAllByPostTypeAndMemberOrderByLikeCountDesc( @Param("postType") PostType postType,
-                                                               @Param("member") Member member,
-                                                               @Param("loginMemberId") Long loginMemberId,
-                                                               Pageable pageable);
-
-
-    // 제목 검색
-    @Query("SELECT p FROM Post p WHERE p.title LIKE %:keyword% AND p.postType = :postType")
-    Page<Post> findPostByTitle(@Param("keyword") String keyword, @Param("postType") PostType postType, Pageable pageable);
-
-    @Query("SELECT p FROM Post p WHERE p.title LIKE %:keyword% AND p.postType = :postType")
-    List<Post> findPostByTitle(@Param("keyword") String keyword, @Param("postType") PostType postType);
-
-    // 제목+내용 검색
-    @Query("SELECT p FROM Post p WHERE (p.title LIKE %:keyword% OR p.body LIKE %:keyword%) AND p.postType = :postType")
-    Page<Post> findPostBodyAndTitle(@Param("keyword") String keyword, @Param("postType") PostType postType, Pageable pageable);
-
-
-    @Query("SELECT p FROM Post p WHERE (p.title LIKE %:keyword% OR p.body LIKE %:keyword%) AND p.postType = :postType")
-    List<Post> findPostBodyAndTitle(@Param("keyword") String keyword, @Param("postType") PostType postType);
-
-    // 게시물 전체 조회 (공개범위 적용) -> 인기순 정렬
-    @Query("SELECT p FROM Post p " +
-            "LEFT JOIN p.likes l " +
-            "LEFT JOIN p.comments c " +
-            "LEFT JOIN p.member m " +
-            "LEFT JOIN MemberFollow mf ON m.idx = mf.followingMemberIdx " +
             "WHERE p.postType = :postType " +
             "AND ( " +
             "      (p.member.ticketScope = 'PUBLIC' AND :postType = 'POST') OR " +
             "      (p.member.ootdScope = 'PUBLIC' AND :postType = 'OOTD') OR " +
-            "      (p.member.ticketScope = 'PROTECTED' AND :postType = 'POST' AND mf.member.idx = :loginMemberId) OR " +
-            "      (p.member.ootdScope = 'PROTECTED' AND :postType = 'OOTD' AND mf.member.idx = :loginMemberId)" +
+            "      (p.member.ticketScope = 'PROTECTED' AND :postType = 'POST' AND p.member.idx IN :followingList) OR " +
+            "      (p.member.ootdScope = 'PROTECTED' AND :postType = 'OOTD' AND p.member.idx IN :followingList)" +
             ") " +
-            "AND ( " +
-            "      (p.member.ticketScope <> 'PRIVATE' AND :postType = 'POST') OR " +
-            "      (p.member.ootdScope <> 'PRIVATE' AND :postType = 'OOTD')" +
-            ") " +
-            "GROUP BY p.id " +
-            "ORDER BY COUNT(l.id) DESC, COUNT(c.id) DESC")
-    Page<Post> findAllByPostTypeWithScopeAndOrderLike(
-            @Param("postType") PostType postType,
-            @Param("loginMemberId") Long loginMemberId,
-            Pageable pageable);
-    ;
-
-    // 게시물 전체 조회 (공개범위 적용) -> 최신순, 조회수 정렬
-    @Query("SELECT p FROM Post p " +
-            "LEFT JOIN p.likes l " +
-            "LEFT JOIN p.comments c " +
-            "LEFT JOIN p.member m " +
-            "LEFT JOIN MemberFollow mf ON m.idx = mf.followingMemberIdx " +
-            "WHERE p.postType = :postType " +
-            "AND (p.member.ticketScope = 'PUBLIC' OR " +
-            "      p.member.ootdScope = 'PUBLIC' OR " +
-            "      (:postType = 'POST' AND mf.member.idx = :loginMemberId AND p.member.ticketScope = 'PROTECTED') OR " +
-            "      (:postType = 'OOTD' AND mf.member.idx = :loginMemberId AND p.member.ootdScope = 'PROTECTED')) " +
             "AND ( " +
             "      (p.member.ticketScope <> 'PRIVATE' AND :postType = 'POST') OR " +
             "      (p.member.ootdScope <> 'PRIVATE' AND :postType = 'OOTD')" +
@@ -133,15 +60,76 @@ public interface PostRepository extends JpaRepository<Post,Long> {
             "GROUP BY p.id")
     Page<Post> findAllByPostTypeWithScope(
             @Param("postType") PostType postType,
-            @Param("loginMemberId") Long loginMemberId,
+            @Param("followingList") List<Long> followingList,
             Pageable pageable);
 
+    // 내 게시물 -> 최신순, 조회수 정렬
+    @Query("SELECT p FROM Post p WHERE p.member = :member AND p.postType = :postType")
+    Page<Post> findMyPostsWithScore(
+                            @Param("member") Member member,
+                           @Param("postType") PostType postType,
+                           Pageable pageable);
+    // 제목 검색
+    @Query("SELECT p FROM Post p WHERE p.title LIKE %:keyword% AND p.postType = :postType")
+    Page<Post> findPostByTitle(@Param("keyword") String keyword, @Param("postType") PostType postType, Pageable pageable);
 
-    //    Page<Post> findAllByPostTypeAndSort(Pageable pageable);
+    // 제목 검색
+    @Query("SELECT p FROM Post p " +
+            "LEFT JOIN p.member m " +
+            "WHERE p.title LIKE %:keyword% " +
+            "AND p.postType = :postType " +
+            "AND ( " +
+            "      (m.ticketScope = 'PUBLIC' AND :postType = 'POST') OR " +
+            "      (m.ootdScope = 'PUBLIC' AND :postType = 'OOTD') OR " +
+            "      (m.ticketScope = 'PROTECTED' AND :postType = 'POST' AND m.idx IN :followingList) OR " +
+            "      (m.ootdScope = 'PROTECTED' AND :postType = 'OOTD' AND m.idx IN :followingList)" +
+            ") " +
+            "AND ( " +
+            "      (m.ticketScope <> 'PRIVATE' AND :postType = 'POST') OR " +
+            "      (m.ootdScope <> 'PRIVATE' AND :postType = 'OOTD')" +
+            ")")
+    Page<Post> findPostByTitle(@Param("keyword") String keyword,
+                               @Param("postType") PostType postType,
+                               @Param("followingList") List<Long> followingList,
+                               Pageable pageable);
+
+    // 제목 + 내용 검색
+    @Query("SELECT p FROM Post p " +
+            "LEFT JOIN p.member m " +
+            "WHERE (p.title LIKE %:keyword% OR p.body LIKE %:keyword%) " +
+            "AND p.postType = :postType " +
+            "AND ( " +
+            "      (m.ticketScope = 'PUBLIC' AND :postType = 'POST') OR " +
+            "      (m.ootdScope = 'PUBLIC' AND :postType = 'OOTD') OR " +
+            "      (m.ticketScope = 'PROTECTED' AND :postType = 'POST' AND m.idx IN :followingList) OR " +
+            "      (m.ootdScope = 'PROTECTED' AND :postType = 'OOTD' AND m.idx IN :followingList)" +
+            ") " +
+            "AND ( " +
+            "      (m.ticketScope <> 'PRIVATE' AND :postType = 'POST') OR " +
+            "      (m.ootdScope <> 'PRIVATE' AND :postType = 'OOTD')" +
+            ")")
+    Page<Post> findPostBodyAndTitle(@Param("keyword") String keyword,
+                                    @Param("postType") PostType postType,
+                                    @Param("followingList") List<Long> followingList,
+                                    Pageable pageable);
+
+
+    // 팔로잉한 게시물
+    @Query("SELECT p FROM Post p " +
+            "WHERE p.member.idx IN :followingMemberIds " +
+            "AND p.postType = :postType " +
+            "AND ((p.member.ticketScope <> 'PRIVATE' AND :postType = 'POST') " +
+            "     OR (p.member.ootdScope <> 'PRIVATE' AND :postType = 'OOTD'))")
+    Page<Post> findByMemberIdxInAndPostType(@Param("followingMemberIds") List<Long> followingMemberIds,
+                                            @Param("postType") PostType postType,
+                                            Pageable pageable);
 
     long countByPostType(PostType postType);
     long countByMemberAndPostType(Member member, PostType postType);
 
-    // 팔로잉한 게시물
-    Page<Post> findByMemberIdxInAndPostType(List<Long> memberIds, PostType postType, Pageable pageable);
+    List<Post> findAllByPostType(PostType type, Sort sort);
+
+    Page<Post> findAllByPostType(PostType type,Pageable pageable);
+
+
 }

@@ -59,12 +59,11 @@ public class CommentService {
     private final CommentDtoConverter commentDtoConverter;
     private final ApplicationEventPublisher eventPublisher;
 
+    private static final int MAX_COMMENTS = 5; // 댓글을 허용할 최대 횟수
     private static final int TIME_LIMIT_SECONDS = 60; // 시간 제한 (60초)
 
     // POST api/comment
     public CommentResponseDto.CommentBasicResponse uploadComment(CommentRequestDto.CommentBasicRequest requestDto, HttpSession session) {
-        checkTimeLimit(session, requestDto.getPostId());
-
         if(requestDto.getParentId()!= null){
             Comment parent = getComment(requestDto.getParentId());
             if(parent.getStatus() == Scope.PRIVATE){
@@ -72,29 +71,50 @@ public class CommentService {
             }
         }
         Comment comment = saveComment(requestDto);
-        updateLastCommentTime(session, requestDto.getPostId());
+        checkTimeLimitAndUpdateCount(session, requestDto.getPostId());
         return CommentDtoConverter.convertToCommentBasicResponse(comment);
     }
 
-    private void checkTimeLimit(HttpSession session, Long postId) {
-        Map<Long, LocalDateTime> lastCommentTimes = (Map<Long, LocalDateTime>) session.getAttribute("lastCommentTimes");
-        if (lastCommentTimes != null && lastCommentTimes.containsKey(postId)) {
-            LocalDateTime lastCommentTime = lastCommentTimes.get(postId);
-            LocalDateTime now = LocalDateTime.now();
-            if (ChronoUnit.SECONDS.between(lastCommentTime, now) < TIME_LIMIT_SECONDS) {
-                throw new ErrorHandler(ErrorStatus.TIME_LIMIT_EXCEEDED);
-            }
-        }
-    }
 
-    private void updateLastCommentTime(HttpSession session, Long postId) {
+    private void checkTimeLimitAndUpdateCount(HttpSession session, Long postId) {
+        // 세션에서 댓글 카운트와 마지막 댓글 시간을 가져옴
+        Map<Long, Integer> commentCounts = (Map<Long, Integer>) session.getAttribute("commentCounts");
         Map<Long, LocalDateTime> lastCommentTimes = (Map<Long, LocalDateTime>) session.getAttribute("lastCommentTimes");
+
+        // 세션 값이 없는 경우 새로 초기화
+        if (commentCounts == null) {
+            commentCounts = new HashMap<>();
+        }
         if (lastCommentTimes == null) {
             lastCommentTimes = new HashMap<>();
         }
-        lastCommentTimes.put(postId, LocalDateTime.now());
+
+        LocalDateTime now = LocalDateTime.now();
+        int commentCount = commentCounts.getOrDefault(postId, 0);
+
+        // 댓글 카운트가 최대 허용 댓글 수를 초과하는 경우 시간 제한 확인
+        if (commentCount >= MAX_COMMENTS) {
+            LocalDateTime lastCommentTime = lastCommentTimes.get(postId);
+            if (lastCommentTime != null && ChronoUnit.SECONDS.between(lastCommentTime, now) < TIME_LIMIT_SECONDS) {
+                // 시간 제한인 경우
+                throw new ErrorHandler(ErrorStatus.TIME_LIMIT_EXCEEDED);
+            } else {
+                // 시간 제한 초과된 경우 댓글 카운트 리셋
+                commentCounts.put(postId, 1);
+                lastCommentTimes.put(postId, now);
+            }
+        } else {
+            // 시간 제한이 초과되지 않았고, 댓글 수가 최대값 이하인 경우
+            commentCounts.put(postId, commentCount + 1);
+            lastCommentTimes.put(postId, now);
+        }
+
+        // 세션에 댓글 카운트와 마지막 댓글 시간 업데이트
+        session.setAttribute("commentCounts", commentCounts);
         session.setAttribute("lastCommentTimes", lastCommentTimes);
     }
+
+
 
     // GET /api/comment by postId
     public Map<Long, CommentResponseDto.CommentTreeDTO> getCommentTree(Long postId){

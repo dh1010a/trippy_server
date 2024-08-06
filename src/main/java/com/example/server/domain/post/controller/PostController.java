@@ -69,7 +69,7 @@ public class PostController {
             @RequestParam(defaultValue = "LATEST") OrderType orderType) {
         String memberId = getLoginMemberId();
         log.info("로그인 회원 게시물 조회 요청 : memberId = {}", memberId);
-        return ApiResponse.onSuccess(postService.getAllMemberPost(memberId, memberId, page, size, orderType));
+        return ApiResponse.onSuccess(postService.getAllMyPost(memberId, page, size, orderType));
     }
 
     @GetMapping("/by-member")
@@ -91,6 +91,12 @@ public class PostController {
             @RequestParam PostType postType) {
         String memberId = getLoginMemberId();
         log.info("팔로잉 게시물 조회 요청 : memberId = {}", memberId);
+        if(postType.equals(PostType.POST)) {
+            ApiResponse.onSuccess(postService.getPostsFromFollowedMembers(memberId, postType, page, size, orderType));
+        }
+        else {
+            return ApiResponse.onSuccess(postService.getOotdsFromFollowedMembers(memberId, postType, page, size, orderType));
+        }
         return ApiResponse.onSuccess(postService.getPostsFromFollowedMembers(memberId, postType, page, size, orderType));
     }
 

@@ -42,6 +42,8 @@ public class Post extends BaseTimeEntity {
 
     private int viewCount;
 
+    private Double score;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_idx")
     private Member member;

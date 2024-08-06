@@ -1,5 +1,6 @@
 package com.example.server.domain.post.service;
 
+import com.example.server.domain.follow.repository.MemberFollowRepository;
 import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.post.domain.Ootd;
@@ -44,6 +45,7 @@ public class OotdService {
     private final PostService postService;
     private final PostRepository postRepository;
     private final RestTemplate restTemplate;
+    private final MemberFollowRepository memberFollowRepository;
 
     // POST /api/ootd
     @Transactional
@@ -80,31 +82,51 @@ public class OotdService {
         return PostDtoConverter.convertToOotdResponseDto(post, member);
     }
 
-    // GET /api/ootd/all
+    // 전체 게시물
     public List<PostResponseDto.GetOotdPostResponseDto> getAllPost(Integer page, Integer size, String memberId, OrderType orderType) {
         Member member = postService.getMemberById(memberId);
+        List<Long> followingList = memberFollowRepository.findFollowingList(member==null ? 0 : member.getIdx());
         Pageable pageable = postService.getPageable(page, size, orderType);
-        List<Post> postList = getPostsByOrderType(orderType, pageable);
+        List<Post> postList = getPostsByOrderType(orderType, pageable, followingList);
 
         return convertToOOTDListResponseDto(postList,member);
 
     }
 
-    // GET /api/ootd/
+    public List<Post> getPostsByOrderType(OrderType orderType, Pageable pageable, List<Long> followingList) {
+        return postRepository.findAllByPostTypeWithScope(PostType.OOTD,followingList, pageable).getContent();
+    }
+
+
+
+    // 멤버별 게시물
     public List<PostResponseDto.GetOotdPostResponseDto> getAllMemberPost(String memberId, String loginMemberId, Integer page, Integer size, OrderType orderType) {
         Member member = postService.getMemberById(memberId);
         Member loginMember = postService.getMemberById(loginMemberId);
         Pageable pageable = postService.getPageable(page, size, orderType);
+        List<Long> followingList = memberFollowRepository.findFollowingList(loginMember==null ? 0 : loginMember.getIdx());
 
-        Long loginMemberIdx;
-        if(loginMember != null){
-            loginMemberIdx = 0L;
-        }
-        else loginMemberIdx = loginMember.getIdx();
-
-        List<Post> postList = getPostsByOrderTypeAndMember(orderType, pageable, member,loginMemberIdx);
+        List<Post> postList = getPostsByOrderTypeAndMember(orderType, pageable, member, followingList);
         return convertToOOTDListResponseDto(postList,loginMember);
     }
+
+    private List<Post> getPostsByOrderTypeAndMember(OrderType orderType, Pageable pageable, Member member, List<Long> followingList) {
+        return postRepository.findAllByMemberAndPostType( PostType.OOTD, member, followingList, pageable).getContent();
+    }
+
+    // 내 게시물
+    public List<PostResponseDto.GetOotdPostResponseDto> getAllMyPost(String loginMemberId, Integer page, Integer size, OrderType orderType) {
+        Member loginMember = postService.getMemberById(loginMemberId);
+        Pageable pageable = postService.getPageable(page, size, orderType);
+
+        List<Post> postList = getMyPostsByOrderType(orderType, pageable, loginMember);
+        return PostDtoConverter.convertToOOTDListResponseDto(postList, loginMember);
+    }
+
+    public List<Post> getMyPostsByOrderType(OrderType orderType, Pageable pageable, Member member) {
+        return postRepository.findMyPostsWithScore(member,PostType.OOTD, pageable).getContent();
+    }
+
 
     // PATCH /api/ootd
     public OotdReqResDto.OotdBasicResponseDto updateOotd(String memberId, OotdReqResDto.UpdateOOTDRequestDto requestDto) {
@@ -163,23 +185,6 @@ public class OotdService {
                 .weatherStatus(requestDto.getWeatherStatus())
                 .detailLocation(requestDto.getDetailLocation())
                 .build();
-    }
-
-    // Helper methods to get posts based on order type
-    private List<Post> getPostsByOrderType(OrderType orderType, Pageable pageable) {
-        if (orderType == OrderType.LIKE) {
-            return postRepository.findAllByPostTypeOrderByLikeCountDesc(PostType.OOTD, pageable).getContent();
-        } else {
-            return postRepository.findAllByPostType(PostType.OOTD, pageable).getContent();
-        }
-    }
-
-    private List<Post> getPostsByOrderTypeAndMember(OrderType orderType, Pageable pageable, Member member, Long loginMemberIdx) {
-        if (orderType == OrderType.LIKE) {
-            return postRepository.findAllByPostTypeAndMemberOrderByLikeCountDesc(PostType.OOTD, member, loginMemberIdx, pageable).getContent();
-        } else {
-            return postRepository.findAllByMemberAndPostType(member, PostType.OOTD,loginMemberIdx,  pageable).getContent();
-        }
     }
 
     // Convert OOTD entity to DTO
