@@ -116,7 +116,6 @@ public class MemberService {
         member.updateNickName(requestDto.getNickName());
         member.updateBlogName(requestDto.getBlogName());
         member.updateBlogIntroduce(requestDto.getBlogIntroduce());
-        member.setRole(Role.ROLE_MEMBER);
         log.info("공통 회원가입이 완료되었습니다. memberId = {}, nickName = {}, blogName = {}, blogIntroduce = {}, profileImgUrl = {}", member.getMemberId(), member.getNickName(), member.getBlogName(), member.getBlogIntroduce(), image.getAccessUri());
         return MemberDtoConverter.convertToMemberTaskDto(member);
 
@@ -359,6 +358,7 @@ public class MemberService {
             log.info("관심사 변경 : memberId = {}, interestedType = {}", memberId, x);
         }
         member.setInterestedTypes(interestedTypes);
+        member.setRole(Role.ROLE_MEMBER);
 
         return MemberTaskSuccessResponseDto.builder()
                 .isSuccess(true)
