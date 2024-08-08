@@ -40,8 +40,27 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     @Param("followingList") List<Long> followingList,
     Pageable pageable);
 
+    // 특정 멤버 게시물 개수 -> 공개 범위 적용
+    @Query("SELECT COUNT(p) FROM Post p " +
+            "WHERE p.member = :member " +
+            "AND p.postType = :postType " +
+            "AND (" +
+            "      (p.member.ticketScope = 'PUBLIC' AND :postType = 'POST') OR " +
+            "      (p.member.ootdScope = 'PUBLIC' AND :postType = 'OOTD') OR " +
+            "      (p.member.ticketScope = 'PROTECTED' AND :postType = 'POST' AND p.member.idx IN :followingList) OR " +
+            "      (p.member.ootdScope = 'PROTECTED' AND :postType = 'OOTD' AND p.member.idx IN :followingList)" +
+            ") " +
+            "AND (" +
+            "      (p.member.ticketScope <> 'PRIVATE' AND :postType = 'POST') OR " +
+            "      (p.member.ootdScope <> 'PRIVATE' AND :postType = 'OOTD')" +
+            ")")
+    long countByMemberAndPostTypeWithScope(
+            @Param("member") Member member,
+            @Param("postType") PostType postType,
+            @Param("followingList") List<Long> followingList);
 
-    // 게시물 전체 조회 (공개범위 적용)
+
+    // 게시물 전체 조회 (공개 범위 적용)
     @Query("SELECT p FROM Post p " +
             "LEFT JOIN p.likes l " +
             "LEFT JOIN p.comments c " +
@@ -62,6 +81,24 @@ public interface PostRepository extends JpaRepository<Post,Long> {
             @Param("postType") PostType postType,
             @Param("followingList") List<Long> followingList,
             Pageable pageable);
+
+    // 게시물 전체 개수 -> 공개 범위 적용
+    @Query("SELECT COUNT(p) FROM Post p " +
+            "WHERE p.postType = :postType " +
+            "AND (" +
+            "      (p.member.ticketScope = 'PUBLIC' AND :postType = 'POST') OR " +
+            "      (p.member.ootdScope = 'PUBLIC' AND :postType = 'OOTD') OR " +
+            "      (p.member.ticketScope = 'PROTECTED' AND :postType = 'POST' AND p.member.idx IN :followingList) OR " +
+            "      (p.member.ootdScope = 'PROTECTED' AND :postType = 'OOTD' AND p.member.idx IN :followingList)" +
+            ") " +
+            "AND (" +
+            "      (p.member.ticketScope <> 'PRIVATE' AND :postType = 'POST') OR " +
+            "      (p.member.ootdScope <> 'PRIVATE' AND :postType = 'OOTD')" +
+            ")")
+    long countByPostTypeWithScope(@Param("postType") PostType postType, @Param("followingList") List<Long> followingList);
+
+    // 내 게시물 전체 개수
+    long countByMemberAndPostType(Member member, PostType postType);
 
     // 내 게시물 -> 최신순, 조회수 정렬
     @Query("SELECT p FROM Post p WHERE p.member = :member AND p.postType = :postType")
@@ -125,7 +162,6 @@ public interface PostRepository extends JpaRepository<Post,Long> {
                                             Pageable pageable);
 
     long countByPostType(PostType postType);
-    long countByMemberAndPostType(Member member, PostType postType);
 
     List<Post> findAllByPostType(PostType type, Sort sort);
 

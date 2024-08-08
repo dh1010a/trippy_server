@@ -361,16 +361,27 @@ public class PostService {
         imageRepository.flush();
     }
 
-    public long getTotalCount(PostType type) {
-        return postRepository.countByPostType(type);
-    }
-
-    public long getTotalCountByMember(String memberId, PostType type) {
+    // 전체 게시물 개수
+    public long getTotalCount(String memberId, PostType type) {
         Member member = getMemberById(memberId);
-        return postRepository.countByMemberAndPostType(member, type);
+        List<Long> followingList = memberFollowRepository.findFollowingList(member==null ? 0 : member.getIdx());
+
+        return postRepository.countByPostTypeWithScope(type, followingList);
     }
 
+    // 특정 멤버 게시물 게수
+    public long getTotalCountByMember(String loginMemberId, String memberId, PostType type) {
+        Member loginMember = getMemberById(loginMemberId);
+        Member targetMember = getMemberById(memberId);
+        List<Long> followingList = memberFollowRepository.findFollowingList(loginMember==null ? 0 : loginMember.getIdx());
+        return postRepository.countByMemberAndPostTypeWithScope(targetMember, type, followingList);
+    }
 
+    // 내 게시물 개수
+    public long getTotalCountMy(String loginMemberId, PostType type) {
+        Member loginMember = getMemberById(loginMemberId);
+        return postRepository.countByMemberAndPostType(loginMember,type);
+    }
 
     public Member getMemberById(String memberId) {
         if ("anonymousUser".equals(memberId)) {
