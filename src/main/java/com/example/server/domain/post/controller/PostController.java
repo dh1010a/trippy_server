@@ -103,14 +103,15 @@ public class PostController {
     @GetMapping("/count/all")
     public ApiResponse<?> getTotalCount(@RequestParam PostType type) {
         log.info("{} 전체 개수 출력", type);
-        return ApiResponse.onSuccess(postService.getTotalCount(type));
+        String memberId = getLoginMemberId();
+        return ApiResponse.onSuccess(postService.getTotalCount(memberId, type));
     }
 
     @GetMapping("/count/my")
     public ApiResponse<?> getTotalCountByLoginMember(@RequestParam PostType type) {
         String memberId = getLoginMemberId();
         log.info("{}의 {} 개수 출력", memberId, type);
-        return ApiResponse.onSuccess(postService.getTotalCountByMember(memberId, type));
+        return ApiResponse.onSuccess(postService.getTotalCountMy(memberId, type));
     }
 
     @GetMapping("/count/by-member")
@@ -118,7 +119,8 @@ public class PostController {
             @RequestParam PostType type,
             @RequestParam String memberId) {
         log.info("{}의 {} 개수 출력", memberId, type);
-        return ApiResponse.onSuccess(postService.getTotalCountByMember(memberId, type));
+        String loginMemberId = getLoginMemberId();
+        return ApiResponse.onSuccess(postService.getTotalCountByMember(loginMemberId, memberId, type));
     }
 
     private String getLoginMemberId() {
