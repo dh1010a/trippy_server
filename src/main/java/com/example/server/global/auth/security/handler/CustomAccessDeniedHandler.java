@@ -46,6 +46,6 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         response.setStatus(ErrorStatus.MEMBER_NOT_AUTHENTICATED.getHttpStatus().value());
         response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.onFailure(ErrorStatus.MEMBER_NOT_AUTHENTICATED.getCode(),
                 ErrorStatus.MEMBER_NOT_AUTHENTICATED.getMessage(), null)));
-        response.setStatus(HttpStatus.FORBIDDEN.value());
+//        response.setStatus(HttpStatus.FORBIDDEN.value());
     }
 }
