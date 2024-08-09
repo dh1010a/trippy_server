@@ -27,9 +27,14 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
                          HttpServletResponse response,
                          AuthenticationException authenticationException) throws IOException {
 
+        if (response.isCommitted()) {
+            log.warn("Response has already been committed.");
+            return;
+        }
+
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setStatus(ErrorStatus._UNAUTHORIZED.getHttpStatus().value());
+//        response.setStatus(ErrorStatus._UNAUTHORIZED.getHttpStatus().value());
         response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(),
                 ErrorStatus._UNAUTHORIZED.getMessage(), null)));
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
