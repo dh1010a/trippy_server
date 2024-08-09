@@ -24,7 +24,7 @@ public class FCMTokenService {
         log.info("Getting FCM Token. MemberId: [{}]", memberId);
         String key = FCM_TOKEN_PREFIX + memberId;
         return redisUtil.get(key, String.class)
-                .orElseThrow(() -> new ErrorHandler(ErrorStatus.FCM_TOKEN_NOT_FOUND));
+                .orElse(null);
     }
 
     public FCMResponseDto.FCMTaskResponseDto saveFCMToken(SaveFCMTokenRequestDto requestDto, String memberId) {
