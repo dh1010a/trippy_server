@@ -150,6 +150,26 @@ public interface PostRepository extends JpaRepository<Post,Long> {
                                     @Param("followingList") List<Long> followingList,
                                     Pageable pageable);
 
+    // 닉네임으로만 검색
+    @Query("SELECT p FROM Post p " +
+            "LEFT JOIN p.member m " +
+            "WHERE m.nickName LIKE %:keyword% " +
+            "AND p.postType = :postType " +
+            "AND ( " +
+            "      (m.ticketScope = 'PUBLIC' AND :postType = 'POST') OR " +
+            "      (m.ootdScope = 'PUBLIC' AND :postType = 'OOTD') OR " +
+            "      (m.ticketScope = 'PROTECTED' AND :postType = 'POST' AND m.idx IN :followingList) OR " +
+            "      (m.ootdScope = 'PROTECTED' AND :postType = 'OOTD' AND m.idx IN :followingList)" +
+            ") " +
+            "AND ( " +
+            "      (m.ticketScope <> 'PRIVATE' AND :postType = 'POST') OR " +
+            "      (m.ootdScope <> 'PRIVATE' AND :postType = 'OOTD')" +
+            ")")
+    Page<Post> findPostByNickname(@Param("keyword") String keyword,
+                                  @Param("postType") PostType postType,
+                                  @Param("followingList") List<Long> followingList,
+                                  Pageable pageable);
+
 
     // 팔로잉한 게시물
     @Query("SELECT p FROM Post p " +

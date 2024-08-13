@@ -33,6 +33,8 @@ public class OotdController {
         return ApiResponse.onSuccess(ootdService.uploadOotdPost(requestDto));
     }
 
+
+
     @PatchMapping("")
     public  ApiResponse<?> updateOotd(@RequestBody OotdReqResDto.UpdateOOTDRequestDto updateOOTDRequestDto) {
         String memberId = getLoginMemberId();
