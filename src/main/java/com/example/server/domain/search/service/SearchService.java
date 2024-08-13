@@ -51,6 +51,9 @@ public class SearchService {
         if(saveSearchRequest.getSearchType().equals(SearchType.TITLE)) {
             posts = postRepository.findPostByTitle(saveSearchRequest.getKeyword(), PostType.POST, followingList, pageable).getContent();
         }
+        else if (saveSearchRequest.getSearchType().equals(SearchType.NICKNAME)){
+            posts = postRepository.findPostByNickname(saveSearchRequest.getKeyword(), PostType.POST, followingList, pageable).getContent();
+        }
         else {
             posts = postRepository.findPostBodyAndTitle(saveSearchRequest.getKeyword(), PostType.POST, followingList, pageable).getContent();
         }
@@ -66,6 +69,9 @@ public class SearchService {
         List<Post> posts;
         if(saveSearchRequest.getSearchType().equals(SearchType.TITLE)) {
             posts = postRepository.findPostByTitle(saveSearchRequest.getKeyword(), PostType.OOTD, followingList, pageable).getContent();
+        }
+        else if (saveSearchRequest.getSearchType().equals(SearchType.NICKNAME)){
+            posts = postRepository.findPostByNickname(saveSearchRequest.getKeyword(), PostType.OOTD, followingList, pageable).getContent();
         }
         else {
             posts = postRepository.findPostBodyAndTitle(saveSearchRequest.getKeyword(), PostType.OOTD, followingList, pageable).getContent();
