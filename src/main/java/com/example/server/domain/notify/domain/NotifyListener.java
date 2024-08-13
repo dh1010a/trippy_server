@@ -32,16 +32,25 @@ public class NotifyListener {
 
     @TransactionalEventListener
     @Async
-    public void handleSseNotification(NotifyDto.NotifyPublishRequestDto requestDto) {
-        try {
-            sseNotifyService.sendNotify(requestDto.getReceiver(), requestDto);
-        } catch (Exception e) {
-            log.error("Error while sending SSE notification for receiver: {}", requestDto.getReceiver().getMemberId(), e);
-        }
-        if (fcmTokenService.getFCMToken(requestDto.getReceiver().getMemberId()) != null) {
-            sendFCMNotificationAsync(requestDto.getReceiver().getMemberId(), fcmNotifyService.createFCMMessage(requestDto.getReceiver(), requestDto));
-        }
-//        sendFCMNotification(requestDto.getReceiver().getMemberId(), fcmNotifyService.createFCMMessage(requestDto.getReceiver(), requestDto));
+    public CompletableFuture<Void> handleSseNotification(NotifyDto.NotifyPublishRequestDto requestDto) {
+        return CompletableFuture.runAsync(() -> {
+                    try {
+                        sseNotifyService.sendNotify(requestDto.getReceiver(), requestDto);
+                        if (fcmTokenService.getFCMToken(requestDto.getReceiver().getMemberId()) != null) {
+                            sendFCMNotificationAsync(requestDto.getReceiver().getMemberId(), fcmNotifyService.createFCMMessage(requestDto.getReceiver(), requestDto));
+                        }
+                    } catch (Exception e) {
+                        log.error("Error while sending SSE notification for receiver: {}", requestDto.getReceiver().getMemberId(), e);
+                    }
+                }).orTimeout(10, TimeUnit.SECONDS) // 타임아웃을 5초로 설정
+                .exceptionally(ex -> {
+                    if (ex instanceof TimeoutException) {
+                        log.error("Async operation timed out for receiver: {}", requestDto.getReceiver().getMemberId());
+                    } else {
+                        log.error("Unexpected error occurred during async operation for receiver: {}", requestDto.getReceiver().getMemberId(), ex);
+                    }
+                    return null;
+                });
     }
 
 //    @TransactionalEventListener(phase = AFTER_COMMIT)
