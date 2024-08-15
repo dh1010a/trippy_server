@@ -14,6 +14,15 @@ public class PostResponseDto {
 
     @Builder
     @Data
+    public static class GetPostResponseDtoGeneric<T> {
+        private PostMemberResponseDto member;
+        private T content;
+        private PostBasicResponseDto post;
+        private Boolean isSuccess;
+    }
+
+    @Builder
+    @Data
     public static class GetPostResponseDto{
         private PostMemberResponseDto member;
         private TicketResponseDto.TicketBasicResponseDto ticket;
