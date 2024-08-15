@@ -31,6 +31,7 @@ import com.example.server.global.auth.oauth2.model.socialLoader.KakaoLoadStrateg
 import com.example.server.global.auth.oauth2.model.socialLoader.NaverLoadStrategy;
 import com.example.server.global.auth.oauth2.model.socialLoader.SocialLoadStrategy;
 import com.example.server.global.auth.security.domain.CustomUserDetails;
+import com.example.server.global.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -56,8 +57,10 @@ public class MemberService {
     private final OracleImageService oracleImageService;
     private final ApplicationEventPublisher eventPublisher;
     private final CommentService commentService;
+    private final RedisUtil redisUtil;
 
     private static final String DEFAULT_BLOG_SUFFIX = ".blog";
+    private static final String ACCESS_TOKEN_KEY = "accessToken";
 
     public MemberTaskResultResponseDto signUp(CreateMemberRequestDto requestDto) {
         String randomNickName = requestDto.getEmail() + UUID.randomUUID().toString().substring(0, 9);
@@ -448,7 +451,7 @@ public class MemberService {
     }
 
     // DELETE /api/member?memberId={memberId}
-    public MemberTaskSuccessResponseDto deleteMember(String memberId, String accessToken) {
+    public MemberTaskSuccessResponseDto deleteMember(String memberId, String accessToken, String device) {
         Member member = memberRepository.getMemberById(memberId);
 
         if (member.getSocialType() != SocialType.LOCAL  && accessToken == null) {
@@ -477,8 +480,17 @@ public class MemberService {
                 break;
         }
 
+        // 액세스 토큰 모두 삭제
+        String redisKey = device + ACCESS_TOKEN_KEY + memberId;
+        List<String> tokens = redisUtil.getAllData(redisKey);
+        if (!tokens.isEmpty()) {
+            redisUtil.deleteData(redisKey);
+        }
+
         // 회원 삭제
         memberRepository.delete(member);
+
+
 
 
         return MemberTaskSuccessResponseDto.builder()

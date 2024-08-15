@@ -9,7 +9,9 @@ import com.example.server.domain.member.service.MemberService;
 import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
+import com.example.server.global.util.DeviceUtil;
 import com.example.server.global.util.SecurityUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -192,10 +194,12 @@ public class MemberController {
     }
 
     @DeleteMapping
-    public ApiResponse<?> deleteMember(@RequestParam(value = "socialAccessToken", required = false) String socialAccessToken) {
+    public ApiResponse<?> deleteMember(@RequestParam(value = "socialAccessToken", required = false) String socialAccessToken,
+                                       HttpServletRequest request) {
         String memberId = getLoginMemberId();
         log.info("회원 탈퇴 요청 : memberId = {}", memberId);
-        return ApiResponse.onSuccess(memberService.deleteMember(memberId, socialAccessToken));
+        String device = DeviceUtil.getDevice(request);
+        return ApiResponse.onSuccess(memberService.deleteMember(memberId, socialAccessToken, device));
     }
 
 
