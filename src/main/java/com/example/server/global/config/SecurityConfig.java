@@ -1,15 +1,17 @@
 package com.example.server.global.config;
 
+import com.example.server.domain.member.dto.MemberResponseDto;
 import com.example.server.domain.member.repository.MemberRepository;
+import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.auth.oauth2.domain.AccessTokenAuthenticationProvider;
 import com.example.server.global.auth.oauth2.filter.OAuth2AccessTokenAuthenticationFilter;
-import com.example.server.global.auth.oauth2.handler.OAuth2AuthenticationSuccessHandler;
 import com.example.server.global.auth.security.filter.SilentReAuthenticationFilter;
 import com.example.server.global.auth.security.service.CustomUserDetailsService;
 import com.example.server.global.auth.security.service.JwtService;
 import com.example.server.global.auth.security.filter.JsonUsernamePasswordAuthenticationFilter;
 import com.example.server.global.auth.security.filter.JwtAuthenticationFilter;
 import com.example.server.global.auth.security.handler.*;
+import com.example.server.global.util.RedisUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +31,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -47,6 +51,7 @@ public class SecurityConfig {
     private final MemberRepository memberRepository;
     private final CorsProperties corsProperties;
     private final AccessTokenAuthenticationProvider provider;
+    private final RedisUtil redisUtil;
 
     // 스프링 시큐리티 기능 비활성화
     @Bean
@@ -76,6 +81,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .logout(logout -> logout
+                        .logoutUrl("/api/member/logout")
+                        .addLogoutHandler(logoutHandler())
+                        .logoutSuccessHandler(logoutSuccessHandler())
+                        .deleteCookies("refreshToken"))
         ;
         http
                 .exceptionHandling(ex -> ex
@@ -111,7 +121,7 @@ public class SecurityConfig {
 
     @Bean
     public LoginSuccessJWTProvideHandler loginSuccessJWTProvideHandler(){
-        return new LoginSuccessJWTProvideHandler(jwtService, memberRepository);
+        return new LoginSuccessJWTProvideHandler(jwtService, memberRepository, redisUtil);
     }
 
     @Bean
@@ -132,7 +142,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationProcessingFilter(){
-        return new JwtAuthenticationFilter(jwtService, memberRepository);
+        return new JwtAuthenticationFilter(jwtService, memberRepository, redisUtil);
     }
 
     @Bean
@@ -161,6 +171,24 @@ public class SecurityConfig {
         corsConfigSource.registerCorsConfiguration("/**", corsConfiguration);
         return corsConfigSource;
     }
+
+    @Bean
+    public LogoutSuccessHandler logoutSuccessHandler() {
+        return (request, response, authentication) -> {
+            if (response.getStatus() != 401) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("utf-8");
+                response.getWriter().write(objectMapper.writeValueAsString(
+                        ApiResponse.onSuccess(MemberResponseDto.MemberTaskSuccessResponseDto.builder().isSuccess(true).build())));
+            }
+        };
+    }
+
+    @Bean
+    public LogoutHandler logoutHandler() {
+        return new LogoutHandlerImpl(memberRepository, jwtService, redisUtil, objectMapper);
+    }
+
 
 //    @Bean
 //    public CorsConfigurationSource corsConfiguration() {

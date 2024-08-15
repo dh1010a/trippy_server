@@ -1,5 +1,8 @@
 package com.example.server.global.auth.oauth2.model.socialLoader;
 
+import com.example.server.domain.member.dto.MemberRequestDto;
+import com.example.server.domain.member.dto.MemberResponseDto;
+import com.example.server.domain.member.dto.MemberResponseDto.MemberTaskSuccessResponseDto;
 import com.example.server.global.auth.oauth2.model.info.OAuth2UserInfo;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -34,10 +37,11 @@ public abstract class SocialLoadStrategy {
     protected abstract OAuth2UserInfo sendRequestToSocialSite(HttpEntity request);
 
 
-
     public void setHeaders(String accessToken, HttpHeaders headers) {
         headers.set("Authorization", accessToken);
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
     }
+
+    public abstract void unlink(String accessToken);
 }

@@ -38,6 +38,8 @@ public enum ErrorStatus implements BaseErrorCode {
     MEMBER_CANNOT_ACCESS_FOLLOW(HttpStatus.BAD_REQUEST, "MEMBER4016", "해당 유저의 팔로우/팔로잉 목록에 접근할 수 없습니다."),
     MEMBER_PROFILE_ACCESS_DENY(HttpStatus.FORBIDDEN, "MEMBER4017", "프로필에 접근할 수 없는 유저입니다."),
     MEMBER_TOKEN_NOT_VALID(HttpStatus.UNAUTHORIZED, "MEMBER4018", "유효하지 않은 토큰입니다."),
+    MEMBER_SOCIAL_TOKEN_NOT_PROVIDED(HttpStatus.BAD_REQUEST, "MEMBER4019", "소셜 토큰이 제공되지 않았습니다."),
+
 
     //사진 응답
     IMAGE_UPLOAD_FAIL(HttpStatus.BAD_REQUEST, "IMG4001", "사진 업로드에 실패하였습니다."),
@@ -56,6 +58,9 @@ public enum ErrorStatus implements BaseErrorCode {
     KAKAO_SOCIAL_LOGIN_FAIL(HttpStatus.BAD_REQUEST, "SOCIAL4002", "KAKAO 소셜 정보를 불러오는데에 실패하였습니다."),
     NAVER_SOCIAL_LOGIN_FAIL(HttpStatus.BAD_REQUEST, "SOCIAL4003", "NAVER 소셜 정보를 불러오는데에 실패하였습니다."),
     GOOGLE_SOCIAL_LOGIN_FAIL(HttpStatus.BAD_REQUEST, "SOCIAL4004", "GOOGLE 소셜 정보를 불러오는데에 실패하였습니다."),
+    KAKAO_SOCIAL_UNLINK_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "SOCIAL5001", "KAKAO 소셜 연동 해제에 실패하였습니다."),
+    NAVER_SOCIAL_UNLINK_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "SOCIAL5002", "NAVER 소셜 연동 해제에 실패하였습니다."),
+    GOOGLE_SOCIAL_UNLINK_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "SOCIAL5003", "GOOGLE 소셜 연동 해제에 실패하였습니다."),
 
     // 게시물 응답
     POST_NOT_FOUND(HttpStatus.BAD_REQUEST, "POST4001", "존재하지 않는 게시물입니다."),

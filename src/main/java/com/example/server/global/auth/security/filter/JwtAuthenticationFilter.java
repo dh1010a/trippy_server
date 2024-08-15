@@ -7,6 +7,8 @@ import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.auth.security.domain.JwtToken;
 import com.example.server.global.auth.security.service.JwtService;
 import com.example.server.global.auth.security.domain.CustomUserDetails;
+import com.example.server.global.util.DeviceUtil;
+import com.example.server.global.util.RedisUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,6 +27,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -35,12 +38,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private final JwtService jwtService;
 	private final MemberRepository memberRepository;
 	private ObjectMapper objectMapper = new ObjectMapper();
+	private final RedisUtil redisUtil;
 
 	private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();//5
 
 	private static final String NO_CHECK_URL = "/api/member/login";//1
 	private static final String NO_CHECK_URL_2 = "/api/member/login/oauth2";
 	private static final String NO_CHECK_URL_3 = "/api/member/login-extension";
+	private static final String ACCESS_TOKEN_KEY = "accessToken";
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -56,8 +61,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 		try {
-			jwtService.extractAccessToken(request).filter(jwtService::isTokenValid).flatMap(jwtService::extractMemberId)
-					.flatMap(memberRepository::findByMemberId).ifPresent(this::saveAuthentication);
+			String device = DeviceUtil.getDevice(request);
+			jwtService.extractAccessToken(request)
+					.filter(jwtService::isTokenValid)
+					.flatMap(accessToken -> {
+						// Redis에서 accessToken이 존재하는지 확인
+						String memberId = jwtService.extractMemberId(accessToken).orElse(null);
+						if (memberId != null) {
+							String redisKey = device + ACCESS_TOKEN_KEY + memberId;
+							List<String> tokens = redisUtil.getAllData(redisKey);
+							if (!tokens.isEmpty() && tokens.contains(accessToken)) {
+								return jwtService.extractMemberId(accessToken);
+							}
+						}
+						return Optional.empty();
+					})
+					.flatMap(memberRepository::findByMemberId)
+					.ifPresent(this::saveAuthentication);
 			filterChain.doFilter(request, response);
 		} catch (NullPointerException e) {
 			response.setCharacterEncoding(StandardCharsets.UTF_8.name());

@@ -6,6 +6,8 @@ import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.auth.security.dto.LoginResponseDto.LoginDto;
 import com.example.server.global.auth.security.service.JwtService;
 import com.example.server.global.auth.security.domain.JwtToken;
+import com.example.server.global.util.DeviceUtil;
+import com.example.server.global.util.RedisUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -32,9 +34,13 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
 
 	private final MemberRepository memberRepository;
 
+	private final RedisUtil redisUtil;
+
 	private ObjectMapper objectMapper = new ObjectMapper();
 
 	private static final String REFRESH_TOKEN = "refreshToken";
+
+	private static final String ACCESS_TOKEN_KEY = "accessToken";
 
 
 
@@ -46,6 +52,11 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
 
 		Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 		member.updateRefreshToken(jwtToken.getRefreshToken());
+
+		String device = DeviceUtil.getDevice(request);
+
+		// Redis에 accessToken을 추가하고 만료 시간 설정
+		redisUtil.addMultiData(device+ACCESS_TOKEN_KEY+memberId, jwtToken.getAccessToken(), jwtService.getAccessTokenExpirationTime());
 
 		jwtService.sendAccessToken(response, jwtToken);
 		log.info( "로그인에 성공합니다. memberId: {}" , memberId);

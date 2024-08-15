@@ -1,5 +1,6 @@
 package com.example.server.domain.member.service;
 
+import com.example.server.domain.comment.service.CommentService;
 import com.example.server.domain.follow.repository.MemberFollowRepository;
 import com.example.server.domain.follow.domain.MemberFollow;
 import com.example.server.domain.image.domain.Image;
@@ -25,7 +26,12 @@ import com.example.server.domain.notify.model.NotificationType;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import com.example.server.global.auth.oauth2.model.SocialType;
+import com.example.server.global.auth.oauth2.model.socialLoader.GoogleLoadStrategy;
+import com.example.server.global.auth.oauth2.model.socialLoader.KakaoLoadStrategy;
+import com.example.server.global.auth.oauth2.model.socialLoader.NaverLoadStrategy;
+import com.example.server.global.auth.oauth2.model.socialLoader.SocialLoadStrategy;
 import com.example.server.global.auth.security.domain.CustomUserDetails;
+import com.example.server.global.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -50,8 +56,11 @@ public class MemberService {
     private final ImageRepository imageRepository;
     private final OracleImageService oracleImageService;
     private final ApplicationEventPublisher eventPublisher;
+    private final CommentService commentService;
+    private final RedisUtil redisUtil;
 
     private static final String DEFAULT_BLOG_SUFFIX = ".blog";
+    private static final String ACCESS_TOKEN_KEY = "accessToken";
 
     public MemberTaskResultResponseDto signUp(CreateMemberRequestDto requestDto) {
         String randomNickName = requestDto.getEmail() + UUID.randomUUID().toString().substring(0, 9);
@@ -439,5 +448,53 @@ public class MemberService {
     public void publishFollowEvent(Member member, Member receiver) {
         eventPublisher.publishEvent(NotifyDtoConverter.convertToNotifyPublishRequestDto(member, receiver, NotificationType.FOLLOW));
 
+    }
+
+    // DELETE /api/member?memberId={memberId}
+    public MemberTaskSuccessResponseDto deleteMember(String memberId, String accessToken, String device) {
+        Member member = memberRepository.getMemberById(memberId);
+
+        if (member.getSocialType() != SocialType.LOCAL  && accessToken == null) {
+            throw new ErrorHandler(ErrorStatus.MEMBER_SOCIAL_TOKEN_NOT_PROVIDED);
+        }
+
+        // 댓글 삭제
+        member.getComments().forEach(comment -> commentService.deleteCommentForUnregister(memberId, comment.getId()));
+
+        // 팔로우 삭제
+        memberFollowRepository.deleteAll(memberFollowRepository.findByFollowingMemberIdx(member.getIdx()));
+
+        // 소셜 연결 해제
+        switch (member.getSocialType()) {
+            case GOOGLE:
+                SocialLoadStrategy google = new GoogleLoadStrategy();
+                google.unlink(accessToken);
+                break;
+            case KAKAO:
+                SocialLoadStrategy kakao = new KakaoLoadStrategy();
+                kakao.unlink(accessToken);
+                break;
+            case NAVER:
+                SocialLoadStrategy naver = new NaverLoadStrategy();
+                naver.unlink(accessToken);
+                break;
+        }
+
+        // 액세스 토큰 모두 삭제
+        String redisKey = device + ACCESS_TOKEN_KEY + memberId;
+        List<String> tokens = redisUtil.getAllData(redisKey);
+        if (!tokens.isEmpty()) {
+            redisUtil.deleteData(redisKey);
+        }
+
+        // 회원 삭제
+        memberRepository.delete(member);
+
+
+
+
+        return MemberTaskSuccessResponseDto.builder()
+                .isSuccess(true)
+                .build();
     }
 }

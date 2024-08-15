@@ -41,6 +41,7 @@ public class JwtTokenProvider {
 	private static final String MEMBER_ID_CLAIM = "memberId";
 	private static final String REFRESH_TOKEN_CLAIM = "RefreshToken";
 	private static final String ACCESS_TOKEN_CLAIM = "AccessToken";
+	private static final String REVOKE_TOKEN_CLAIM = "isRevoke";
 	private final MemberRepository memberRepository;
 
 
@@ -74,6 +75,7 @@ public class JwtTokenProvider {
 				.setSubject(REFRESH_TOKEN_CLAIM)
 				.setIssuedAt(now)
 				.claim(MEMBER_ID_CLAIM, user.getMemberId())
+				.claim(REVOKE_TOKEN_CLAIM, false)
 				.setExpiration(refreshTokenExpiration)
 				.signWith(key, SignatureAlgorithm.HS512)
 				.compact();
@@ -88,6 +90,7 @@ public class JwtTokenProvider {
 				.setSubject(REFRESH_TOKEN_CLAIM)
 				.setIssuedAt(now)
 				.claim(MEMBER_ID_CLAIM, memberId)
+				.claim(REVOKE_TOKEN_CLAIM, false)
 				.setExpiration(refreshTokenExpiration)
 				.signWith(key, SignatureAlgorithm.HS512)
 				.compact();
@@ -164,10 +167,18 @@ public class JwtTokenProvider {
 	// 토큰 정보를 검증하는 메서드
 	public boolean validateToken(String token) {
 		try {
+			Claims claims = parseClaims(token);
+
 			Jwts.parserBuilder()
 					.setSigningKey(key)
 					.build()
 					.parseClaimsJws(token);
+
+//			if (isRevokedToken(token)) {
+//				log.info("Revoked JWT Token : " + "member id = " + claims.get("memberId"));
+//				return false;
+//			}
+
 			return true;
 		} catch (SecurityException | MalformedJwtException e) {
 			log.info("Invalid JWT Token : " +  e.getMessage());
@@ -188,6 +199,22 @@ public class JwtTokenProvider {
 			log.error("JWT validation fails: " +  exception.getMessage());
 			return false;
 		}
+	}
+
+	// 토큰 만료
+	public void revokeToken(String accessToken) {
+		Claims claims = parseClaims(accessToken);
+		claims.put(REVOKE_TOKEN_CLAIM, true);
+	}
+
+	// 폐기된 토큰인지 검사
+	public boolean isRevokedToken(String accessToken) {
+		Claims claims = parseClaims(accessToken);
+		return claims.containsKey(REVOKE_TOKEN_CLAIM) && (boolean) claims.get(REVOKE_TOKEN_CLAIM);
+	}
+
+	public long getAccessTokenExpirationTime() {
+		return ACCESS_TOKEN_EXPIRE_HOUR * 24 * 60 * 60 * 1000;
 	}
 
 

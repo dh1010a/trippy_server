@@ -1,6 +1,7 @@
 package com.example.server.domain.member.dto;
 
 import com.example.server.domain.image.dto.ImageDto;
+import com.example.server.global.auth.oauth2.model.SocialType;
 import lombok.*;
 
 import java.util.List;
@@ -57,5 +58,14 @@ public class MemberRequestDto {
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class UpdateInterestedTypesRequestDto {
         private List<String> koreanInterestedTypes;
+    }
+
+    @Builder
+    @Data
+    public static class UnlinkSocialRequestDto {
+        private SocialType socialType;
+        private String accessToken;
+        private String memberId;
+
     }
 }

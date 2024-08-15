@@ -31,4 +31,6 @@ public interface JwtService {
 
 	String getDomain();
 
+	long getAccessTokenExpirationTime();
+
 }
