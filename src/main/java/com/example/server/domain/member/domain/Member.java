@@ -54,11 +54,11 @@ public class Member extends BaseTimeEntity {
     @Column(length = 1000)
     private String refreshToken;
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval=true)
     @JsonIgnore
     private List<Post> posts;
 
-    @OneToMany(mappedBy = "member")
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval=true)
     @JsonIgnore
     private List<BookMark> bookMarks;
 
@@ -70,7 +70,7 @@ public class Member extends BaseTimeEntity {
 //    @JsonIgnore
 //    private List<MemberBadge> memberBadges;
 
-    @OneToMany(mappedBy = "member")
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval=true)
     @JsonIgnore
     private List<MemberFollow> memberFollows;
 
@@ -90,7 +90,7 @@ public class Member extends BaseTimeEntity {
 //    @JsonIgnore
 //    private List<MemberTicket> memberTickets;
 //
-    @OneToMany(mappedBy = "member")
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval=true)
     @JsonIgnore
     private List<Image> images;
 

@@ -9,6 +9,7 @@ import com.example.server.global.auth.security.domain.JwtToken;
 import com.example.server.global.auth.security.domain.JwtTokenProvider;
 import com.example.server.global.auth.security.domain.CustomUserDetails;
 import com.example.server.global.auth.security.dto.LoginResponseDto;
+import com.example.server.global.util.RedisUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,6 +38,7 @@ public class JwtServiceImpl implements JwtService {
 	private final ObjectMapper objectMapper;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final AuthenticationManagerBuilder authenticationManagerBuilder;
+	private final RedisUtil redisUtil;
 
 	@Value("${jwt.access.header}")
 	private String accessHeader;
@@ -82,14 +84,6 @@ public class JwtServiceImpl implements JwtService {
 						() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND)
 				);
 		return refreshToken;
-	}
-
-	public void updateRefreshToken(String memberId, String refreshToken) {
-		memberRepository.findByMemberId(memberId)
-				.ifPresentOrElse(
-						member -> member.updateRefreshToken(refreshToken),
-						() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND)
-				);
 	}
 
 	@Override
@@ -151,6 +145,9 @@ public class JwtServiceImpl implements JwtService {
 
 	@Override
 	public Optional<String> extractMemberId(String accessToken) {
+		if (accessToken == null) {
+			return Optional.empty();
+		}
 		Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
 		CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
 		return Optional.ofNullable(user.getUsername());
@@ -166,7 +163,14 @@ public class JwtServiceImpl implements JwtService {
 		return jwtTokenProvider.validateToken(token);
 	}
 
+	@Override
 	public String getDomain() {
 		return domain;
 	}
+
+	@Override
+	public long getAccessTokenExpirationTime() {
+		return jwtTokenProvider.getAccessTokenExpirationTime();
+	}
+
 }

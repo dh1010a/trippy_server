@@ -172,6 +172,16 @@ public class CommentService {
             return DeleteStatus.DEAD;
         }
     }
+
+    // 회원 탈퇴시 댓글 처리
+    public void deleteCommentForUnregister(String memberId, Long commentId) {
+        deleteComment(memberId, commentId);
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ErrorHandler(ErrorStatus.COMMENT_NOT_FOUND));
+        comment.deleteMember();
+        commentRepository.save(comment);
+    }
+
     private void updateParentDeleteStatus(Comment comment) {
         Comment parent = comment.getParent();
         while (parent != null) {

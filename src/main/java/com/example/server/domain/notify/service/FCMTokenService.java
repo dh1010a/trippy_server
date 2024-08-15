@@ -39,7 +39,7 @@ public class FCMTokenService {
 
     public FCMResponseDto.FCMTaskResponseDto removeFCMToken(String memberId) {
         String key = FCM_TOKEN_PREFIX + memberId;
-        redisUtil.delete(key);
+        redisUtil.deleteObjectTemplateKey(key);
         log.info("Removed FCM Token. Member Email: [{}]", memberId);
         return FCMResponseDto.FCMTaskResponseDto.builder()
                 .success(true)

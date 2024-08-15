@@ -50,7 +50,7 @@ public class RedisUtil {
         }
     }
 
-    public void delete(String key) {
+    public void deleteObjectTemplateKey(String key) {
         log.info("delete data from redis with key: {}", key);
         redisObjectTemplate.delete(key);
     }
@@ -69,6 +69,7 @@ public class RedisUtil {
         valueOperations.set(key,value,expireDuration);
     }
     public void deleteData(String key){//지정된 키(key)에 해당하는 데이터를 Redis에서 삭제하는 메서드
+        log.info("delete data from redis with key: {}", key);
         redisTemplate.delete(key);
     }
 
@@ -116,6 +117,13 @@ public class RedisUtil {
     public Set<String> getDESCList(String key) {
         return redisTemplate.opsForZSet().reverseRange(key, 0, 9);
         //return resultSet.stream().collect(Collectors.toList());
+    }
+
+    public void addMultiData(String key, String value, long expiration) {
+        log.info("add data to redis with key: {}, value: {}, expiration: {} milliseconds", key, value, expiration);
+        ListOperations<String, String> listOperations = redisTemplate.opsForList();
+        listOperations.rightPush(key, value);
+        redisTemplate.expire(key, expiration, TimeUnit.MILLISECONDS);
     }
 
 

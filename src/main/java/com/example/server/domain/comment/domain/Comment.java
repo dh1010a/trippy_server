@@ -72,6 +72,10 @@ public class Comment extends BaseTimeEntity {
         this.content = content;
     }
 
+    public void deleteMember(){
+        this.member = null;
+    }
+
     public LocalDateTime getCreateDate() {
         return this.getCreatedAt();
     }

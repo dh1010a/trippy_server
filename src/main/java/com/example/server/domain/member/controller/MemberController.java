@@ -191,6 +191,13 @@ public class MemberController {
         return ApiResponse.onSuccess(memberService.getBookmarkList(memberId));
     }
 
+    @DeleteMapping
+    public ApiResponse<?> deleteMember(@RequestParam(value = "socialAccessToken", required = false) String socialAccessToken) {
+        String memberId = getLoginMemberId();
+        log.info("회원 탈퇴 요청 : memberId = {}", memberId);
+        return ApiResponse.onSuccess(memberService.deleteMember(memberId, socialAccessToken));
+    }
+
 
 
     private String getLoginMemberId() {
