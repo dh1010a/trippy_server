@@ -181,6 +181,17 @@ public interface PostRepository extends JpaRepository<Post,Long> {
                                             @Param("postType") PostType postType,
                                             Pageable pageable);
 
+    // 팔로잉한 게시물 개수
+    @Query("SELECT COUNT(p) FROM Post p " +
+            "WHERE p.member.idx IN :followingMemberIds " +
+            "AND p.postType = :postType " +
+            "AND ((p.member.ticketScope <> 'PRIVATE' AND :postType = 'POST') " +
+            "     OR (p.member.ootdScope <> 'PRIVATE' AND :postType = 'OOTD'))")
+    long countByMemberIdxInAndPostType(@Param("followingMemberIds") List<Long> followingMemberIds,
+                                       @Param("postType") PostType postType);
+
+    // 팔로잉 카운트
+
     long countByPostType(PostType postType);
 
     List<Post> findAllByPostType(PostType type, Sort sort);

@@ -123,6 +123,14 @@ public class PostController {
         return ApiResponse.onSuccess(postService.getTotalCountByMember(loginMemberId, memberId, type));
     }
 
+    @GetMapping("/count/follow")
+    public ApiResponse<?> getTotalCountByFollow(
+            @RequestParam PostType type) {
+        String loginMemberId = getLoginMemberId();
+        log.info("{}의 팔로잉 {} 개수 출력", loginMemberId, type);
+        return ApiResponse.onSuccess(postService.getFollowingCount(loginMemberId,type));
+    }
+
     private String getLoginMemberId() {
         return SecurityUtil.getLoginMemberId().orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
     }
