@@ -1,6 +1,5 @@
 package com.example.server.domain.post.service;
 
-import com.example.server.domain.follow.domain.MemberFollow;
 import com.example.server.domain.follow.repository.MemberFollowRepository;
 import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.image.dto.ImageDto;
@@ -24,7 +23,6 @@ import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -38,7 +36,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -196,7 +193,7 @@ public class PostService {
         return PostDtoConverter.convertToDeletePostDto(postId);
     }
 
-    public PostResponseDto.GetPostResponseDto updatePost(PostRequestDto.UpdatePostRequestDto requestDto) {
+    public Object updatePost(PostRequestDto.UpdatePostRequestDto requestDto) {
         Post post = getPostById(requestDto.getId());
         Member member = getMemberById(requestDto.getMemberId());
 
@@ -206,6 +203,10 @@ public class PostService {
 
         updateTagsAndImages(post, requestDto.getTags(), requestDto.getImages());
         post.updatePost(requestDto);
+
+        if (post.getPostType().equals(PostType.OOTD)) {
+            return PostDtoConverter.convertToOotdResponseDto(post, member);
+        }
 
         return PostDtoConverter.convertToGetResponseDto(post, member);
     }
