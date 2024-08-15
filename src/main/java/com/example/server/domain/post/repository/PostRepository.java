@@ -190,6 +190,47 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     long countByMemberIdxInAndPostType(@Param("followingMemberIds") List<Long> followingMemberIds,
                                        @Param("postType") PostType postType);
 
+    // 좋아요한 게시물
+    @Query("SELECT p FROM Post p " +
+            "JOIN p.likes l " +
+            "JOIN p.member m " +
+            "WHERE l.member.memberId = :memberId " +
+            "AND p.postType = :postType " +
+            "AND (" +
+            "      (m.ticketScope = 'PUBLIC' AND :postType = 'POST') OR " +
+            "      (m.ootdScope = 'PUBLIC' AND :postType = 'OOTD') OR " +
+            "      (m.ticketScope = 'PROTECTED' AND :postType = 'POST' AND m.idx IN :followingList) OR " +
+            "      (m.ootdScope = 'PROTECTED' AND :postType = 'OOTD' AND m.idx IN :followingList)" +
+            ") " +
+            "AND (" +
+            "      (m.ticketScope <> 'PRIVATE' AND :postType = 'POST') OR " +
+            "      (m.ootdScope <> 'PRIVATE' AND :postType = 'OOTD')" +
+            ")")
+    Page<Post> findLikedPostsByMemberWithPostTypeAndScope(@Param("memberId") String memberId,
+                                                          @Param("postType") PostType postType,
+                                                          @Param("followingList") List<Long> followingList,
+                                                          Pageable pageable);
+
+    // 좋아요 게시물 카운트
+    @Query("SELECT COUNT(p) FROM Post p " +
+            "JOIN p.likes l " +
+            "JOIN p.member m " +
+            "WHERE l.member.memberId = :memberId " +
+            "AND p.postType = :postType " +
+            "AND (" +
+            "      (m.ticketScope = 'PUBLIC' AND :postType = 'POST') OR " +
+            "      (m.ootdScope = 'PUBLIC' AND :postType = 'OOTD') OR " +
+            "      (m.ticketScope = 'PROTECTED' AND :postType = 'POST' AND m.idx IN :followingList) OR " +
+            "      (m.ootdScope = 'PROTECTED' AND :postType = 'OOTD' AND m.idx IN :followingList)" +
+            ") " +
+            "AND (" +
+            "      (m.ticketScope <> 'PRIVATE' AND :postType = 'POST') OR " +
+            "      (m.ootdScope <> 'PRIVATE' AND :postType = 'OOTD')" +
+            ")")
+    long countLikedPostsByMemberWithPostTypeAndScope(@Param("memberId") String memberId,
+                                                     @Param("postType") PostType postType,
+                                                     @Param("followingList") List<Long> followingList);
+
     // 팔로잉 카운트
 
     long countByPostType(PostType postType);

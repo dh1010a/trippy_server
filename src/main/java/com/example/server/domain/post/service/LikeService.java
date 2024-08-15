@@ -1,5 +1,6 @@
 package com.example.server.domain.post.service;
 
+import com.example.server.domain.follow.repository.MemberFollowRepository;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.domain.notify.dto.NotifyDtoConverter;
@@ -7,6 +8,10 @@ import com.example.server.domain.notify.model.NotificationType;
 import com.example.server.domain.post.domain.Like;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.domain.post.dto.LikeResponseDto;
+import com.example.server.domain.post.dto.PostDtoConverter;
+import com.example.server.domain.post.dto.PostResponseDto;
+import com.example.server.domain.post.model.OrderType;
+import com.example.server.domain.post.model.PostType;
 import com.example.server.domain.post.repository.LikeRepository;
 import com.example.server.domain.post.repository.PostRepository;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
@@ -15,6 +20,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,6 +37,8 @@ public class LikeService {
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final MemberFollowRepository memberFollowRepository;
+    private final PostService postService;
 
     // POST /api/like/{postId}
     public LikeResponseDto.LikeBasicResponseDto likeToPost(Long postId, String memberId) {
@@ -79,6 +87,39 @@ public class LikeService {
         }
         else throw new ErrorHandler(ErrorStatus.POST_NOT_LIKED);
     }
+
+    // 좋아요 게시물 개수
+    public long getLikePostCount(String loginMemberId, PostType type) {
+        Member loginMember = postService.getMemberById(loginMemberId);
+        List<Long> followingList = memberFollowRepository.findFollowingList(loginMember==null ? 0 : loginMember.getIdx());
+        return postRepository.countLikedPostsByMemberWithPostTypeAndScope(loginMemberId, type, followingList);
+    }
+
+    // 좋아요 게시물 리스트
+    public List<PostResponseDto.GetPostResponseDto> getLikePosts(String memberId, PostType postType, Integer page, Integer size) {
+        Member member = postService.getMemberById(memberId);
+        Pageable pageable = postService.getPageable(page, size, OrderType.LATEST);
+
+        List<Long> followingMemberIds = memberFollowRepository.findFollowingList(member.getIdx());
+
+        List<Post> posts = postRepository.findLikedPostsByMemberWithPostTypeAndScope(memberId,postType,  followingMemberIds, pageable).getContent();
+
+        return PostDtoConverter.convertToPostListResponseDto(posts, member);
+    }
+
+    // 팔로잉 게시물 -> OOTD
+    public List<PostResponseDto.GetOotdPostResponseDto> getLikeOotds(String memberId, PostType postType, Integer page, Integer size) {
+        Member member = postService.getMemberById(memberId);
+        Pageable pageable = postService.getPageable(page, size, OrderType.LATEST);
+
+        List<Long> followingMemberIds =  memberFollowRepository.findFollowingList(member.getIdx());
+
+        List<Post> posts = postRepository.findLikedPostsByMemberWithPostTypeAndScope(memberId,postType,  followingMemberIds, pageable).getContent();
+
+        return PostDtoConverter.convertToOOTDListResponseDto(posts, member);
+    }
+
+
 
     public Integer getLikeCount(Long postId) {
         return likeRepository.countByPostId(postId);
