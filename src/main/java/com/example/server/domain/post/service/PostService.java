@@ -383,6 +383,13 @@ public class PostService {
         return postRepository.countByMemberAndPostType(loginMember,type);
     }
 
+    // 팔로잉 개수
+    public long getFollowingCount(String loginMemberId, PostType type) {
+        Member loginMember = getMemberById(loginMemberId);
+        List<Long> followingList = memberFollowRepository.findFollowingList(loginMember==null ? 0 : loginMember.getIdx());
+        return postRepository.countByMemberIdxInAndPostType(followingList, type);
+    }
+
     public Member getMemberById(String memberId) {
         if ("anonymousUser".equals(memberId)) {
             return null;
