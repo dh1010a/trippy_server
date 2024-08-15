@@ -91,13 +91,11 @@ public class PostController {
             @RequestParam PostType postType) {
         String memberId = getLoginMemberId();
         log.info("팔로잉 게시물 조회 요청 : memberId = {}", memberId);
-        if(postType.equals(PostType.POST)) {
-            ApiResponse.onSuccess(postService.getPostsFromFollowedMembers(memberId, postType, page, size, orderType));
-        }
-        else {
+        if (postType.equals(PostType.POST)) {
+            return ApiResponse.onSuccess(postService.getPostsFromFollowedMembers(memberId, postType, page, size, orderType));
+        } else {
             return ApiResponse.onSuccess(postService.getOotdsFromFollowedMembers(memberId, postType, page, size, orderType));
         }
-        return ApiResponse.onSuccess(postService.getPostsFromFollowedMembers(memberId, postType, page, size, orderType));
     }
 
     @GetMapping("/count/all")

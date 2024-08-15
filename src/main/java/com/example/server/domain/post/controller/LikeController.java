@@ -1,6 +1,8 @@
 package com.example.server.domain.post.controller;
 
 import com.example.server.domain.post.dto.LikeResponseDto;
+import com.example.server.domain.post.model.OrderType;
+import com.example.server.domain.post.model.PostType;
 import com.example.server.domain.post.service.LikeService;
 import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
@@ -44,6 +46,27 @@ public class LikeController {
         log.info("게시물 좋아요 취소 요청 : memberId = {}, postId = {}", memberId ,postId);
         return ApiResponse.onSuccess(likeService.deletePostLike(postId,memberId));
     }
+
+    @GetMapping("/my-list")
+    public ApiResponse<?>  getMyLikePost(@RequestParam(defaultValue = "0") Integer page,
+                                         @RequestParam(defaultValue = "0") Integer size,
+                                         @RequestParam PostType postType){
+        String memberId = getLoginMemberId();
+        log.info("내 좋아요 게시물 조회 : memberId = {}", memberId);
+        if(postType.equals(PostType.POST)) {
+            return ApiResponse.onSuccess(likeService.getLikePosts(memberId, postType, page, size));
+        } else {
+            return ApiResponse.onSuccess(likeService.getLikeOotds(memberId, postType, page, size));
+        }
+    }
+
+    @GetMapping("/count/my")
+    public ApiResponse<?> getTotalCountByLoginMember(@RequestParam PostType type) {
+        String memberId = getLoginMemberId();
+        log.info("{}의 {} 좋아요 게시물 개수 출력", memberId, type);
+        return ApiResponse.onSuccess(likeService.getLikePostCount(memberId, type));
+    }
+
 
     private String getLoginMemberId() {
         return SecurityUtil.getLoginMemberId().orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
