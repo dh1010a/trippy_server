@@ -2,12 +2,10 @@ package com.example.server.domain.post.domain;
 
 import com.example.server.domain.comment.domain.Comment;
 import com.example.server.domain.image.domain.Image;
-import com.example.server.domain.member.domain.BookMark;
+import com.example.server.domain.bookmark.domain.BookMark;
 import com.example.server.domain.member.domain.Member;
-import com.example.server.domain.member.model.Scope;
 import com.example.server.domain.post.dto.PostRequestDto;
 import com.example.server.domain.post.model.PostType;
-import com.example.server.domain.ticket.domain.MemberTicket;
 import com.example.server.domain.ticket.domain.Ticket;
 import com.example.server.global.common.BaseTimeEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -15,8 +13,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 @Builder

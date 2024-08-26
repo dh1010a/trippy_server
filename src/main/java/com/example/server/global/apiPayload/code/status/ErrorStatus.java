@@ -89,6 +89,12 @@ public enum ErrorStatus implements BaseErrorCode {
     FCM_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "FCM4001", "FCM 토큰이 존재하지 않습니다."),
     FCM_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "FCM4002", "FCM 권한이 없습니다."),
 
+    // 북마크 응답
+    BOOKMARK_TYPE_ERROR(HttpStatus.BAD_REQUEST, "BOOKMARK4001", "조회하려는 북마크 타입이 올바르지 않습니다."),
+    BOOKMARK_NOT_FOUND(HttpStatus.BAD_REQUEST, "BOOKMARK4002", "북마크가 존재하지 않습니다"),
+    BOOKMARK_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "BOOKMARK4003", "이미 북마크한 게시물입니다."),
+    BOOKMARK_NOT_EXIST(HttpStatus.BAD_REQUEST, "BOOKMARK4004", "북마크한 게시물이 존재하지 않습니다."),
+
 
     // 시간 제한
     TIME_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST,"TIME4001", "시간 제한"),

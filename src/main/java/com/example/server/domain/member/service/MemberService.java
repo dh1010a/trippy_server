@@ -8,7 +8,7 @@ import com.example.server.domain.image.model.ImageType;
 import com.example.server.domain.image.repository.ImageRepository;
 import com.example.server.domain.image.service.OracleImageService;
 import com.example.server.domain.mail.service.MailService;
-import com.example.server.domain.member.domain.BookMark;
+import com.example.server.domain.bookmark.domain.BookMark;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.dto.MemberDtoConverter;
 import com.example.server.domain.member.dto.MemberRequestDto;
@@ -64,9 +64,9 @@ public class MemberService {
 
     public MemberTaskResultResponseDto signUp(CreateMemberRequestDto requestDto) {
         String randomNickName = requestDto.getEmail() + UUID.randomUUID().toString().substring(0, 9);
-        if (isExistByEmail(requestDto.getEmail())) {
-            throw new ErrorHandler(ErrorStatus.MEMBER_EMAIL_ALREADY_EXIST);
-        }
+//        if (isExistByEmail(requestDto.getEmail())) {
+//            throw new ErrorHandler(ErrorStatus.MEMBER_EMAIL_ALREADY_EXIST);
+//        }
 
         if (isExistByMemberId(requestDto.getMemberId())) {
             throw new ErrorHandler(ErrorStatus.MEMBER_ID_ALREADY_EXIST);

@@ -1,5 +1,6 @@
-package com.example.server.domain.member.domain;
+package com.example.server.domain.bookmark.domain;
 
+import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.global.common.BaseTimeEntity;
 import jakarta.persistence.*;

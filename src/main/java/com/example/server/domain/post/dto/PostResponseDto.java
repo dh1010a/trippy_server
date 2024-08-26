@@ -55,7 +55,6 @@ public class PostResponseDto {
         private Integer commentCount;
         private Integer viewCount;
         private Integer bookmarkCount;
-
     }
 
     @Builder
