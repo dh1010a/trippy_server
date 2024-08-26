@@ -48,6 +48,9 @@ public class PostDtoConverter {
         int commentCount = post.getComments() != null ? (int) post.getComments().stream().filter(
                 comment -> comment.getStatus() != Scope.PRIVATE
         ).count() :0;
+
+        // 북마크 수 계산
+        int bookmarkCount = post.getBookMarks() != null ? post.getBookMarks().size() : 0;
         return PostResponseDto.PostBasicResponseDto.builder()
                 .id(post.getId())
                 .createDateTime(post.getCreateDate())
@@ -59,6 +62,7 @@ public class PostDtoConverter {
                 .likeCount(likeCount)
                 .isLiked(isLiked)
                 .commentCount(commentCount)
+                .bookmarkCount(bookmarkCount)
                 .viewCount(post.getViewCount())
                 .build();
     }

@@ -1,5 +1,6 @@
 package com.example.server.domain.search.service;
 
+import com.example.server.domain.post.domain.Post;
 import com.example.server.domain.post.model.PostType;
 import com.example.server.global.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,14 @@ public class SearchRedisService {
                 .limit(10)
                 .collect(Collectors.toList());
         return popularList;
+    }
+
+    public List<String> getPopularListByType(PostType type){
+
+        Set<String> postSet = redisUtil.getDESCList(type.equals(PostType.POST) ? "popularSearches" + PostType.POST : "popularSearches" + PostType.OOTD);
+        return postSet.stream().sorted(Comparator.reverseOrder())
+                .limit(10)
+                .toList();
     }
 
     public List<String> getRecentSearch(String key) {
