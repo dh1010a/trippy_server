@@ -39,6 +39,9 @@ public class PostDtoConverter {
         // 좋아요
         int likeCount = post.getLikes() != null ? post.getLikes().size() : 0;
 
+        // 북마크
+        int bookmarkCount = post.getBookMarks() != null ? post.getBookMarks().size() : 0;
+
         boolean isLiked = false;
         if (member != null && member.getRole().equals(Role.ROLE_MEMBER) && post.getLikes() != null) {
             isLiked = post.getLikes().stream().anyMatch(like -> like.getMember().equals(member));
@@ -59,6 +62,7 @@ public class PostDtoConverter {
                 .likeCount(likeCount)
                 .isLiked(isLiked)
                 .commentCount(commentCount)
+                .bookmarkCount(bookmarkCount)
                 .viewCount(post.getViewCount())
                 .build();
     }

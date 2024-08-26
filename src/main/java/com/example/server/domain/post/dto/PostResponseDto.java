@@ -54,6 +54,7 @@ public class PostResponseDto {
         private Boolean isLiked;
         private Integer commentCount;
         private Integer viewCount;
+        private Integer bookmarkCount;
     }
 
     @Builder

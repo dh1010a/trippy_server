@@ -2,6 +2,7 @@ package com.example.server.domain.member.domain;
 
 //import com.example.server.domain.badge.domain.MemberBadge;
 //import com.example.server.domain.follow.domain.MemberFollow;
+import com.example.server.domain.bookmark.domain.BookMark;
 import com.example.server.domain.comment.domain.Comment;
 import com.example.server.domain.follow.domain.MemberFollow;
 import com.example.server.domain.image.domain.Image;

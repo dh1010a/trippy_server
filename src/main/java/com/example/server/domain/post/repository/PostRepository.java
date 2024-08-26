@@ -240,4 +240,6 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     Page<Post> findAllByPostType(PostType type,Pageable pageable);
 
 
+
+
 }

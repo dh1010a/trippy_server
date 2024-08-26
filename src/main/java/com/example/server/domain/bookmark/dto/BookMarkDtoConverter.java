@@ -1,6 +1,6 @@
-package com.example.server.domain.member.dto;
+package com.example.server.domain.bookmark.dto;
 
-import com.example.server.domain.member.domain.BookMark;
+import com.example.server.domain.bookmark.domain.BookMark;
 
 public class BookMarkDtoConverter {
 
