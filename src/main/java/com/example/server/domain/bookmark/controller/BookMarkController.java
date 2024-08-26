@@ -42,7 +42,7 @@ public class BookMarkController {
         return ApiResponse.onFailure(ErrorStatus.BOOKMARK_TYPE_ERROR.getCode(), ErrorStatus.BOOKMARK_TYPE_ERROR.getMessage(), "Query parameter 'type' must be 'OOTD' or 'POST'");
     }
 
-    @GetMapping("/my/count")
+    @GetMapping("/count/my")
     public ApiResponse<?> getBookMarkCount() {
         String memberId = getLoginMemberId();
         log.info("내 북마크 개수 조회 요청 : memberId = {}", memberId);
