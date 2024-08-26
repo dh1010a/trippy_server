@@ -116,7 +116,7 @@ public class PostService {
     public List<PostResponseDto.GetPostResponseDto> getAllPost(Integer page, String memberId, Integer size, OrderType orderType) {
         Member member = getMemberById(memberId);
 
-        List<Long> followingList = memberFollowRepository.findFollowingList(member==null ? 0 : member.getIdx());
+        List<Long> followingList = getFollowingList(member);
 
         Pageable pageable = getPageable(page, size, orderType);
         List<Post> postList = getPostsByOrderType(orderType, pageable, followingList);
@@ -136,7 +136,7 @@ public class PostService {
     public List<PostResponseDto.GetPostResponseDto> getAllMemberPost(String memberId, String loginMemberId, Integer page, Integer size, OrderType orderType) {
         Member member = getMemberById(memberId);
         Member loginMember = getMemberById(loginMemberId);
-        List<Long> followingList = memberFollowRepository.findFollowingList(loginMember==null ? 0 : loginMember.getIdx());
+        List<Long> followingList = getFollowingList(member);
         Pageable pageable = getPageable(page, size, orderType);
 
         List<Post> postList = getPostsByOrderTypeAndMember(orderType, pageable, member, followingList);
@@ -184,10 +184,7 @@ public class PostService {
 
     public PostResponseDto.DeletePostResultResponseDto deletePost(Long postId, String memberId) {
         Post post = getPostById(postId);
-
-        if (!post.getMember().getMemberId().equals(memberId)) {
-            throw new ErrorHandler(ErrorStatus.NO_PERMISSION__FOR_POST);
-        }
+        validatePostOwnership(post, memberId);
 
         postRepository.delete(post);
         return PostDtoConverter.convertToDeletePostDto(postId);
@@ -197,9 +194,7 @@ public class PostService {
         Post post = getPostById(requestDto.getId());
         Member member = getMemberById(requestDto.getMemberId());
 
-        if (!post.getMember().getIdx().equals(member.getIdx())) {
-            throw new ErrorHandler(ErrorStatus.NO_PERMISSION__FOR_POST);
-        }
+        validatePostOwnership(post, member.getMemberId());
 
         updateTagsAndImages(post, requestDto.getTags(), requestDto.getImages());
         post.updatePost(requestDto);
@@ -216,7 +211,7 @@ public class PostService {
         Member member = getMemberById(memberId);
         Pageable pageable = getPageable(page, size, orderType);
 
-        List<Long> followingMemberIds = memberFollowRepository.findFollowingList(member.getIdx());
+        List<Long> followingMemberIds = getFollowingList(member);
 
         List<Post> posts = postRepository.findByMemberIdxInAndPostType(followingMemberIds, postType, pageable).getContent();
 
@@ -228,21 +223,12 @@ public class PostService {
         Member member = getMemberById(memberId);
         Pageable pageable = getPageable(page, size, orderType);
 
-        List<Long> followingMemberIds =  memberFollowRepository.findFollowingList(member.getIdx());
+        List<Long> followingMemberIds = getFollowingList(member);
 
         List<Post> posts = postRepository.findByMemberIdxInAndPostType(followingMemberIds, postType, pageable).getContent();
 
         return PostDtoConverter.convertToOOTDListResponseDto(posts, member);
     }
-
-    // 내가 팔로우한 회원 리스트
-//    private List<Long> getFollowingMemberIds(Long memberIdx) {
-//        List<MemberFollow> follows = memberFollowRepository.findByMemberIdx(memberIdx);
-//        return follows.stream()
-//                .map(MemberFollow::getFollowingMemberIdx)
-//                .collect(Collectors.toList());
-//    }
-
 
     public Post savePost(PostRequestDto.CommonPostRequestDto requestDto) {
         Member member = getMemberById(requestDto.getMemberId());
@@ -365,7 +351,7 @@ public class PostService {
     // 전체 게시물 개수
     public long getTotalCount(String memberId, PostType type) {
         Member member = getMemberById(memberId);
-        List<Long> followingList = memberFollowRepository.findFollowingList(member==null ? 0 : member.getIdx());
+        List<Long> followingList = getFollowingList(member);
 
         return postRepository.countByPostTypeWithScope(type, followingList);
     }
@@ -374,7 +360,7 @@ public class PostService {
     public long getTotalCountByMember(String loginMemberId, String memberId, PostType type) {
         Member loginMember = getMemberById(loginMemberId);
         Member targetMember = getMemberById(memberId);
-        List<Long> followingList = memberFollowRepository.findFollowingList(loginMember==null ? 0 : loginMember.getIdx());
+        List<Long> followingList = getFollowingList(loginMember);
         return postRepository.countByMemberAndPostTypeWithScope(targetMember, type, followingList);
     }
 
@@ -387,7 +373,7 @@ public class PostService {
     // 팔로잉 개수
     public long getFollowingCount(String loginMemberId, PostType type) {
         Member loginMember = getMemberById(loginMemberId);
-        List<Long> followingList = memberFollowRepository.findFollowingList(loginMember==null ? 0 : loginMember.getIdx());
+        List<Long> followingList =getFollowingList(loginMember);
         return postRepository.countByMemberIdxInAndPostType(followingList, type);
     }
 
@@ -402,6 +388,16 @@ public class PostService {
     public Post getPostById(Long postId) {
         return postRepository.findById(postId)
                 .orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND));
+    }
+
+    public List<Long> getFollowingList(Member member) {
+        return member == null ? new ArrayList<>() : memberFollowRepository.findFollowingList(member.getIdx());
+    }
+
+    private void validatePostOwnership(Post post, String memberId) {
+        if (!post.getMember().getMemberId().equals(memberId)) {
+            throw new ErrorHandler(ErrorStatus.NO_PERMISSION__FOR_POST);
+        }
     }
 
 }
