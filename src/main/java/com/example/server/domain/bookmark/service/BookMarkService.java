@@ -38,6 +38,9 @@ public class BookMarkService {
     public BookMarkResponseDto.BookMarkBasicResponse postBookMark(Long postId, String memberId){
         Post post = postRepository.findById(postId).orElseThrow(() -> new ErrorHandler(ErrorStatus.POST_NOT_FOUND));
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        if (isBookMarked(memberId, postId)) {
+            throw new ErrorHandler(ErrorStatus.BOOKMARK_ALREADY_EXIST);
+        }
 
         BookMark bookMark = BookMark.builder()
                 .post(post)
