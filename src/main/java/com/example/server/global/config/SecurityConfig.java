@@ -162,7 +162,7 @@ public class SecurityConfig {
 
         corsConfiguration.setAllowedHeaders(Arrays.asList(corsProperties.getAllowedHeaders().split(",")));
         corsConfiguration.setAllowedMethods(Arrays.asList(corsProperties.getAllowedMethods().split(",")));
-        corsConfiguration.setAllowedOrigins(Arrays.asList(corsProperties.getAllowedOrigins(), "http://localhost:3000"));
+        corsConfiguration.setAllowedOrigins(Arrays.asList(corsProperties.getAllowedOrigins(), "http://localhost:3000", "https://trippy-api.store"));
         corsConfiguration.setExposedHeaders(Arrays.asList("Authorization", "Authorization-refresh"));
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setMaxAge(corsConfiguration.getMaxAge());
