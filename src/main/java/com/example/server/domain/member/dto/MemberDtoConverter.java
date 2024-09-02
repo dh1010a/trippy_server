@@ -94,7 +94,7 @@ public class MemberDtoConverter {
     public static MemberGetFollowAvailableResponseDto convertToMemberGetFollowAvailableResponseDto(boolean isAvailable, Scope scope) {
         return MemberGetFollowAvailableResponseDto.builder()
                 .isAvailable(isAvailable)
-                .status(scope.getKey())
+                .status(scope)
                 .message(scope.getTitle())
                 .build();
     }

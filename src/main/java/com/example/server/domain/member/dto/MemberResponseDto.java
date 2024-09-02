@@ -1,5 +1,6 @@
 package com.example.server.domain.member.dto;
 
+import com.example.server.domain.member.model.Scope;
 import lombok.Builder;
 import lombok.Data;
 
@@ -116,7 +117,7 @@ public class MemberResponseDto {
     @Builder
     public static class MemberGetFollowAvailableResponseDto {
         private boolean isAvailable;
-        private String status;
+        private Scope status;
         private String message;
     }
 
