@@ -76,7 +76,7 @@ public class SecurityConfig {
                         .requestMatchers( "/api/email/send", "/api/member/password", "/api/email/confirm", "/api/member/find").permitAll()
                         .requestMatchers("/api/post/all", "/api/ootd/all", "/api/post/count/all", "/api/post/info/{postId}", "/api/ootd/info/{postId}").permitAll()
                         .requestMatchers("/api/search/**").permitAll()
-                        .requestMatchers("/api/member/profile", "/api/post/by-member", "/api/ootd/by-member").permitAll()
+                        .requestMatchers("/api/member/profile", "/api/post/by-member", "/api/ootd/by-member", "/api/post/count/by-member").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
