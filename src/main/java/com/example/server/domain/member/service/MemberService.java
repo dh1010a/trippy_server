@@ -286,6 +286,19 @@ public class MemberService {
         return targetMember.getFollowScope() == Scope.PRIVATE;
     }
 
+    public MemberGetFollowAvailableResponseDto getFollowAvailable(String memberId, String targetMemberId) {
+        Member targetMember = memberRepository.getMemberById(targetMemberId);
+        boolean isAvailable = !isNotValidAccessToFollow(memberId, targetMemberId);
+        if (!isAvailable && targetMember.getFollowScope() == Scope.PROTECTED) {
+            return MemberDtoConverter.convertToMemberGetFollowAvailableResponseDto(isAvailable, Scope.PROTECTED);
+        } else if (!isAvailable && targetMember.getFollowScope() == Scope.PRIVATE) {
+            return MemberDtoConverter.convertToMemberGetFollowAvailableResponseDto(isAvailable, Scope.PRIVATE);
+        } else if (isAvailable && targetMember.getFollowScope() == Scope.PROTECTED) {
+            return MemberDtoConverter.convertToMemberGetFollowAvailableResponseDto(isAvailable, Scope.PROTECTED);
+        }
+        return MemberDtoConverter.convertToMemberGetFollowAvailableResponseDto(isAvailable, Scope.PUBLIC);
+    }
+
     private boolean isFollower(Member member, Member targetMember) {
             return memberFollowRepository.existsByMemberAndFollowingMemberIdx(member, targetMember.getIdx());
     }

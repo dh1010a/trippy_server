@@ -116,6 +116,8 @@ public class MemberResponseDto {
     @Builder
     public static class MemberGetFollowAvailableResponseDto {
         private boolean isAvailable;
+        private String status;
+        private String message;
     }
 
     @Data

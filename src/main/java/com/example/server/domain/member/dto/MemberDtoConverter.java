@@ -4,6 +4,7 @@ import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.dto.MemberResponseDto.*;
 import com.example.server.domain.member.model.InterestedType;
+import com.example.server.domain.member.model.Scope;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -90,9 +91,11 @@ public class MemberDtoConverter {
                 .build();
     }
 
-    public static MemberGetFollowAvailableResponseDto convertToMemberGetFollowAvailableResponseDto(boolean isAvailable) {
+    public static MemberGetFollowAvailableResponseDto convertToMemberGetFollowAvailableResponseDto(boolean isAvailable, Scope scope) {
         return MemberGetFollowAvailableResponseDto.builder()
                 .isAvailable(isAvailable)
+                .status(scope.getKey())
+                .message(scope.getTitle())
                 .build();
     }
 }
