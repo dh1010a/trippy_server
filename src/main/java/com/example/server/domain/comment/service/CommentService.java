@@ -21,6 +21,7 @@ import com.example.server.domain.post.dto.PostResponseDto;
 import com.example.server.domain.post.repository.PostRepository;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
+import com.example.server.global.util.SecurityUtil;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -66,6 +67,9 @@ public class CommentService {
     public CommentResponseDto.CommentBasicResponse uploadComment(CommentRequestDto.CommentBasicRequest requestDto, HttpSession session) {
         if(requestDto.getParentId()!= null){
             Comment parent = getComment(requestDto.getParentId());
+            if (parent == null) {
+                throw new ErrorHandler(ErrorStatus.PARENT_NOT_FOUND);
+            }
             if(parent.getStatus() == Scope.PRIVATE){
                 throw new ErrorHandler(ErrorStatus.PARENT_NOT_FOUND);
             }
@@ -137,7 +141,6 @@ public class CommentService {
     public CommentResponseDto.CommentTreeDTO updateComment(CommentRequestDto.CommentUpdateRequest requestDto){
         Comment comment = commentRepository.findById(requestDto.getCommentId())
                 .orElseThrow(() -> new ErrorHandler(ErrorStatus.COMMENT_NOT_FOUND));
-
         if(!((comment.getMember().getMemberId()).equals(requestDto.getMemberId()))) throw new ErrorHandler(ErrorStatus.NO_PERMISSION__FOR_POST);
         if (comment.getStatus() == Scope.PRIVATE) {
             throw new ErrorHandler(ErrorStatus.COMMENT_IS_DELETED);
@@ -156,6 +159,12 @@ public class CommentService {
         boolean allChildrenPrivate = comment.getChildComments().stream().allMatch(
                 child -> child.getDeleteStatus() == DeleteStatus.DELETE
         );
+
+        List<Comment> mentionedComments = commentRepository.findAllByMentionCommentId(commentId);
+        for (Comment mentionedComment : mentionedComments) {
+            mentionedComment.updateMentionedInfo(mentionedComment.getMentionMemberId(), null, mentionedComment.getMentionMemberNickName());
+            commentRepository.save(mentionedComment);
+        }
 
         // 자식 댓글이 없거나, 자식 댓글의 DELETE STATUS가 모두 DELETE인 경우
         if (comment.getChildComments().isEmpty() || allChildrenPrivate) {
@@ -223,6 +232,9 @@ public class CommentService {
             if (parentComment == null || !parentComment.getPost().equals(post)) {
                 throw new ErrorHandler(ErrorStatus.PARENT_COMMENT_AND_POST_NOT_FOUND);
             }
+            if (parentComment.getParent() != null) {
+                throw new ErrorHandler(ErrorStatus.COMMENT_CHILD_CANNOT_BE_PARENT);
+            }
         }
 
         Comment comment = Comment.builder()
@@ -231,10 +243,25 @@ public class CommentService {
                 .status(requestDto.getStatus())
                 .content(requestDto.getContent())
                 .build();
+
+        Member mentionMember = null;
+
         // 자식 댓글인 경우
         if(parentComment != null){
             comment.updateParent(parentComment);
+            if (requestDto.getMentionMemberId() == null || requestDto.getMentionCommentId() == null || requestDto.getMentionMemberNickName() == null) {
+                throw new ErrorHandler(ErrorStatus.COMMENT_MENTION_COMMENT_INFO_NOT_FOUND);
+            }
+            mentionMember = getMember(requestDto.getMentionMemberId());
+            if (mentionMember == null) {
+                throw new ErrorHandler(ErrorStatus.COMMNET_MENTION_MEMBER_INFO_NOT_FOUND);
+            }
+            if (!requestDto.getMentionMemberNickName().equals(mentionMember.getNickName())) {
+                throw new ErrorHandler(ErrorStatus.COMMNET_MENTION_MEMBER_INFO_NOT_FOUND);
+            }
+            comment.updateMentionedInfo(requestDto.getMentionMemberId(), requestDto.getMentionCommentId(), requestDto.getMentionMemberNickName());
         }
+
         commentRepository.save(comment);
 
         // 알람 전송
@@ -243,7 +270,7 @@ public class CommentService {
 //            content = content.substring(0, 30) + "...";
 //        }
         if(parentComment != null && !member.getMemberId().equals(parentComment.getMember().getMemberId())){
-            publishCommentEvent(member, parentComment.getMember(), NotificationType.REPLY, content);
+            publishCommentEvent(member, mentionMember, NotificationType.REPLY, content);
         } else if (parentComment == null && !member.getMemberId().equals(post.getMember().getMemberId())) {
             publishCommentEvent(member, post.getMember(), NotificationType.COMMENT, content);
         }

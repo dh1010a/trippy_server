@@ -1,6 +1,5 @@
 package com.example.server.domain.comment.domain;
 
-import com.example.server.domain.comment.model.CommentStatus;
 import com.example.server.domain.comment.model.DeleteStatus;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.model.Scope;
@@ -9,8 +8,6 @@ import com.example.server.global.common.BaseTimeEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.sql.Delete;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -53,6 +50,12 @@ public class Comment extends BaseTimeEntity {
     @JoinColumn(name = "parent_id")
     private Comment parent;
 
+    private String mentionMemberId;
+
+    private Long mentionCommentId;
+
+    private String mentionMemberNickName;
+
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     @JsonIgnore
     @Builder.Default
@@ -70,6 +73,12 @@ public class Comment extends BaseTimeEntity {
 
     public void updateContent(String content){
         this.content = content;
+    }
+
+    public void updateMentionedInfo(String mentionMemberId, Long mentionCommentId, String mentionMemberNickName){
+        this.mentionMemberId = mentionMemberId;
+        this.mentionCommentId = mentionCommentId;
+        this.mentionMemberNickName = mentionMemberNickName;
     }
 
     public void deleteMember(){

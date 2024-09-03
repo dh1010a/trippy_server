@@ -17,6 +17,9 @@ public class CommentResponseDto {
         private Long id;
         private String content;
         private Long postId;
+        private String mentionMemberId;
+        private String mentionMemberNickName;
+        private Long mentionCommentId;
         private Scope status;
         private LocalDateTime createDateTime;
         private CommentMemberDto member;
@@ -41,6 +44,9 @@ public class CommentResponseDto {
     public static class CommentTreeDTO {
         private Long id;
         private Long parentId;
+        private String mentionMemberId;
+        private String mentionMemberNickName;
+        private Long mentionCommentId;
         private String content;
         private Scope status;
         private int depth;

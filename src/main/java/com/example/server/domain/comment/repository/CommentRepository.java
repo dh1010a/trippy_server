@@ -12,7 +12,11 @@ public interface CommentRepository extends JpaRepository<Comment,Long> {
 
 
     List<Comment> findByPostId(Long postId);
+
     @Query("SELECT c FROM Comment c WHERE c.post.id = :postId ORDER BY c.id ASC")
     List<Comment> findByPostIdOrderByAsc(@Param("postId") Long postId);
+
+    @Query("SELECT c FROM Comment c WHERE c.mentionCommentId = :mentionedId ORDER BY c.id DESC")
+    List<Comment> findAllByMentionCommentId(@Param("mentionedId") Long mentionCommentId);
 
 }

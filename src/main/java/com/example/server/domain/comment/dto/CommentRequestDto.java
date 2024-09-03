@@ -14,6 +14,9 @@ public class CommentRequestDto {
         private Long parentId;
         private String content;
         private Scope status;
+        private String mentionMemberId;
+        private String mentionMemberNickName;
+        private Long mentionCommentId;
     }
 
     @Data
