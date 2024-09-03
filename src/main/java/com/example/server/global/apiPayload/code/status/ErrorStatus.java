@@ -80,6 +80,9 @@ public enum ErrorStatus implements BaseErrorCode {
     COMMENT_NOT_FOUND(HttpStatus.BAD_REQUEST, "COMMENT4002", "존재하지 않는 댓글입니다."),
     PARENT_NOT_FOUND(HttpStatus.BAD_REQUEST, "COMMENT4003", "부모 댓글이 삭제되었기 때문에 대댓글을 달 수 없습니다."),
     COMMENT_IS_DELETED(HttpStatus.BAD_REQUEST, "COMMENT4004", "댓글이 삭제되었습니다."),
+    COMMENT_CHILD_CANNOT_BE_PARENT(HttpStatus.BAD_REQUEST, "COMMENT4005", "대댓글은 부모 댓글이 될 수 없습니다."),
+    COMMENT_MENTION_COMMENT_INFO_NOT_FOUND(HttpStatus.BAD_REQUEST, "COMMENT4006", "멘션할 댓글 정보가 존재하지 않습니다."),
+    COMMNET_MENTION_MEMBER_INFO_NOT_FOUND(HttpStatus.BAD_REQUEST, "COMMENT4007", "멘션 대상인 회원이 존재하지 않습니다."),
 
     // 좋아요 응답
     ALREADY_LIKED(HttpStatus.BAD_REQUEST, "LIKE4001", "이미 좋아요를 누른 게시물입니다."),

@@ -39,6 +39,9 @@ public class CommentDtoConverter {
                 .id(comment.getId())
                 .content(comment.getContent())
                 .postId(comment.getPost().getId())
+                .mentionMemberId(comment.getMentionMemberId())
+                .mentionMemberNickName(comment.getMentionMemberNickName())
+                .mentionCommentId(comment.getMentionCommentId())
                 .member(memberDto)
                 .createDateTime(comment.getCreateDate())
                  .status(comment.getStatus())
@@ -66,7 +69,7 @@ public class CommentDtoConverter {
     }
 
     public static CommentResponseDto.CommentTreeDTO converToCommentTreeDTO(Comment comment){
-        Long parentId = 0L;
+        Long parentId = null;
         // 부모 댓글이 없는 경우 -> 최상위 댓글
         if(comment.getParent()!=null) {
             parentId = comment.getParent().getId();
@@ -89,6 +92,9 @@ public class CommentDtoConverter {
                 .parentId(parentId)
                 .depth(getDepth(comment))
                 .id(comment.getId())
+                .mentionCommentId(comment.getMentionCommentId())
+                .mentionMemberId(comment.getMentionMemberId())
+                .mentionMemberNickName(comment.getMentionMemberNickName())
                 .children(childList)
                 .member(memberDto)
                 .createDateTime(comment.getCreateDate())
