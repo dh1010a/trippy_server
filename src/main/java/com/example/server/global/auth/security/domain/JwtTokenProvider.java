@@ -37,20 +37,58 @@ public class JwtTokenProvider {
 	private long REFRESH_TOKEN_EXPIRE_DATE;
 	@Value("${jwt.secret}")
 	private String secret;
+	@Value("${jwt.secret_email}")
+	private String secretEmail;
 
 	private static final String MEMBER_ID_CLAIM = "memberId";
 	private static final String REFRESH_TOKEN_CLAIM = "RefreshToken";
 	private static final String ACCESS_TOKEN_CLAIM = "AccessToken";
+	private static final String EMAIL_AUTH_TOKEN_CLAIM = "EmailAuthToken";
 	private static final String REVOKE_TOKEN_CLAIM = "isRevoke";
+	private static final String EMAIL_CLAIM = "email";
 	private final MemberRepository memberRepository;
 
 
 	private Key key;
 
+	private Key emailKey;
+
 	@PostConstruct
 	public void init() {
 		byte[] keyBytes = Decoders.BASE64URL.decode(secret);
+		byte[] keyBytes_email = Decoders.BASE64URL.decode(secretEmail);
 		this.key = Keys.hmacShaKeyFor(keyBytes);
+		this.emailKey = Keys.hmacShaKeyFor(keyBytes_email);
+	}
+
+	public String createEmailAuthToken(String email) {
+		Date now = new Date();
+		Date authTokenExpiration = new Date(now.getTime() + 5 * 60 * 1000); // 5분
+
+		return Jwts.builder()
+				.setSubject(EMAIL_AUTH_TOKEN_CLAIM)
+				.claim(EMAIL_CLAIM, email)
+				.setIssuedAt(now)
+				.setExpiration(authTokenExpiration)
+				.signWith(key, SignatureAlgorithm.HS256)
+				.compact();
+	}
+
+	// Jwt 토큰을 복호화하여 이메일 정보가 유효한지 검증하는 메서드
+	public boolean isValidEmailAuthToken(String accessToken, String email) {
+		// Jwt 토큰 복호화
+		Claims claims = parseClaims(accessToken);
+
+		if (!claims.getSubject().equals(EMAIL_AUTH_TOKEN_CLAIM) || claims.get(EMAIL_CLAIM) == null) {
+			return false;
+		}
+
+		if (!validateToken(accessToken)) {
+			return false;
+		}
+
+		String memberId = (String) claims.get(EMAIL_CLAIM);
+		return memberId.equals(email);
 	}
 
 	public JwtToken createToken(Authentication authentication) {

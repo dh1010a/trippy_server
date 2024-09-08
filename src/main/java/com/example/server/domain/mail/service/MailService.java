@@ -1,7 +1,11 @@
 package com.example.server.domain.mail.service;
 
 import com.example.server.domain.mail.converter.MailDtoConverter;
+import com.example.server.domain.mail.dto.MailResponseDto;
 import com.example.server.domain.mail.dto.MailResponseDto.CheckMailResponseDto;
+import com.example.server.domain.mail.dto.MailResponseDto.CheckMailSuccessResponseDto;
+import com.example.server.global.auth.security.domain.JwtTokenProvider;
+import com.example.server.global.auth.security.service.JwtService;
 import com.example.server.global.util.RedisUtil;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -25,6 +29,8 @@ public class MailService {
 
     private final RedisUtil redisUtil;
 
+    private final JwtService jwtService;
+
     @Value("${spring.mail.username}")
     private String username;
 
@@ -47,14 +53,15 @@ public class MailService {
         return MailDtoConverter.convertCheckMailResultToDto(true);
     }
 
-    public CheckMailResponseDto checkEmail(String email, String authNumber) {
+    public CheckMailSuccessResponseDto checkEmail(String email, String authNumber) {
         String data = redisUtil.getData(authNumber);
         if (data == null || !data.equals(email)) {
             log.info("인증에 실패하였습니다. email = {}", email);
-            return MailDtoConverter.convertCheckMailResultToDto(false);
+            return MailDtoConverter.convertCheckMailSuccessResultToDto(false, null);
         }
         log.info("인증에 성공하였습니다. email = {}", email);
-        return MailDtoConverter.convertCheckMailResultToDto(true);
+        String authToken = jwtService.createEmailAuthToken(email);
+        return MailDtoConverter.convertCheckMailSuccessResultToDto(true, authToken);
     }
 
     public void finishCheckEmail(String authNumber) {

@@ -39,6 +39,8 @@ public enum ErrorStatus implements BaseErrorCode {
     MEMBER_PROFILE_ACCESS_DENY(HttpStatus.FORBIDDEN, "MEMBER4017", "프로필에 접근할 수 없는 유저입니다."),
     MEMBER_TOKEN_NOT_VALID(HttpStatus.UNAUTHORIZED, "MEMBER4018", "유효하지 않은 토큰입니다."),
     MEMBER_SOCIAL_TOKEN_NOT_PROVIDED(HttpStatus.BAD_REQUEST, "MEMBER4019", "소셜 토큰이 제공되지 않았습니다."),
+    MEMBER_EMAIL_AUTH_TOKEN_NOT_PROVIDED(HttpStatus.BAD_REQUEST, "MEMBER4020", "이메일 인증 토큰이 제공되지 않았습니다."),
+    MEMBER_EMAIL_AUTH_TOKEN_NOT_VALID(HttpStatus.UNAUTHORIZED, "MEMBER4021", "유효하지 않은 이메일 인증 토큰입니다."),
 
 
     //사진 응답

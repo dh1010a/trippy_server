@@ -9,6 +9,7 @@ import com.example.server.domain.member.service.MemberService;
 import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
+import com.example.server.global.auth.security.service.JwtService;
 import com.example.server.global.util.DeviceUtil;
 import com.example.server.global.util.SecurityUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,10 +26,18 @@ import static com.example.server.domain.member.dto.MemberResponseDto.*;
 public class MemberController {
 
     private final MemberService memberService;
+    private final JwtService jwtService;
 
     @PostMapping("/signup")
-    public ApiResponse<?> signUp(@RequestBody CreateMemberRequestDto createMemberRequestDto) {
+    public ApiResponse<?> signUp(@RequestBody CreateMemberRequestDto createMemberRequestDto,
+                                 @RequestParam(value = "code") String code) {
         log.info("회원가입 요청 : memberId = {}", createMemberRequestDto.getMemberId());
+        if (code == null) {
+            return ApiResponse.onFailure(ErrorStatus.MEMBER_EMAIL_AUTH_TOKEN_NOT_PROVIDED.getCode(), ErrorStatus.MEMBER_EMAIL_AUTH_TOKEN_NOT_PROVIDED.getMessage(), null);
+        }
+        if (jwtService.isValidEmailAuthToken(createMemberRequestDto.getMemberId(), code)) {
+            return ApiResponse.onFailure(ErrorStatus.MEMBER_EMAIL_AUTH_TOKEN_NOT_VALID.getCode(), ErrorStatus.MEMBER_EMAIL_AUTH_TOKEN_NOT_VALID.getMessage(), null);
+        }
         return ApiResponse.onSuccess(memberService.signUp(createMemberRequestDto));
     }
 

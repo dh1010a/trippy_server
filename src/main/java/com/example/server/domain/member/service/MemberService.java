@@ -94,6 +94,10 @@ public class MemberService {
         return MemberDtoConverter.convertToMemberTaskDto(member);
     }
 
+    public boolean validateAuthToken(String authToken) {
+        return authToken != null && authToken.startsWith("Bearer ");
+    }
+
     public Member createDefaultOAuth2Member(CustomUserDetails oAuth2User) {
         String randomNickName = oAuth2User.getMemberName().substring(1, 3) + UUID.randomUUID().toString().substring(0, 9);
 //        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");

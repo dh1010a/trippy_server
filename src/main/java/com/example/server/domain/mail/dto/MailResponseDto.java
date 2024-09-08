@@ -10,4 +10,11 @@ public class MailResponseDto {
     public static class CheckMailResponseDto {
         private boolean isSuccess;
     }
+
+    @Data
+    @Builder
+    public static class CheckMailSuccessResponseDto {
+        private boolean isSuccess;
+        private String authToken;
+    }
 }
