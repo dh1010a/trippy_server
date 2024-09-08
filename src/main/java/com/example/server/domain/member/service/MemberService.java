@@ -86,11 +86,6 @@ public class MemberService {
         memberRepository.save(member);
         log.info("로컬 회원가입에 성공하였습니다. memberIdx = {}, memberId = {}, nickName = {}", member.getIdx(), member.getMemberId(), member.getNickName());
 
-        // 개발용 관리자 계정
-        if (member.getEmail().equals("dh1010a@gmail.com")) {
-            member.setRole(Role.ROLE_ADMIN);
-        }
-
         return MemberDtoConverter.convertToMemberTaskDto(member);
     }
 
@@ -506,10 +501,6 @@ public class MemberService {
 
         // 회원 삭제
         memberRepository.delete(member);
-
-
-
-
         return MemberTaskSuccessResponseDto.builder()
                 .isSuccess(true)
                 .build();
