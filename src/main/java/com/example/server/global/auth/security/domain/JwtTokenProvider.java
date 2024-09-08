@@ -68,22 +68,24 @@ public class JwtTokenProvider {
 		return Jwts.builder()
 				.setSubject(EMAIL_AUTH_TOKEN_CLAIM)
 				.claim(EMAIL_CLAIM, email)
+				.claim(REVOKE_TOKEN_CLAIM, false)
 				.setIssuedAt(now)
 				.setExpiration(authTokenExpiration)
-				.signWith(key, SignatureAlgorithm.HS256)
+				.signWith(emailKey, SignatureAlgorithm.HS256)
 				.compact();
 	}
 
 	// Jwt 토큰을 복호화하여 이메일 정보가 유효한지 검증하는 메서드
 	public boolean isValidEmailAuthToken(String accessToken, String email) {
 		// Jwt 토큰 복호화
-		Claims claims = parseClaims(accessToken);
+//		accessToken = "Bearer " + accessToken;
+		Claims claims = parseEmailClaims(accessToken);
 
 		if (!claims.getSubject().equals(EMAIL_AUTH_TOKEN_CLAIM) || claims.get(EMAIL_CLAIM) == null) {
 			return false;
 		}
 
-		if (!validateToken(accessToken)) {
+		if (!validateEmailToken(accessToken, emailKey)) {
 			return false;
 		}
 
@@ -207,8 +209,44 @@ public class JwtTokenProvider {
 		try {
 			Claims claims = parseClaims(token);
 
-			Jwts.parserBuilder()
+			Jws<Claims> claimsJws = Jwts.parserBuilder()
 					.setSigningKey(key)
+					.build()
+					.parseClaimsJws(token);
+
+//			if (isRevokedToken(token)) {
+//				log.info("Revoked JWT Token : " + "member id = " + claims.get("memberId"));
+//				return false;
+//			}
+
+			return true;
+		} catch (SecurityException | MalformedJwtException e) {
+			log.info("Invalid JWT Token : " +  e.getMessage());
+			return false;
+		} catch (SignatureException exception) {
+			log.error("JWT signature validation fails");
+			return false;
+		} catch (ExpiredJwtException e) {
+			log.info("Expired JWT Token: " +  e.getMessage());
+			return false;
+		} catch (UnsupportedJwtException e) {
+			log.info("Unsupported JWT Token: " +  e.getMessage());
+			return false;
+		} catch (IllegalArgumentException e) {
+			log.info("JWT claims string is empty.: " +  e.getMessage());
+			return false;
+		} catch (Exception exception) {
+			log.error("JWT validation fails: " +  exception.getMessage());
+			return false;
+		}
+	}
+
+	public boolean validateEmailToken(String token, Key keyType) {
+		try {
+			Claims claims = parseEmailClaims(token);
+
+			Jws<Claims> claimsJws = Jwts.parserBuilder()
+					.setSigningKey(keyType)
 					.build()
 					.parseClaimsJws(token);
 
@@ -261,6 +299,19 @@ public class JwtTokenProvider {
 		try {
 			return Jwts.parserBuilder()
 					.setSigningKey(key)
+					.build()
+					.parseClaimsJws(accessToken)
+					.getBody();
+		} catch (ExpiredJwtException e) {
+			return e.getClaims();
+		}
+	}
+
+	// emailToken
+	private Claims parseEmailClaims(String accessToken) {
+		try {
+			return Jwts.parserBuilder()
+					.setSigningKey(emailKey)
 					.build()
 					.parseClaimsJws(accessToken)
 					.getBody();
