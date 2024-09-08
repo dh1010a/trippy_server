@@ -31,11 +31,11 @@ public class MemberController {
     @PostMapping("/signup")
     public ApiResponse<?> signUp(@RequestBody CreateMemberRequestDto createMemberRequestDto,
                                  @RequestParam(value = "authToken", required = false) String authToken) {
-        log.info("회원가입 요청 : memberId = {}", createMemberRequestDto.getMemberId());
+        log.info("회원가입 요청 : email = {}", createMemberRequestDto.getEmail());
         if (authToken == null) {
             return ApiResponse.onFailure(ErrorStatus.MEMBER_EMAIL_AUTH_TOKEN_NOT_PROVIDED.getCode(), ErrorStatus.MEMBER_EMAIL_AUTH_TOKEN_NOT_PROVIDED.getMessage(), null);
         }
-        if (!jwtService.isValidEmailAuthToken(authToken, createMemberRequestDto.getMemberId())) {
+        if (!jwtService.isValidEmailAuthToken(authToken, createMemberRequestDto.getEmail())) {
             return ApiResponse.onFailure(ErrorStatus.MEMBER_EMAIL_AUTH_TOKEN_NOT_VALID.getCode(), ErrorStatus.MEMBER_EMAIL_AUTH_TOKEN_NOT_VALID.getMessage(), null);
         }
         return ApiResponse.onSuccess(memberService.signUp(createMemberRequestDto));

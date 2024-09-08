@@ -63,7 +63,7 @@ public class JwtTokenProvider {
 
 	public String createEmailAuthToken(String email) {
 		Date now = new Date();
-		Date authTokenExpiration = new Date(now.getTime() + 5 * 60 * 1000); // 5분
+		Date authTokenExpiration = new Date(now.getTime() + 30 * 60 * 1000); // 30분
 
 		return Jwts.builder()
 				.setSubject(EMAIL_AUTH_TOKEN_CLAIM)

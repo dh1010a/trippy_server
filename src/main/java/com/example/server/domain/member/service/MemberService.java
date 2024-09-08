@@ -68,12 +68,12 @@ public class MemberService {
 //            throw new ErrorHandler(ErrorStatus.MEMBER_EMAIL_ALREADY_EXIST);
 //        }
 
-        if (isExistByMemberId(requestDto.getMemberId())) {
+        if (isExistByMemberId(requestDto.getEmail())) {
             throw new ErrorHandler(ErrorStatus.MEMBER_ID_ALREADY_EXIST);
         }
 //        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         Member member = Member.builder()
-                .memberId(requestDto.getMemberId())
+                .memberId(requestDto.getEmail())
                 .password(passwordEncoder.encode(requestDto.getPassword()))
                 .nickName(randomNickName)
                 .email(requestDto.getEmail())
