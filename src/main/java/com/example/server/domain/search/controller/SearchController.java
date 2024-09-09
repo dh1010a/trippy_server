@@ -30,8 +30,8 @@ public class SearchController {
     @GetMapping ("")
     public ApiResponse<?> getSearchPostList(
             @RequestParam String keyword,
-            @RequestParam PostType postType,
             @RequestParam SearchType searchType,
+            @RequestParam(required = false) PostType postType,
             @RequestParam(required = false, defaultValue = "0") Integer page,
             @RequestParam(required = false, defaultValue = "0") Integer size
 
@@ -45,11 +45,19 @@ public class SearchController {
                 .size(size)
                 .build();
         log.info("게시물 검색 요청 : memberId = {}, keyword = {}", memberId ,saveSearchRequest.getKeyword());
-        if (saveSearchRequest.getPostType().equals(PostType.POST)) {
-            return ApiResponse.onSuccess(searchService.getPosts(saveSearchRequest, memberId));
-        } else {
-            return ApiResponse.onSuccess(searchService.getOotds(saveSearchRequest, memberId));
+        // 게시물 반환
+        if(searchType.equals(SearchType.TITLE) ||
+                searchType.equals(SearchType.TITLE_OR_BODY)) {
+            if (saveSearchRequest.getPostType().equals(PostType.POST)) {
+                return ApiResponse.onSuccess(searchService.getPosts(saveSearchRequest, memberId));
+            } else {
+                return ApiResponse.onSuccess(searchService.getOotds(saveSearchRequest, memberId));
+            }
+        } // 닉네임, 블로그 ->  블로그 반환
+        else {
+            return ApiResponse.onSuccess(searchService.getMembers(saveSearchRequest, memberId));
         }
+
     }
 
     @GetMapping("/recent")
@@ -95,8 +103,5 @@ public class SearchController {
     private String getLoginMemberId() {
         return SecurityUtil.getLoginMemberId().orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
     }
-
-
-
 
 }
