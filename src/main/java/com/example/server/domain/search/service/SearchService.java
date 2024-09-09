@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,24 +49,25 @@ public class SearchService {
         updateSearchLog(memberId, saveSearchRequest);
         Member member = !"anonymousUser".equals(memberId) ? getMember(memberId) : null;
         List<Long> followingList = memberFollowRepository.findFollowingList(member==null ? 0 : member.getIdx());
-        Pageable pageable = postService.getPageable(saveSearchRequest.getPage(), saveSearchRequest.getSize(), OrderType.LATEST);
+        Pageable pageable = postService.getPageable(saveSearchRequest.getPage(), saveSearchRequest.getSize(), saveSearchRequest.getOrderType());
 
-        List<Post> posts;
-        if(saveSearchRequest.getSearchType().equals(SearchType.TITLE)) {
-            posts = postRepository.findPostByTitle(saveSearchRequest.getKeyword(), PostType.POST, followingList, pageable).getContent();
-        }
-//        else if (saveSearchRequest.getSearchType().equals(SearchType.NICKNAME)){
-//            posts = postRepository.findPostByNickname(saveSearchRequest.getKeyword(), PostType.POST, followingList, pageable).getContent();
-//        }
-        else {
-            posts = postRepository.findPostBodyAndTitle(saveSearchRequest.getKeyword(), PostType.POST, followingList, pageable).getContent();
-        }
+        List<Post> posts = postRepository.findPostByTitle(saveSearchRequest.getKeyword(), PostType.POST, followingList, pageable).getContent();
         return PostDtoConverter.convertToPostListResponseDto(posts, member);
+    }
+
+    public List<PostResponseDto.GetOotdPostResponseDto> getOotds(SearchRequestDto.SaveSearchRequest saveSearchRequest, String memberId) {
+        updateSearchLog(memberId, saveSearchRequest);
+        Member member = !"anonymousUser".equals(memberId) ? getMember(memberId) : null;
+        List<Long> followingList = memberFollowRepository.findFollowingList(member==null ? 0 : member.getIdx());
+        Pageable pageable = postService.getPageable(saveSearchRequest.getPage(), saveSearchRequest.getSize(), saveSearchRequest.getOrderType());
+
+        List<Post> posts = postRepository.findPostByTitle(saveSearchRequest.getKeyword(), PostType.OOTD, followingList, pageable).getContent();
+        return PostDtoConverter.convertToOOTDListResponseDto(posts, member);
     }
 
     public List<SearchResponseDto.SearchMemberDto> getMembers(SearchRequestDto.SaveSearchRequest saveSearchRequest, String memberId) {
         List<Member> members;
-        Pageable pageable = postService.getPageable(saveSearchRequest.getPage(), saveSearchRequest.getSize(), OrderType.LATEST);
+        Pageable pageable = getPageable(saveSearchRequest.getPage(), saveSearchRequest.getSize(), saveSearchRequest.getOrderType());
         if(saveSearchRequest.getSearchType().equals(SearchType.NICKNAME)) {
             members = memberRepository.findByNicknameContaining(saveSearchRequest.getKeyword(), pageable).getContent();
         }
@@ -75,25 +77,22 @@ public class SearchService {
         return convertToSearchMemberDto(members);
     }
 
-    public List<PostResponseDto.GetOotdPostResponseDto> getOotds(SearchRequestDto.SaveSearchRequest saveSearchRequest, String memberId) {
-        updateSearchLog(memberId, saveSearchRequest);
-        Member member = !"anonymousUser".equals(memberId) ? getMember(memberId) : null;
-        List<Long> followingList = memberFollowRepository.findFollowingList(member==null ? 0 : member.getIdx());
-        Pageable pageable = postService.getPageable(saveSearchRequest.getPage(), saveSearchRequest.getSize(), OrderType.LATEST);
-
-        List<Post> posts;
-        if(saveSearchRequest.getSearchType().equals(SearchType.TITLE)) {
-            posts = postRepository.findPostByTitle(saveSearchRequest.getKeyword(), PostType.OOTD, followingList, pageable).getContent();
+    private Pageable getPageable(Integer page, Integer size, OrderType orderType) {
+        if (page == 0 && size == 0) {
+            return Pageable.unpaged();
+        } else {
+            return PageRequest.of(page, size, getSortByOrderType(orderType));
         }
-        else if (saveSearchRequest.getSearchType().equals(SearchType.NICKNAME)){
-            posts = postRepository.findPostByNickname(saveSearchRequest.getKeyword(), PostType.OOTD, followingList, pageable).getContent();
-        }
-        else {
-            posts = postRepository.findPostBodyAndTitle(saveSearchRequest.getKeyword(), PostType.OOTD, followingList, pageable).getContent();
-        }
-        return PostDtoConverter.convertToOOTDListResponseDto(posts, member);
     }
 
+    private Sort getSortByOrderType(OrderType orderType) {
+        switch (orderType) {
+            case LIKE:
+                return Sort.by(Sort.Direction.DESC, "followerCnt");
+            default:
+                return Sort.by(Sort.Direction.DESC, "createdAt");
+        }
+    }
 
 
     private void updateSearchLog(String memberId, SearchRequestDto.SaveSearchRequest saveSearchRequest){
