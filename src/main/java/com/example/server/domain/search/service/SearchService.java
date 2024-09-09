@@ -12,6 +12,7 @@ import com.example.server.domain.post.repository.PostRepository;
 import com.example.server.domain.post.repository.TagRepository;
 import com.example.server.domain.post.service.PostService;
 import com.example.server.domain.search.dto.SearchRequestDto;
+import com.example.server.domain.search.dto.SearchResponseDto;
 import com.example.server.domain.search.model.SearchType;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
@@ -27,6 +28,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.example.server.domain.search.dto.SearchDtoConverter.convertToSearchMemberDto;
 
 @Service
 @Transactional
@@ -51,13 +54,25 @@ public class SearchService {
         if(saveSearchRequest.getSearchType().equals(SearchType.TITLE)) {
             posts = postRepository.findPostByTitle(saveSearchRequest.getKeyword(), PostType.POST, followingList, pageable).getContent();
         }
-        else if (saveSearchRequest.getSearchType().equals(SearchType.NICKNAME)){
-            posts = postRepository.findPostByNickname(saveSearchRequest.getKeyword(), PostType.POST, followingList, pageable).getContent();
-        }
+//        else if (saveSearchRequest.getSearchType().equals(SearchType.NICKNAME)){
+//            posts = postRepository.findPostByNickname(saveSearchRequest.getKeyword(), PostType.POST, followingList, pageable).getContent();
+//        }
         else {
             posts = postRepository.findPostBodyAndTitle(saveSearchRequest.getKeyword(), PostType.POST, followingList, pageable).getContent();
         }
         return PostDtoConverter.convertToPostListResponseDto(posts, member);
+    }
+
+    public List<SearchResponseDto.SearchMemberDto> getMembers(SearchRequestDto.SaveSearchRequest saveSearchRequest, String memberId) {
+        List<Member> members;
+        Pageable pageable = postService.getPageable(saveSearchRequest.getPage(), saveSearchRequest.getSize(), OrderType.LATEST);
+        if(saveSearchRequest.getSearchType().equals(SearchType.NICKNAME)) {
+            members = memberRepository.findByNicknameContaining(saveSearchRequest.getKeyword(), pageable).getContent();
+        }
+        else{
+            members = memberRepository.findByBlogNameContaining(saveSearchRequest.getKeyword(), pageable).getContent();
+        }
+        return convertToSearchMemberDto(members);
     }
 
     public List<PostResponseDto.GetOotdPostResponseDto> getOotds(SearchRequestDto.SaveSearchRequest saveSearchRequest, String memberId) {
@@ -78,6 +93,8 @@ public class SearchService {
         }
         return PostDtoConverter.convertToOOTDListResponseDto(posts, member);
     }
+
+
 
     private void updateSearchLog(String memberId, SearchRequestDto.SaveSearchRequest saveSearchRequest){
         // 전체 검색어 count
