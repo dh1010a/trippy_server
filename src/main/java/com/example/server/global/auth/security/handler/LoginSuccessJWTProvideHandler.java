@@ -96,7 +96,7 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
 		cookie.setHttpOnly(false);  //httponly 옵션 설정
 		cookie.setSecure(false); //https 옵션 설정
 		cookie.setPath("/"); // 모든 곳에서 쿠키열람이 가능하도록 설정
-		cookie.setDomain(jwtService.getDomain());
+//		cookie.setDomain(jwtService.getDomain());
 		cookie.setMaxAge(60 * 60 * 24); //쿠키 만료시간 24시간 * 10일
 
 		response.addCookie(cookie);
@@ -111,7 +111,8 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
 //
 //		response.addCookie(cookie);
 
-		String cookieValue = "refreshToken="+ jwtToken.getRefreshToken() +"; "+"Path=/; "+"Domain="+jwtService.getDomain()+"; "+"Max-Age=604800; HttpOnly; SameSite=None; Secure";
+//		String cookieValue = "refreshToken="+ jwtToken.getRefreshToken() +"; "+"Path=/; "+"Domain="+jwtService.getDomain()+"; "+"Max-Age=604800; HttpOnly; SameSite=None; Secure";
+		String cookieValue = "refreshToken="+ jwtToken.getRefreshToken() +"; "+"Max-Age=604800; HttpOnly; SameSite=None; Secure";
 		response.addHeader("Set-Cookie",cookieValue);
 	}
 
