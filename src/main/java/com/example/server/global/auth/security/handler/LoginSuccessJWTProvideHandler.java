@@ -82,19 +82,19 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
 
 
 
-//		if(request.getServerName().equals("localhost")){
-//			setCookieForLocal(response, jwtToken);
-//		}
-//		else{
-		setCookieForProd(response, jwtToken);
-//		}
+		if(request.getServerName().equals("localhost")){
+			setCookieForLocal(response, jwtToken);
+		}
+		else{
+			setCookieForProd(response, jwtToken);
+		}
 
 	}
 
 	private void setCookieForLocal(HttpServletResponse response, JwtToken jwtToken) {
 		Cookie cookie = new Cookie(REFRESH_TOKEN, jwtToken.getRefreshToken());
-		cookie.setHttpOnly(true);  //httponly 옵션 설정
-		cookie.setSecure(true); //https 옵션 설정
+		cookie.setHttpOnly(false);  //httponly 옵션 설정
+		cookie.setSecure(false); //https 옵션 설정
 		cookie.setPath("/"); // 모든 곳에서 쿠키열람이 가능하도록 설정
 		cookie.setDomain(jwtService.getDomain());
 		cookie.setMaxAge(60 * 60 * 24); //쿠키 만료시간 24시간 * 10일
