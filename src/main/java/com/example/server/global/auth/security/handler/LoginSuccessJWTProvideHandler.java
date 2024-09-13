@@ -82,12 +82,12 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
 
 
 
-		if(request.getServerName().equals("localhost")){
-			setCookieForLocal(response, jwtToken);
-		}
-		else{
-			setCookieForProd(response, jwtToken);
-		}
+//		if(request.getServerName().equals("localhost")){
+//			setCookieForLocal(response, jwtToken);
+//		}
+//		else{
+		setCookieForProd(response, jwtToken);
+//		}
 
 	}
 
