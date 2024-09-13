@@ -11,7 +11,6 @@ public class MemberRequestDto {
     @Builder
     @Data
     public static class CreateMemberRequestDto {
-        private String memberId;
         private String password;
         private String email;
     }

@@ -173,4 +173,14 @@ public class JwtServiceImpl implements JwtService {
 		return jwtTokenProvider.getAccessTokenExpirationTime();
 	}
 
+	@Override
+	public String createEmailAuthToken(String email) {
+		return jwtTokenProvider.createEmailAuthToken(email);
+	}
+
+	@Override
+	public boolean isValidEmailAuthToken(String accessToken, String email) {
+		return jwtTokenProvider.isValidEmailAuthToken(accessToken, email);
+	}
+
 }
