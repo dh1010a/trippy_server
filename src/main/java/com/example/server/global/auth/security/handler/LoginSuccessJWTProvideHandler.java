@@ -112,7 +112,7 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
 //		response.addCookie(cookie);
 
 //		String cookieValue = "refreshToken="+ jwtToken.getRefreshToken() +"; "+"Path=/; "+"Domain="+jwtService.getDomain()+"; "+"Max-Age=604800; HttpOnly; SameSite=None; Secure";
-		String cookieValue = "refreshToken="+ jwtToken.getRefreshToken() +"; "+"Max-Age=604800; SameSite=None";
+		String cookieValue = "refreshToken="+ jwtToken.getRefreshToken() +"; "+"Max-Age=604800; SameSite=None; Secure";
 		response.addHeader("Set-Cookie",cookieValue);
 	}
 
