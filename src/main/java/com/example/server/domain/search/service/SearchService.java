@@ -77,6 +77,7 @@ public class SearchService {
 
     public List<SearchResponseDto.SearchMemberDto> getMembers(SearchRequestDto.SaveSearchRequest saveSearchRequest, String memberId) {
         List<Member> members;
+
         Pageable pageable = getPageable(saveSearchRequest.getPage(), saveSearchRequest.getSize(), saveSearchRequest.getOrderType());
         if(saveSearchRequest.getSearchType().equals(SearchType.NICKNAME)) {
             members = memberRepository.findByNicknameContaining(saveSearchRequest.getKeyword(), pageable).getContent();

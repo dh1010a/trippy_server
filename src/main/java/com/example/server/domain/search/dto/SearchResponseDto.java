@@ -14,5 +14,7 @@ public class SearchResponseDto {
         private String blogTitleImgUrl;
         private String blogIntroduction;
         private String blogName;
+        private int followerCnt;
+        private int followingCnt;
     }
 }

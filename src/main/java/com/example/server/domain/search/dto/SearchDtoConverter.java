@@ -24,6 +24,8 @@ public class SearchDtoConverter {
                             .blogName(member.getBlogName())
                             .blogIntroduction(member.getBlogIntroduce() != null ? member.getBlogIntroduce() : "")
                             .nickName(member.getNickName())
+                            .followerCnt(member.getFollowerCnt())
+                            .followingCnt(member.getFollowingCnt())
                             .build();
                 })
                 .collect(Collectors.toList());
