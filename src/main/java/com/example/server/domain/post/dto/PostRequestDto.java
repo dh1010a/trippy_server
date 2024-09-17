@@ -62,4 +62,11 @@ public class PostRequestDto {
         private List<ImageDto> images;
         private List<String> tags;
     }
+
+    @Builder
+    @Data
+    public static class RecommendPostRequestDto{
+        private String memberId;
+        private List<Long> postIds;
+    }
 }

@@ -151,6 +151,21 @@ public class PostService {
         }
     }
 
+    // 추천 게시물
+    public List<PostResponseDto.GetPostResponseDto> getRecommendPost(PostRequestDto.RecommendPostRequestDto requestDto) {
+        List<PostResponseDto.GetPostResponseDto> list = new ArrayList<>();
+        for (Long postId : requestDto.getPostIds()) {
+            Post post = postRepository.findById(postId)
+                    .orElse(null);
+            Member member = getMemberById(requestDto.getMemberId());
+            if (post == null) {
+                continue;
+            }
+            list.add(PostDtoConverter.convertToGetResponseDto(post, member));
+        }
+        return list;
+    }
+
     // 전체 게시물
     public List<Post> getPostsByOrderType(OrderType orderType, Pageable pageable, List<Long> followingList) {
         return postRepository.findAllByPostTypeWithScope(PostType.POST,followingList, pageable).getContent();
@@ -399,5 +414,4 @@ public class PostService {
             throw new ErrorHandler(ErrorStatus.NO_PERMISSION__FOR_POST);
         }
     }
-
 }
