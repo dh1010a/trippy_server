@@ -2,6 +2,7 @@ package com.example.server.domain.recommend.service;
 
 import aj.org.objectweb.asm.TypeReference;
 import com.example.server.domain.member.domain.Member;
+import com.example.server.domain.member.model.InterestedType;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.domain.post.dto.PostResponseDto;
 import com.example.server.domain.post.model.OrderType;
@@ -10,6 +11,7 @@ import com.example.server.domain.post.repository.PostRepository;
 import com.example.server.domain.post.service.PostService;
 import com.example.server.domain.recommend.dto.RecommendRequestDto;
 import com.example.server.domain.search.service.SearchRedisService;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,8 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
@@ -47,6 +51,100 @@ public class RecommendService {
         mergedSet.addAll(recommendKeywordsPOST);
         return new ArrayList<>(mergedSet);
 
+    }
+
+    public List<String> getRecommendSpot(String area) {
+        String FLASK_URL = "http://flask-app:5000/api/find_area";
+        try {
+            String encodedArea = URLEncoder.encode(area, StandardCharsets.UTF_8.toString());
+            String url = FLASK_URL + "?input=" + encodedArea;
+
+            // HTTP 헤더 설정
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Accept", "application/json");
+
+            HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> responseEntity = restTemplate.exchange(
+                    url, HttpMethod.GET, requestEntity, String.class);
+            String responseBody = responseEntity.getBody();
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(responseBody);
+
+            List<String> result = new ArrayList<>();
+            for (JsonNode node : jsonNode) {
+                String hubTatsNm = node.get("hubTatsNm").asText();
+                result.add(hubTatsNm);
+            }
+
+            return result;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Integer> getRecommendInterest(InterestedType interest, PostType postType, String memberId) {
+        String FLASK_URL = "http://flask-app:5000/api/interest_posts";
+        //
+        int memberIdx = -1;
+        if(!memberId.equals("anonymousUser")){
+            Member member = postService.getMemberById(memberId);
+            memberIdx = member.getIdx().intValue();
+        }
+        String url = UriComponentsBuilder.fromHttpUrl(FLASK_URL)
+                .queryParam("interest", interest)
+                .queryParam("post_type", postType)
+                .queryParam("member_idx", memberIdx)
+                .toUriString();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept", "application/json");
+
+        HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        try {
+            ResponseEntity<String> responseEntity = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    requestEntity,
+                    String.class
+            );
+
+            String responseBody = responseEntity.getBody();
+            System.out.println("Flask 서버 응답: " + responseBody);
+
+            return parsePostIds(responseBody);
+
+        } catch (HttpClientErrorException e) {
+            System.err.println("HTTP 오류 발생: " + e.getStatusCode());
+            System.err.println("오류 메시지: " + e.getResponseBodyAsString());
+        } catch (Exception e) {
+            System.err.println("예기치 못한 오류 발생: " + e.getMessage());
+        }
+
+        return new ArrayList<>();
+    }
+
+    private List<Integer> parsePostIds(String responseBody) {
+        List<Integer> postIds = new ArrayList<>();
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode root = objectMapper.readTree(responseBody);
+            JsonNode postIdsNode = root.path("post_ids");
+
+            if (postIdsNode.isArray()) {
+                for (JsonNode node : postIdsNode) {
+                    postIds.add(node.asInt());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("JSON 파싱 오류 발생: " + e.getMessage());
+        }
+        return postIds;
     }
 
 

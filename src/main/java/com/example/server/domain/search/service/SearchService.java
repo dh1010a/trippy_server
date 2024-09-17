@@ -49,6 +49,16 @@ public class SearchService {
         updateSearchLog(memberId, saveSearchRequest);
         Member member = !"anonymousUser".equals(memberId) ? getMember(memberId) : null;
         List<Long> followingList = memberFollowRepository.findFollowingList(member==null ? 0 : member.getIdx());
+
+        // Page<Post> 객체를 통해 전체 데이터를 포함한 정보를 가져옴
+//        Page<Post> postPage = postRepository.findPostByTitle(saveSearchRequest.getKeyword(), PostType.OOTD, followingList, pageable);
+//
+//        // 전체 갯수는 postPage.getTotalElements()로 가져옴
+//        long totalPosts = postPage.getTotalElements();  // 전체 게시물 수
+//
+//        // 페이지별 게시물 목록
+//        List<Post> posts = postPage.getContent();
+
         Pageable pageable = postService.getPageable(saveSearchRequest.getPage(), saveSearchRequest.getSize(), saveSearchRequest.getOrderType());
 
         List<Post> posts = postRepository.findPostByTitle(saveSearchRequest.getKeyword(), PostType.POST, followingList, pageable).getContent();
@@ -61,7 +71,7 @@ public class SearchService {
         List<Long> followingList = memberFollowRepository.findFollowingList(member==null ? 0 : member.getIdx());
         Pageable pageable = postService.getPageable(saveSearchRequest.getPage(), saveSearchRequest.getSize(), saveSearchRequest.getOrderType());
 
-        List<Post> posts = postRepository.findPostByTitle(saveSearchRequest.getKeyword(), PostType.OOTD, followingList, pageable).getContent();
+        List<Post> posts = postRepository.findPostBodyAndTitle(saveSearchRequest.getKeyword(), PostType.OOTD, followingList, pageable).getContent();
         return PostDtoConverter.convertToOOTDListResponseDto(posts, member);
     }
 
