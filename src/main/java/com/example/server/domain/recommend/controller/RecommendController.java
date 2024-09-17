@@ -1,9 +1,11 @@
 package com.example.server.domain.recommend.controller;
 
+import com.example.server.domain.member.model.InterestedType;
 import com.example.server.domain.post.dto.PostRequestDto;
 import com.example.server.domain.post.model.PostType;
 import com.example.server.domain.recommend.dto.RecommendRequestDto;
 import com.example.server.domain.recommend.service.RecommendService;
+import com.example.server.domain.search.model.SearchType;
 import com.example.server.global.apiPayload.ApiResponse;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
@@ -41,7 +43,26 @@ public class RecommendController {
         return ApiResponse.onSuccess(recommendService.getRecommendSearch(memberId));
     }
 
+    @GetMapping("/interest")
+    public ApiResponse<?> getRecommendInterest(
+            @RequestParam InterestedType interestedType,
+            @RequestParam PostType postType
+    ) {
+        String memberId = getLoginMemberId();
+        log.info("추천 게시물 요청 (관심 분야) : memberId = {}", memberId);
+        return ApiResponse.onSuccess(recommendService.getRecommendInterest(interestedType, postType, memberId));
+    }
     private String getLoginMemberId() {
         return SecurityUtil.getLoginMemberId().orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
+    }
+
+    // 관광지 추천
+    @GetMapping("/spot")
+    public ApiResponse<?> getRecommendSpot(
+            @RequestParam String area
+    ) {
+        String memberId = getLoginMemberId();
+        log.info("추천 관광지 요청 : memberId = {}", memberId);
+        return ApiResponse.onSuccess(recommendService.getRecommendSpot(area));
     }
 }

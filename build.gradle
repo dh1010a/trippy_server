@@ -80,6 +80,10 @@ dependencies {
     implementation 'org.springframework.retry:spring-retry'
     implementation 'org.springframework:spring-aspects'
 
+    // Jackson
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.0'
+
+
 }
 
 tasks.named('test') {
