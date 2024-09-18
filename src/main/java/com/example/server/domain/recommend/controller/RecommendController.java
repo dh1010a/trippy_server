@@ -43,7 +43,7 @@ public class RecommendController {
         return ApiResponse.onSuccess(recommendService.getRecommendSearch(memberId));
     }
 
-    @GetMapping("/interest")
+    @GetMapping("/interest/my")
     public ApiResponse<?> getRecommendInterest(
             @RequestParam String interestedType,
             @RequestParam PostType postType
