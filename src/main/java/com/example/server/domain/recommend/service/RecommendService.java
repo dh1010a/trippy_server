@@ -78,7 +78,7 @@ public class RecommendService {
         List<RecommendResponseDto.RecommendPlaceResponseDto> result = new ArrayList<>();
         for (String spot : recommendSpot) {
             try {
-                String encodedSpot = URLEncoder.encode(spot, StandardCharsets.UTF_8.toString());
+                String encodedSpot = StandardCharsets.UTF_8.encode(spot).toString();
                 String url = kakaoSearchUrl + "?query=" + encodedSpot;
 
                 HttpHeaders headers = new HttpHeaders();
