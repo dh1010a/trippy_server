@@ -62,6 +62,12 @@ public class PostController {
         return ApiResponse.onSuccess(postService.getAllPost(page, loginMemberId, size, orderType));
     }
 
+    @GetMapping("/recommend")
+    public ApiResponse<?> getRecommendPost(@RequestBody PostRequestDto.RecommendPostRequestDto recommendPostRequestDto) {
+        log.info("추천 게시물 조회 요청 : memberId = {}", recommendPostRequestDto.getMemberId());
+        return ApiResponse.onSuccess(postService.getRecommendPost(recommendPostRequestDto));
+    }
+
     @GetMapping("/my")
     public ApiResponse<?> getAllLoginMemberPost(
             @RequestParam(defaultValue = "0") Integer page,
