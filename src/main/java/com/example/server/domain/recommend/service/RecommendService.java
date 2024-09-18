@@ -14,6 +14,8 @@ import com.example.server.domain.post.model.PostType;
 import com.example.server.domain.post.repository.PostRepository;
 import com.example.server.domain.post.service.PostService;
 import com.example.server.domain.recommend.dto.RecommendRequestDto;
+import com.example.server.domain.recommend.dto.RecommendResponseDto;
+import com.example.server.domain.recommend.dto.RecommendResponseDto.PlaceImageDto;
 import com.example.server.domain.search.service.SearchRedisService;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
@@ -22,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -49,6 +52,14 @@ public class RecommendService {
 
     private static final String ANONYMOUS = "anonymousUser";
 
+    @Value("${spring.security.oauth2.client.registration.google.clientId}")
+    private String kakaoClientId;
+
+    @Value("${spring.security.oauth2.client.registration.google.clientSecret}")
+    private String kakaoClientSecret;
+
+    private static final String kakaoSearchUrl = "https://dapi.kakao.com/v2/search/image";
+
     public List<String> getRecommendSearch(String memberId){
         Set<String> mergedSet = new HashSet<>();
         Member member = postService.getMemberById(memberId);
@@ -62,7 +73,59 @@ public class RecommendService {
 
     }
 
-    public List<String> getRecommendSpot(String area) {
+    public List<RecommendResponseDto.RecommendPlaceResponseDto> getRecommendSpot(String area) {
+        List<String> recommendSpot = getRecommendSpotFromFlask(area);
+        List<RecommendResponseDto.RecommendPlaceResponseDto> result = new ArrayList<>();
+        for (String spot : recommendSpot) {
+            try {
+                String encodedSpot = URLEncoder.encode(spot, StandardCharsets.UTF_8.toString());
+                String url = kakaoSearchUrl + "?query=" + encodedSpot;
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.set("Authorization", "KakaoAK " + kakaoClientId);
+
+                HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+                ResponseEntity<String> responseEntity = restTemplate.exchange(
+                        url, HttpMethod.GET, requestEntity, String.class);
+                String responseBody = responseEntity.getBody();
+
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode jsonNode = objectMapper.readTree(responseBody);
+
+                List<PlaceImageDto> imgList = new ArrayList<>();
+                int cnt = 0;
+                for (JsonNode node : jsonNode.get("documents")) {
+                    if (cnt++ >= 5) {
+                        break;
+                    }
+                    PlaceImageDto placeImageDto = PlaceImageDto.builder()
+                            .imgUrl(node.get("image_url").asText())
+                            .thumbnailUrl(node.get("thumbnail_url").asText())
+                            .width(node.get("width").asInt())
+                            .height(node.get("height").asInt())
+                            .displaySiteName(node.get("display_sitename").asText())
+                            .docUrl(node.get("doc_url").asText())
+                            .build();
+                    imgList.add(placeImageDto);
+                }
+                RecommendResponseDto.RecommendPlaceResponseDto dto = RecommendResponseDto.RecommendPlaceResponseDto.builder()
+                        .title(spot)
+                        .hubTatsNm(spot)
+                        .imgUrl(imgList)
+                        .content("추천 관광지")
+                        .imgCnt(imgList.size())
+                        .build();
+                result.add(dto);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
+
+    }
+
+    public List<String> getRecommendSpotFromFlask(String area) {
         String FLASK_URL = "http://flask-app:5000/api/find_area";
         try {
             String encodedArea = URLEncoder.encode(area, StandardCharsets.UTF_8.toString());
