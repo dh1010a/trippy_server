@@ -36,6 +36,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URLEncoder;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -78,7 +79,9 @@ public class RecommendService {
         List<RecommendResponseDto.RecommendPlaceResponseDto> result = new ArrayList<>();
         for (String spot : recommendSpot) {
             try {
-                String encodedSpot = StandardCharsets.UTF_8.encode(spot).toString();
+                ByteBuffer buffer = StandardCharsets.UTF_8.encode(spot);
+                String encodedSpot = StandardCharsets.UTF_8.decode(buffer).toString();
+
                 String url = kakaoSearchUrl + "?query=" + encodedSpot;
 
                 HttpHeaders headers = new HttpHeaders();
