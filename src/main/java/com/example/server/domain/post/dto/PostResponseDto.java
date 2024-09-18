@@ -32,6 +32,22 @@ public class PostResponseDto {
 
     @Builder
     @Data
+    public static class GetRecommendPostResponseDto{
+        private List<GetPostResponseDto> recommendPostList;
+        private Boolean isSuccess;
+        private int totalCnt;
+    }
+
+    @Builder
+    @Data
+    public static class GetRecommendOotdResponseDto{
+        private List<GetOotdPostResponseDto> recommendOotdList;
+        private Boolean isSuccess;
+        private int totalCnt;
+    }
+
+    @Builder
+    @Data
     public static class GetOotdPostResponseDto{
         private PostMemberResponseDto member;
         private OotdReqResDto.OotdBasicResponseDto ootd;

@@ -24,17 +24,17 @@ public class RecommendController {
 
 
 
-    @GetMapping("/post")
-    public ApiResponse<?> getRecommendPost(@RequestParam PostType postType) {
-        String memberId = getLoginMemberId();
-        log.info("추천 게시물 요청 : memberId = {}", memberId);
-        if(postType.equals(PostType.OOTD)) {
-            return ApiResponse.onSuccess(recommendService.getRecommendOotds(memberId, postType));
-        }
-        else {
-            return ApiResponse.onSuccess(recommendService.getRecommendPosts(memberId, postType));
-        }
-    }
+//    @GetMapping("/post")
+//    public ApiResponse<?> getRecommendPost(@RequestParam PostType postType) {
+//        String memberId = getLoginMemberId();
+//        log.info("추천 게시물 요청 : memberId = {}", memberId);
+//        if(postType.equals(PostType.OOTD)) {
+//            return ApiResponse.onSuccess(recommendService.getRecommendOotds(memberId, postType));
+//        }
+//        else {
+//            return ApiResponse.onSuccess(recommendService.getRecommendPosts(memberId, postType));
+//        }
+//    }
 
     @GetMapping("/search")
     public ApiResponse<?> getRecommendSearch() {
@@ -45,13 +45,22 @@ public class RecommendController {
 
     @GetMapping("/interest")
     public ApiResponse<?> getRecommendInterest(
-            @RequestParam InterestedType interestedType,
+            @RequestParam String interestedType,
             @RequestParam PostType postType
     ) {
         String memberId = getLoginMemberId();
-        log.info("추천 게시물 요청 (관심 분야) : memberId = {}", memberId);
-        return ApiResponse.onSuccess(recommendService.getRecommendInterest(interestedType, postType, memberId));
+        log.info("추천 게시물 요청 (관심 분야) : memberId = {}, type = {}", memberId, interestedType);
+        if(postType.equals(PostType.OOTD)) {
+            return ApiResponse.onSuccess(recommendService.getRecommendOotds(interestedType, postType, memberId));
+        }
+        else if (postType.equals(PostType.POST)) {
+            return ApiResponse.onSuccess(recommendService.getRecommendPosts(interestedType, postType, memberId));
+        }
+        else {
+            throw new ErrorHandler(ErrorStatus.POST_TYPE_ERROR);
+        }
     }
+
     private String getLoginMemberId() {
         return SecurityUtil.getLoginMemberId().orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
     }
