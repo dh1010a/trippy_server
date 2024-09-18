@@ -52,10 +52,10 @@ public class RecommendService {
 
     private static final String ANONYMOUS = "anonymousUser";
 
-    @Value("${spring.security.oauth2.client.registration.google.clientId}")
+    @Value("${spring.security.oauth2.client.registration.kakao.clientId}")
     private String kakaoClientId;
 
-    @Value("${spring.security.oauth2.client.registration.google.clientSecret}")
+    @Value("${spring.security.oauth2.client.registration.kakao.clientSecret}")
     private String kakaoClientSecret;
 
     private static final String kakaoSearchUrl = "https://dapi.kakao.com/v2/search/image";
