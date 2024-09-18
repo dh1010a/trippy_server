@@ -25,7 +25,9 @@ public class RecommendResponseDto {
         private String thumbnailUrl;
         private int width;
         private int height;
+        // 출처
         private String displaySiteName;
+        // 출처 url
         private String docUrl;
 
     }
