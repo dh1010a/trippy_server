@@ -139,4 +139,11 @@ public class MemberResponseDto {
         private List<Long> bookMarkList;
     }
 
+    @Data
+    @Builder
+    public static class MemberInterestResponseDto {
+        private List<String> koreanInterestedTypes;
+        private int cnt;
+    }
+
 }
