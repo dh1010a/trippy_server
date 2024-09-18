@@ -2,6 +2,9 @@ package com.example.server.domain.member.model;
 
 import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 public enum InterestedType {
 
@@ -48,5 +51,13 @@ public enum InterestedType {
             }
         }
         return null;
+    }
+
+    public static List<String> getAllInterestedType(){
+        List<String> list = new ArrayList<>();
+        for (InterestedType value : values()) {
+            list.add(value.getTitle());
+        }
+        return list;
     }
 }

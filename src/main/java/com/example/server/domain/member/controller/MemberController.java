@@ -211,6 +211,13 @@ public class MemberController {
         return ApiResponse.onSuccess(memberService.deleteMember(memberId, socialAccessToken, device));
     }
 
+    @GetMapping("/interest/my")
+    public ApiResponse<?> getInterestedTypes() {
+        String memberId = getLoginMemberId();
+        log.info("관심사 조회 요청 : memberId = {}", memberId);
+        return ApiResponse.onSuccess(memberService.getInterestedTypes(memberId));
+    }
+
 
 
     private String getLoginMemberId() {

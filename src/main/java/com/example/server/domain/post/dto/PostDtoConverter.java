@@ -136,5 +136,23 @@ public class PostDtoConverter {
         return memberDto;
     }
 
+    public static PostResponseDto.GetRecommendPostResponseDto convertToRecommendPostResponseDto(List<Post> posts, Member member) {
+        List<PostResponseDto.GetPostResponseDto> getPostResponseDtos = convertToPostListResponseDto(posts, member);
+        return PostResponseDto.GetRecommendPostResponseDto.builder()
+                .recommendPostList(getPostResponseDtos)
+                .isSuccess(true)
+                .totalCnt(getPostResponseDtos.size())
+                .build();
+    }
+
+    public static PostResponseDto.GetRecommendOotdResponseDto convertToRecommendOotdResponseDto(List<Post> posts, Member member) {
+        List<PostResponseDto.GetOotdPostResponseDto> getOotdPostResponseDtos = convertToOOTDListResponseDto(posts, member);
+        return PostResponseDto.GetRecommendOotdResponseDto.builder()
+                .recommendOotdList(getOotdPostResponseDtos)
+                .isSuccess(true)
+                .totalCnt(getOotdPostResponseDtos.size())
+                .build();
+    }
+
 
 }

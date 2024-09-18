@@ -98,4 +98,11 @@ public class MemberDtoConverter {
                 .message(scope.getTitle())
                 .build();
     }
+
+    public static MemberInterestResponseDto convertToMemberInterestResponseDto(List<InterestedType> interestedTypes) {
+        return MemberInterestResponseDto.builder()
+                .koreanInterestedTypes(interestedTypes.stream().map(InterestedType::getTitle).toList())
+                .cnt(interestedTypes.size())
+                .build();
+    }
 }

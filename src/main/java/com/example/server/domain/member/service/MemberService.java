@@ -61,6 +61,7 @@ public class MemberService {
 
     private static final String DEFAULT_BLOG_SUFFIX = ".blog";
     private static final String ACCESS_TOKEN_KEY = "accessToken";
+    private static final String ANONYMOUS = "anonymous";
 
     public MemberTaskResultResponseDto signUp(CreateMemberRequestDto requestDto) {
         String randomNickName = requestDto.getEmail() + UUID.randomUUID().toString().substring(0, 9);
@@ -504,5 +505,16 @@ public class MemberService {
         return MemberTaskSuccessResponseDto.builder()
                 .isSuccess(true)
                 .build();
+    }
+
+    public MemberInterestResponseDto getInterestedTypes(String memberId) {
+        if (memberId.equals(ANONYMOUS)) {
+            return MemberInterestResponseDto.builder()
+                    .koreanInterestedTypes(InterestedType.getAllInterestedType())
+                    .cnt(20)
+                    .build();
+        }
+        Member member = memberRepository.getMemberById(memberId);
+        return MemberDtoConverter.convertToMemberInterestResponseDto(member.getInterestedTypes());
     }
 }

@@ -41,6 +41,8 @@ public enum ErrorStatus implements BaseErrorCode {
     MEMBER_SOCIAL_TOKEN_NOT_PROVIDED(HttpStatus.BAD_REQUEST, "MEMBER4019", "소셜 토큰이 제공되지 않았습니다."),
     MEMBER_EMAIL_AUTH_TOKEN_NOT_PROVIDED(HttpStatus.BAD_REQUEST, "MEMBER4020", "이메일 인증 토큰이 제공되지 않았습니다."),
     MEMBER_EMAIL_AUTH_TOKEN_NOT_VALID(HttpStatus.UNAUTHORIZED, "MEMBER4021", "유효하지 않은 이메일 인증 토큰입니다."),
+    MEMBER_INTEREST_TYPE_NOT_VALID(HttpStatus.BAD_REQUEST, "MEMBER4022", "관심 분야 타입이 올바르지 않습니다."),
+
 
 
     //사진 응답

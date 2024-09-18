@@ -1,9 +1,13 @@
 package com.example.server.domain.recommend.service;
 
 import aj.org.objectweb.asm.TypeReference;
+import com.example.server.domain.follow.repository.MemberFollowRepository;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.model.InterestedType;
+import com.example.server.domain.member.model.Scope;
+import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.domain.post.domain.Post;
+import com.example.server.domain.post.dto.PostDtoConverter;
 import com.example.server.domain.post.dto.PostResponseDto;
 import com.example.server.domain.post.model.OrderType;
 import com.example.server.domain.post.model.PostType;
@@ -11,6 +15,8 @@ import com.example.server.domain.post.repository.PostRepository;
 import com.example.server.domain.post.service.PostService;
 import com.example.server.domain.recommend.dto.RecommendRequestDto;
 import com.example.server.domain.search.service.SearchRedisService;
+import com.example.server.global.apiPayload.code.status.ErrorStatus;
+import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
@@ -39,6 +45,9 @@ public class RecommendService {
     private final PostService postService;
     private final SearchRedisService searchRedisService;
     private final RestTemplate restTemplate;
+    private final MemberFollowRepository memberFollowRepository;
+
+    private static final String ANONYMOUS = "anonymousUser";
 
     public List<String> getRecommendSearch(String memberId){
         Set<String> mergedSet = new HashSet<>();
@@ -86,8 +95,75 @@ public class RecommendService {
         }
     }
 
-    public List<Integer> getRecommendInterest(InterestedType interest, PostType postType, String memberId) {
+
+    public PostResponseDto.GetRecommendPostResponseDto getRecommendPosts(String interest, PostType postType, String memberId){
+        Member member = postService.getMemberById(memberId);
+        List<Integer> postIds = getRecommendInterest(interest, postType, memberId);
+        List<Post> posts = new ArrayList<>();
+        // RecommendRequest 객체 생성
+        for (int x: postIds){
+            Post post = postService.getPostById((long)x);
+            if (!isValidAccessToPost(post, member, postType)) {
+                continue;
+            }
+            posts.add(post);
+        }
+        return PostDtoConverter.convertToRecommendPostResponseDto(posts, member);
+    }
+
+    public PostResponseDto.GetRecommendOotdResponseDto getRecommendOotds(String interest, PostType postType, String memberId){
+        Member member = postService.getMemberById(memberId);
+        List<Integer> ootdIds = getRecommendInterest(interest, postType, memberId);
+        List<Post> ootds = new ArrayList<>();
+        // RecommendRequest 객체 생성
+        for (int x: ootdIds){
+            Post post = postService.getPostById((long)x);
+            if (!isValidAccessToPost(post, member, postType)) {
+                continue;
+            }
+            ootds.add(post);
+        }
+        return PostDtoConverter.convertToRecommendOotdResponseDto(ootds, member);
+    }
+
+    private boolean isValidAccessToPost(Post post, Member member, PostType postType) {
+        if (postType == PostType.OOTD) {
+            if (post.getMember().getOotdScope() == Scope.PRIVATE) {
+                return false;
+            }
+            if (post.getMember().getOotdScope() == Scope.PROTECTED) {
+                if (member == null) {
+                    return false;
+                }
+                return isFollower(member, post.getMember());
+            }
+
+        } else if (postType == PostType.POST) {
+            if (post.getMember().getTicketScope() == Scope.PRIVATE) {
+                return false;
+            }
+            if (post.getMember().getTicketScope() == Scope.PROTECTED) {
+                if (member == null) {
+                    return false;
+                }
+                return isFollower(member, post.getMember());
+            }
+        }
+        return true;
+    }
+
+    private boolean isFollower(Member member, Member targetMember) {
+        return memberFollowRepository.existsByMemberAndFollowingMemberIdx(member, targetMember.getIdx());
+    }
+
+    // 추천 게시물 요청
+    private List<Integer> getRecommendInterest(String interest, PostType postType, String memberId) {
         String FLASK_URL = "http://flask-app:5000/api/interest_posts";
+
+        InterestedType interestedType = InterestedType.fromKoreanName(interest);
+        if (interestedType == null) {
+            throw new ErrorHandler(ErrorStatus.MEMBER_INTEREST_TYPE_NOT_VALID);
+        }
         //
         int memberIdx = -1;
         if(!memberId.equals("anonymousUser")){
@@ -95,7 +171,7 @@ public class RecommendService {
             memberIdx = member.getIdx().intValue();
         }
         String url = UriComponentsBuilder.fromHttpUrl(FLASK_URL)
-                .queryParam("interest", interest)
+                .queryParam("interest", interestedType)
                 .queryParam("post_type", postType)
                 .queryParam("member_idx", memberIdx)
                 .toUriString();
@@ -145,23 +221,6 @@ public class RecommendService {
             System.err.println("JSON 파싱 오류 발생: " + e.getMessage());
         }
         return postIds;
-    }
-
-
-    public List<PostResponseDto.GetPostResponseDto> getRecommendPosts(String memberId, PostType postType){
-        Member member = postService.getMemberById(memberId);
-
-        // RecommendRequest 객체 생성
-        RecommendRequestDto.GetRecommendRequest getRecommendRequest = createRecommendRequest(member, postType);
-        return null;
-    }
-
-    public List<PostResponseDto.GetOotdPostResponseDto> getRecommendOotds(String memberId, PostType postType){
-        Member member = postService.getMemberById(memberId);
-
-        // RecommendRequest 객체 생성
-        RecommendRequestDto.GetRecommendRequest getRecommendRequest = createRecommendRequest(member, postType);
-        return null;
     }
 
     private RecommendRequestDto.GetRecommendRequest createRecommendRequest(Member member, PostType postType) {
