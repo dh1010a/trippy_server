@@ -363,6 +363,7 @@ public class MemberService {
                 // 올렸던 사진 자체를 삭제하지 않음
 //                oracleImageService.deleteImg(profileImage.getId());
                 imageRepository.delete(profileImage);
+                member.getImages().remove(profileImage);
             }
         }
     }
@@ -370,10 +371,11 @@ public class MemberService {
     private void checkBlogImageExistsAndDelete(Member member) throws Exception{
         List<Image> images = member.getImages();
         if (!images.isEmpty()) {
-            Image profileImage = images.stream().filter(Image::isBlogTitleImage).findAny().orElse(null);
-            if (profileImage != null) {
-                oracleImageService.deleteImg(profileImage.getId());
-                imageRepository.delete(profileImage);
+            Image blogImage = images.stream().filter(Image::isBlogTitleImage).findAny().orElse(null);
+            if (blogImage != null) {
+//                oracleImageService.deleteImg(profileImage.getId());
+                imageRepository.delete(blogImage);
+                member.getImages().remove(blogImage);
             }
         }
     }
@@ -518,5 +520,21 @@ public class MemberService {
         }
         Member member = memberRepository.getMemberById(memberId);
         return MemberDtoConverter.convertToMemberInterestResponseDto(member.getInterestedTypes());
+    }
+
+    // for admin
+    // DELETE /api/admin/member/img
+    public MemberTaskSuccessResponseDto deleteAllMemberImg() {
+        List<Member> members = memberRepository.findAll();
+        for (Member member : members) {
+            List<Image> images = member.getImages();
+            if (images.size() > 2) {
+                imageRepository.deleteAll(images);
+                member.getImages().clear();
+            }
+        }
+        return MemberTaskSuccessResponseDto.builder()
+                .isSuccess(true)
+                .build();
     }
 }

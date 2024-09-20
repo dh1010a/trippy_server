@@ -64,4 +64,10 @@ public class AdminController {
     private String getLoginMemberId() {
         return SecurityUtil.getLoginMemberId().orElseThrow(() -> new ErrorHandler(ErrorStatus.MEMBER_NOT_FOUND));
     }
+
+    @DeleteMapping("/member/img")
+    public ApiResponse<?> deleteMemberImg() {
+        log.info("회원 이미지 삭제 요청 : AdminId = {}", getLoginMemberId());
+        return ApiResponse.onSuccess(memberService.deleteAllMemberImg());
+    }
 }
