@@ -532,6 +532,7 @@ public class MemberService {
                 imageRepository.deleteAll(images);
                 member.getImages().clear();
             }
+            memberRepository.save(member);
         }
         return MemberTaskSuccessResponseDto.builder()
                 .isSuccess(true)
