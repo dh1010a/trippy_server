@@ -133,6 +133,7 @@ public class MemberService {
 
     }
 
+    @Transactional
     public MemberTaskResultResponseDto updateMyInfo(String memberId, MemberRequestDto.UpdateMemberRequestDto requestDto) throws Exception{
         Member member = memberRepository.getMemberById(memberId);
 

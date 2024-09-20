@@ -26,7 +26,7 @@ public class MemberDtoConverter {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         String profileImageAccessUri = member.getProfileImageAccessUri();
-        String getBlogTitleImageAccessUri = member.getProfileImageAccessUri();
+        String getBlogTitleImageAccessUri = member.getBlogTitleImageAccessUri();
 
         return MyInfoResponseDto.builder()
                 .idx(member.getIdx())
