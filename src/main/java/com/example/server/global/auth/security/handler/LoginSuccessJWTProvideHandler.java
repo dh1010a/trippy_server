@@ -53,10 +53,10 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
 		Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 		member.updateRefreshToken(jwtToken.getRefreshToken());
 
-		String device = DeviceUtil.getDevice(request);
+//		String device = DeviceUtil.getDevice(request);
 
 		// Redis에 accessToken을 추가하고 만료 시간 설정
-		redisUtil.addMultiData(device+ACCESS_TOKEN_KEY+memberId, jwtToken.getAccessToken(), jwtService.getAccessTokenExpirationTime());
+		redisUtil.addMultiData(ACCESS_TOKEN_KEY+memberId, jwtToken.getAccessToken(), jwtService.getAccessTokenExpirationTime());
 
 		jwtService.sendAccessToken(response, jwtToken);
 		log.info( "로그인에 성공합니다. memberId: {}" , memberId);
