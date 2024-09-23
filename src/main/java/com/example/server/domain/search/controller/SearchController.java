@@ -63,7 +63,7 @@ public class SearchController {
     }
 
     @GetMapping("/recent")
-    public ApiResponse<?> getCurrentSearchLog(@RequestParam  PostType postType){
+    public ApiResponse<?> getCurrentSearchLog(@RequestParam  SearchType searchType){
         String memberId = getLoginMemberId();
         log.info("최근 검색어 조회 요청 : memberId = {}", memberId);
         List<String> searchLogs;
@@ -71,7 +71,7 @@ public class SearchController {
             searchLogs = Collections.emptyList();
         }
         else {
-            String key = "SearchLog" + postType + memberId;
+            String key = "SearchLog" + searchType + memberId;
             searchLogs = searchRedisService.getRecentSearch(key);
         }
         return ApiResponse.onSuccess(searchLogs);
