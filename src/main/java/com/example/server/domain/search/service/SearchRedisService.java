@@ -2,6 +2,7 @@ package com.example.server.domain.search.service;
 
 import com.example.server.domain.post.domain.Post;
 import com.example.server.domain.post.model.PostType;
+import com.example.server.domain.search.model.SearchType;
 import com.example.server.global.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +59,7 @@ public class SearchRedisService {
         return redisUtil.getAllData(key);
     }
 
-    public void saveRecentSearch(String memberId, String keyword, PostType postType) {
+    public void saveRecentSearch(String memberId, String keyword, SearchType postType) {
         String key = "SearchLog" + postType + memberId;
         if (redisUtil.getSize(key) == 10) {
             redisUtil.deleteOldData(key);

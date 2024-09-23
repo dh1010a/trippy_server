@@ -50,15 +50,6 @@ public class SearchService {
         Member member = !"anonymousUser".equals(memberId) ? getMember(memberId) : null;
         List<Long> followingList = memberFollowRepository.findFollowingList(member==null ? 0 : member.getIdx());
 
-        // Page<Post> 객체를 통해 전체 데이터를 포함한 정보를 가져옴
-//        Page<Post> postPage = postRepository.findPostByTitle(saveSearchRequest.getKeyword(), PostType.OOTD, followingList, pageable);
-//
-//        // 전체 갯수는 postPage.getTotalElements()로 가져옴
-//        long totalPosts = postPage.getTotalElements();  // 전체 게시물 수
-//
-//        // 페이지별 게시물 목록
-//        List<Post> posts = postPage.getContent();
-
         Pageable pageable = postService.getPageable(saveSearchRequest.getPage(), saveSearchRequest.getSize(), saveSearchRequest.getOrderType());
 
         List<Post> posts = postRepository.findPostByTitle(saveSearchRequest.getKeyword(), PostType.POST, followingList, pageable).getContent();
@@ -108,12 +99,12 @@ public class SearchService {
 
     private void updateSearchLog(String memberId, SearchRequestDto.SaveSearchRequest saveSearchRequest){
         // 전체 검색어 count
-        searchRedisService.incrementCount("popularSearches" + saveSearchRequest.getPostType(), saveSearchRequest.getKeyword());
+        searchRedisService.incrementCount("popularSearches" + saveSearchRequest.getSearchType(), saveSearchRequest.getKeyword());
         if (!"anonymousUser".equals(memberId)) {
             // 회원별 검색어 log
-            searchRedisService.saveRecentSearch(memberId, saveSearchRequest.getKeyword(), saveSearchRequest.getPostType());
+            searchRedisService.saveRecentSearch(memberId, saveSearchRequest.getKeyword(), saveSearchRequest.getSearchType());
             // 회원별 검색어 count
-            searchRedisService.incrementCount("member:" + memberId + ":popularSearches" + saveSearchRequest.getPostType(), saveSearchRequest.getKeyword());
+            searchRedisService.incrementCount("member:" + memberId + ":popularSearches" + saveSearchRequest.getSearchType(), saveSearchRequest.getKeyword());
         }
     }
 
