@@ -228,6 +228,16 @@ public class OotdService {
             collect.add(cityTag);
         }
 
+        // 날씨 태그 추가
+        if (requestDto.getOotdRequest().getWeatherStatus() != null) {
+            Tag weatherTag = Tag.builder()
+                    .name(requestDto.getOotdRequest().getWeatherStatus())
+                    .post(post)
+                    .build();
+            tagRepository.save(weatherTag);
+            collect.add(weatherTag);
+        }
+
 
         for (String tagName : requestDto.getPostRequest().getTags()) {
             Tag tag = Tag.builder()

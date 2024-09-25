@@ -278,7 +278,7 @@ public class PostService {
         return ticket;
     }
 
-    public List<Tag> saveTags(PostRequestDto.UploadPostRequestDto requestDto, Post post) {
+    private List<Tag> saveTags(PostRequestDto.UploadPostRequestDto requestDto, Post post) {
         List<Tag> collect = new ArrayList<>();
         // 국가와 도시 태그 추가
         Tag countryTag = Tag.builder()
