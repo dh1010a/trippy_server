@@ -2,6 +2,7 @@ package com.example.server.domain.search.service;
 
 import com.example.server.domain.follow.repository.MemberFollowRepository;
 import com.example.server.domain.member.domain.Member;
+import com.example.server.domain.member.model.Scope;
 import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.domain.post.dto.PostDtoConverter;
@@ -45,7 +46,7 @@ public class SearchService {
     private final PostService postService;
     private final TagRepository tagRepository;
 
-    public List<PostResponseDto.GetPostResponseDto> getPosts(SearchRequestDto.SaveSearchRequest saveSearchRequest, String memberId) {
+    public PostResponseDto.GetMultiplePostResponseDto getPosts(SearchRequestDto.SaveSearchRequest saveSearchRequest, String memberId) {
         updateSearchLog(memberId, saveSearchRequest);
         Member member = !"anonymousUser".equals(memberId) ? getMember(memberId) : null;
         List<Long> followingList = memberFollowRepository.findFollowingList(member==null ? 0 : member.getIdx());
@@ -53,17 +54,17 @@ public class SearchService {
         Pageable pageable = postService.getPageable(saveSearchRequest.getPage(), saveSearchRequest.getSize(), saveSearchRequest.getOrderType());
 
         List<Post> posts = postRepository.findPostByTitle(saveSearchRequest.getKeyword(), PostType.POST, followingList, pageable).getContent();
-        return PostDtoConverter.convertToPostListResponseDto(posts, member);
+        return PostDtoConverter.convertToMultiplePostResponseDto(posts, member);
     }
 
-    public List<PostResponseDto.GetOotdPostResponseDto> getOotds(SearchRequestDto.SaveSearchRequest saveSearchRequest, String memberId) {
+    public PostResponseDto.GetMultipleOotdResponseDto getOotds(SearchRequestDto.SaveSearchRequest saveSearchRequest, String memberId) {
         updateSearchLog(memberId, saveSearchRequest);
         Member member = !"anonymousUser".equals(memberId) ? getMember(memberId) : null;
         List<Long> followingList = memberFollowRepository.findFollowingList(member==null ? 0 : member.getIdx());
         Pageable pageable = postService.getPageable(saveSearchRequest.getPage(), saveSearchRequest.getSize(), saveSearchRequest.getOrderType());
 
         List<Post> posts = postRepository.findPostBodyAndTitle(saveSearchRequest.getKeyword(), PostType.OOTD, followingList, pageable).getContent();
-        return PostDtoConverter.convertToOOTDListResponseDto(posts, member);
+        return PostDtoConverter.convertToMultipleOotdResponseDto(posts, member);
     }
 
     public List<SearchResponseDto.SearchMemberDto> getMembers(SearchRequestDto.SaveSearchRequest saveSearchRequest, String memberId) {
@@ -108,15 +109,15 @@ public class SearchService {
         }
     }
 
-    public List<PostResponseDto.GetPostResponseDto> getPostSearchByTag(String tag, String memberId, Integer size, Integer page) {
-        return getPostsByTag(tag, memberId, size, page, PostType.POST);
+    public PostResponseDto.GetMultiplePostResponseDto getPostSearchByTag(String tag, String memberId, Integer size, Integer page) {
+        return (PostResponseDto.GetMultiplePostResponseDto) getPostsByTag(tag, memberId, size, page, PostType.POST);
     }
 
-    public List<PostResponseDto.GetOotdPostResponseDto> getOotdSearchByTag(String tag, String memberId, Integer size, Integer page) {
-        return getPostsByTag(tag, memberId, size, page, PostType.OOTD);
+    public PostResponseDto.GetMultipleOotdResponseDto getOotdSearchByTag(String tag, String memberId, Integer size, Integer page) {
+        return (PostResponseDto.GetMultipleOotdResponseDto) getPostsByTag(tag, memberId, size, page, PostType.OOTD);
     }
 
-    private <T> List<T> getPostsByTag(String tag, String memberId, Integer size, Integer page, PostType postType) {
+    private Object getPostsByTag(String tag, String memberId, Integer size, Integer page, PostType postType) {
         Member member = getMember(memberId);
         List<Post> posts;
 
@@ -130,12 +131,46 @@ public class SearchService {
                     .filter(post -> post.getPostType().equals(postType))
                     .collect(Collectors.toList());
         }
-
-        if (postType.equals(PostType.POST)) {
-            return (List<T>) PostDtoConverter.convertToPostListResponseDto(posts, member);
-        } else {
-            return (List<T>) PostDtoConverter.convertToOOTDListResponseDto(posts, member);
+        for (Post post : posts) {
+            if (!isValidAccessToPost(post, member, postType)) {
+                posts.remove(post);
+            }
         }
+        if (postType == PostType.POST) {
+            return PostDtoConverter.convertToPostListResponseDto(posts, member);
+        } else {
+            return PostDtoConverter.convertToOOTDListResponseDto(posts, member);
+        }
+    }
+
+    private boolean isValidAccessToPost(Post post, Member member, PostType postType) {
+        if (postType == PostType.OOTD) {
+            if (post.getMember().getOotdScope() == Scope.PRIVATE) {
+                return false;
+            }
+            if (post.getMember().getOotdScope() == Scope.PROTECTED) {
+                if (member == null) {
+                    return false;
+                }
+                return isFollower(member, post.getMember());
+            }
+
+        } else if (postType == PostType.POST) {
+            if (post.getMember().getTicketScope() == Scope.PRIVATE) {
+                return false;
+            }
+            if (post.getMember().getTicketScope() == Scope.PROTECTED) {
+                if (member == null) {
+                    return false;
+                }
+                return isFollower(member, post.getMember());
+            }
+        }
+        return true;
+    }
+
+    private boolean isFollower(Member member, Member targetMember) {
+        return memberFollowRepository.existsByMemberAndFollowingMemberIdx(member, targetMember.getIdx());
     }
 
 

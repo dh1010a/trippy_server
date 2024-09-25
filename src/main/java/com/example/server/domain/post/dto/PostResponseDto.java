@@ -6,7 +6,6 @@ import com.example.server.domain.ticket.dto.TicketResponseDto;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -32,16 +31,16 @@ public class PostResponseDto {
 
     @Builder
     @Data
-    public static class GetRecommendPostResponseDto{
-        private List<GetPostResponseDto> recommendPostList;
+    public static class GetMultiplePostResponseDto {
+        private List<GetPostResponseDto> postList;
         private Boolean isSuccess;
         private int totalCnt;
     }
 
     @Builder
     @Data
-    public static class GetRecommendOotdResponseDto{
-        private List<GetOotdPostResponseDto> recommendOotdList;
+    public static class GetMultipleOotdResponseDto {
+        private List<GetOotdPostResponseDto> ootdList;
         private Boolean isSuccess;
         private int totalCnt;
     }

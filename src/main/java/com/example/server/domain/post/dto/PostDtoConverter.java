@@ -9,16 +9,12 @@ import com.example.server.domain.member.model.Scope;
 import com.example.server.domain.post.domain.Ootd;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.domain.ticket.dto.TicketResponseDto;
-import com.example.server.global.apiPayload.code.status.ErrorStatus;
-import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
-import com.example.server.global.util.SecurityUtil;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.example.server.domain.image.dto.ImageDtoConverter.convertToImageBasicDto;
-import static com.example.server.domain.post.dto.TagDtoConverter.convertToTagBasicResponseDto;
 import static com.example.server.domain.ticket.dto.TicketDtoConverter.convertToTicketResponseDto;
 
 public class PostDtoConverter {
@@ -136,19 +132,19 @@ public class PostDtoConverter {
         return memberDto;
     }
 
-    public static PostResponseDto.GetRecommendPostResponseDto convertToRecommendPostResponseDto(List<Post> posts, Member member) {
+    public static PostResponseDto.GetMultiplePostResponseDto convertToMultiplePostResponseDto(List<Post> posts, Member member) {
         List<PostResponseDto.GetPostResponseDto> getPostResponseDtos = convertToPostListResponseDto(posts, member);
-        return PostResponseDto.GetRecommendPostResponseDto.builder()
-                .recommendPostList(getPostResponseDtos)
+        return PostResponseDto.GetMultiplePostResponseDto.builder()
+                .postList(getPostResponseDtos)
                 .isSuccess(true)
                 .totalCnt(getPostResponseDtos.size())
                 .build();
     }
 
-    public static PostResponseDto.GetRecommendOotdResponseDto convertToRecommendOotdResponseDto(List<Post> posts, Member member) {
+    public static PostResponseDto.GetMultipleOotdResponseDto convertToMultipleOotdResponseDto(List<Post> posts, Member member) {
         List<PostResponseDto.GetOotdPostResponseDto> getOotdPostResponseDtos = convertToOOTDListResponseDto(posts, member);
-        return PostResponseDto.GetRecommendOotdResponseDto.builder()
-                .recommendOotdList(getOotdPostResponseDtos)
+        return PostResponseDto.GetMultipleOotdResponseDto.builder()
+                .ootdList(getOotdPostResponseDtos)
                 .isSuccess(true)
                 .totalCnt(getOotdPostResponseDtos.size())
                 .build();
