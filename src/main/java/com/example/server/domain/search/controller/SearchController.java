@@ -96,9 +96,10 @@ public class SearchController {
             @RequestParam(required = false, defaultValue = "0") Integer size) {
         String memberId = getLoginMemberId();
         log.info("태그 필터링 조회 요청 : memberId = {}", memberId);
-        if(postType.equals(PostType.POST)) return ApiResponse.onSuccess(searchService.getPostSearchByTag(tag, memberId, size, page));
-        else return ApiResponse.onSuccess(searchService.getOotdSearchByTag(tag, memberId,size,page));
-
+        if(postType.equals(PostType.POST))
+            return ApiResponse.onSuccess(searchService.getPostSearchByTag(tag, memberId, size, page));
+        else
+            return ApiResponse.onSuccess(searchService.getOotdSearchByTag(tag, memberId,size,page));
     }
 
 

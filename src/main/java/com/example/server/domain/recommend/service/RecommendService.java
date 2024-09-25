@@ -1,11 +1,9 @@
 package com.example.server.domain.recommend.service;
 
-import aj.org.objectweb.asm.TypeReference;
 import com.example.server.domain.follow.repository.MemberFollowRepository;
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.member.model.InterestedType;
 import com.example.server.domain.member.model.Scope;
-import com.example.server.domain.member.repository.MemberRepository;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.domain.post.dto.PostDtoConverter;
 import com.example.server.domain.post.dto.PostResponseDto;
@@ -162,7 +160,7 @@ public class RecommendService {
     }
 
 
-    public PostResponseDto.GetRecommendPostResponseDto getRecommendPosts(String interest, PostType postType, String memberId){
+    public PostResponseDto.GetMultiplePostResponseDto getRecommendPosts(String interest, PostType postType, String memberId){
         Member member = postService.getMemberById(memberId);
         List<Integer> postIds = getRecommendInterest(interest, postType, memberId);
         List<Post> posts = new ArrayList<>();
@@ -174,10 +172,10 @@ public class RecommendService {
             }
             posts.add(post);
         }
-        return PostDtoConverter.convertToRecommendPostResponseDto(posts, member);
+        return PostDtoConverter.convertToMultiplePostResponseDto(posts, member);
     }
 
-    public PostResponseDto.GetRecommendOotdResponseDto getRecommendOotds(String interest, PostType postType, String memberId){
+    public PostResponseDto.GetMultipleOotdResponseDto getRecommendOotds(String interest, PostType postType, String memberId){
         Member member = postService.getMemberById(memberId);
         List<Integer> ootdIds = getRecommendInterest(interest, postType, memberId);
         List<Post> ootds = new ArrayList<>();
@@ -189,7 +187,7 @@ public class RecommendService {
             }
             ootds.add(post);
         }
-        return PostDtoConverter.convertToRecommendOotdResponseDto(ootds, member);
+        return PostDtoConverter.convertToMultipleOotdResponseDto(ootds, member);
     }
 
     private boolean isValidAccessToPost(Post post, Member member, PostType postType) {

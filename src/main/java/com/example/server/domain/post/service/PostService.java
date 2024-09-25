@@ -1,5 +1,6 @@
 package com.example.server.domain.post.service;
 
+import com.example.server.domain.country.service.CountryService;
 import com.example.server.domain.follow.repository.MemberFollowRepository;
 import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.image.dto.ImageDto;
@@ -50,6 +51,8 @@ public class PostService {
     private final TicketRepository ticketRepository;
     private final MemberFollowRepository memberFollowRepository;
 
+    private final CountryService countryService;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -66,7 +69,7 @@ public class PostService {
         }
 
         if (requestDto.getPostRequest().getTags() != null) {
-            List<Tag> tags = saveTags(requestDto.getPostRequest(), post);
+            List<Tag> tags = saveTags(requestDto, post);
             post.updateTags(tags);
         }
 
@@ -275,17 +278,34 @@ public class PostService {
         return ticket;
     }
 
-    public List<Tag> saveTags(PostRequestDto.CommonPostRequestDto requestDto, Post post) {
-        return requestDto.getTags().stream()
-                .map(tagName -> {
-                    Tag tag = Tag.builder()
-                            .name(tagName)
-                            .post(post)
-                            .build();
-                    tagRepository.save(tag);
-                    return tag;
-                })
-                .collect(Collectors.toList());
+    private List<Tag> saveTags(PostRequestDto.UploadPostRequestDto requestDto, Post post) {
+        List<Tag> collect = new ArrayList<>();
+        // 국가와 도시 태그 추가
+        Tag countryTag = Tag.builder()
+                .name(requestDto.getTicketRequest().getDestination())
+                .post(post)
+                .build();
+        tagRepository.save(countryTag);
+        collect.add(countryTag);
+        Tag cityTag = Tag.builder()
+                .name(countryService.getCountryByLocation(requestDto.getTicketRequest().getDestination()).getCountryNm())
+                .post(post)
+                .build();
+        tagRepository.save(cityTag);
+        collect.add(cityTag);
+
+
+        for (String tagName : requestDto.getPostRequest().getTags()) {
+            Tag tag = Tag.builder()
+                    .name(tagName)
+                    .post(post)
+                    .build();
+            tagRepository.save(tag);
+            collect.add(tag);
+        }
+
+        return collect;
+
     }
 
     public List<Image> saveImages(PostRequestDto.CommonPostRequestDto requestDto, Post post) {

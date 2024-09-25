@@ -1,5 +1,6 @@
 package com.example.server.domain.post.service;
 
+import com.example.server.domain.country.service.CountryService;
 import com.example.server.domain.follow.repository.MemberFollowRepository;
 import com.example.server.domain.image.domain.Image;
 import com.example.server.domain.member.domain.Member;
@@ -14,6 +15,7 @@ import com.example.server.domain.post.model.OrderType;
 import com.example.server.domain.post.model.PostType;
 import com.example.server.domain.post.repository.OotdRepository;
 import com.example.server.domain.post.repository.PostRepository;
+import com.example.server.domain.post.repository.TagRepository;
 import com.example.server.domain.ticket.domain.Ticket;
 import com.example.server.domain.ticket.dto.TicketRequestDto;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
@@ -30,6 +32,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -46,6 +50,8 @@ public class OotdService {
     private final PostRepository postRepository;
     private final RestTemplate restTemplate;
     private final MemberFollowRepository memberFollowRepository;
+    private final TagRepository tagRepository;
+    private final CountryService countryService;
 
     // POST /api/ootd
     @Transactional
@@ -60,7 +66,7 @@ public class OotdService {
         }
 
         if (postRequestDto.getTags() != null) {
-            List<Tag> tags = postService.saveTags(postRequestDto, post);
+            List<Tag> tags = saveTags(requestDto, post);
             post.updateTags(tags);
         }
 
@@ -197,5 +203,50 @@ public class OotdService {
                 .weatherStatus(ootd.getWeatherStatus())
                 .detailLocation(ootd.getDetailLocation())
                 .build();
+    }
+
+    private List<Tag> saveTags(PostRequestDto.UploadOOTDPostRequestDto requestDto, Post post) {
+        List<Tag> collect = new ArrayList<>();
+        // 국가와 도시 태그 추가
+        String country = countryService.getCountryByLocation(requestDto.getPostRequest().getLocation()).getCountryNm();
+        if (country != null) {
+            Tag countryTag = Tag.builder()
+                    .name(country)
+                    .post(post)
+                    .build();
+            tagRepository.save(countryTag);
+            collect.add(countryTag);
+        }
+
+        String city = requestDto.getOotdRequest().getArea();
+        if (city != null) {
+            Tag cityTag = Tag.builder()
+                    .name(city)
+                    .post(post)
+                    .build();
+            tagRepository.save(cityTag);
+            collect.add(cityTag);
+        }
+
+        // 날씨 태그 추가
+        if (requestDto.getOotdRequest().getWeatherStatus() != null) {
+            Tag weatherTag = Tag.builder()
+                    .name(requestDto.getOotdRequest().getWeatherStatus())
+                    .post(post)
+                    .build();
+            tagRepository.save(weatherTag);
+            collect.add(weatherTag);
+        }
+
+
+        for (String tagName : requestDto.getPostRequest().getTags()) {
+            Tag tag = Tag.builder()
+                    .name(tagName)
+                    .post(post)
+                    .build();
+            tagRepository.save(tag);
+            collect.add(tag);
+        }
+        return collect;
     }
 }
