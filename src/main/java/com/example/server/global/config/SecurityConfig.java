@@ -73,7 +73,7 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers( "/api/member/signup", "/api/member/isDuplicated", "/api/member/login/oauth").permitAll()
-                        .requestMatchers( "/api/email/send", "/api/member/password", "/api/email/confirm", "/api/member/find", "/api/recommend/interest").permitAll()
+                        .requestMatchers( "/api/email/send", "/api/member/password", "/api/email/confirm", "/api/member/find", "/api/recommend/interest", "/api/recommend/spot").permitAll()
                         .requestMatchers("/api/post/all", "/api/ootd/all", "/api/post/count/all", "/api/post/info/{postId}", "/api/ootd/info/{postId}").permitAll()
                         .requestMatchers("/api/search/**").permitAll()
                         .requestMatchers("/api/member/profile", "/api/post/by-member", "/api/ootd/by-member", "/api/post/count/by-member").permitAll()

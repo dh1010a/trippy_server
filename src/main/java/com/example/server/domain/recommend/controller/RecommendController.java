@@ -68,10 +68,10 @@ public class RecommendController {
     // 관광지 추천
     @GetMapping("/spot")
     public ApiResponse<?> getRecommendSpot(
-            @RequestParam String area
+            @RequestParam Long postId
     ) {
         String memberId = getLoginMemberId();
         log.info("추천 관광지 요청 : memberId = {}", memberId);
-        return ApiResponse.onSuccess(recommendService.getRecommendSpot(area));
+        return ApiResponse.onSuccess(recommendService.getRecommendSpot( postId));
     }
 }

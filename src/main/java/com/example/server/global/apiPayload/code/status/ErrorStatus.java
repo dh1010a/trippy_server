@@ -102,6 +102,8 @@ public enum ErrorStatus implements BaseErrorCode {
     BOOKMARK_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "BOOKMARK4003", "이미 북마크한 게시물입니다."),
     BOOKMARK_NOT_EXIST(HttpStatus.BAD_REQUEST, "BOOKMARK4004", "북마크한 게시물이 존재하지 않습니다."),
 
+    // 추천 응답
+    INVALID_CITY_NAME(HttpStatus.BAD_REQUEST, "RECOMMEND4001", "주소에서 유효한 도시 이름을 찾을 수 없습니다."),
 
     // 시간 제한
     TIME_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST,"TIME4001", "시간 제한"),
