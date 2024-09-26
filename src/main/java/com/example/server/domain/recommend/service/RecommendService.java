@@ -37,6 +37,8 @@ import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 @Service
 @Transactional
@@ -72,7 +74,16 @@ public class RecommendService {
 
     }
 
-    public List<RecommendResponseDto.RecommendPlaceResponseDto> getRecommendSpot(String area) {
+    public List<RecommendResponseDto.RecommendPlaceResponseDto> getRecommendSpot(Long postId) {
+        Post post = postService.getPostById(postId);
+        String area;
+        if(post.getPostType().equals(PostType.OOTD)) {
+            String address = post.getOotd().getDetailLocation();
+            area = extractCityOrCountyName(address);
+            System.out.println(area);
+
+        } else  area = post.getTicket().getDestination();
+
         List<String> recommendSpot = getRecommendSpotFromFlask(area);
         List<RecommendResponseDto.RecommendPlaceResponseDto> result = new ArrayList<>();
         for (String spot : recommendSpot) {
@@ -124,6 +135,17 @@ public class RecommendService {
         }
         return result;
 
+    }
+
+    public static String extractCityOrCountyName(String address) {
+
+        Pattern pattern = Pattern.compile("([가-힣]+?)(?=광역시|특별시|특별자치시|시|군)");
+        Matcher matcher = pattern.matcher(address);
+
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        else throw new ErrorHandler(ErrorStatus.INVALID_CITY_NAME);
     }
 
     public List<String> getRecommendSpotFromFlask(String area) {
