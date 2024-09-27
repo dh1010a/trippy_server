@@ -232,8 +232,9 @@ public class OotdService {
 
         // 날씨 태그 추가
         if (requestDto.getOotdRequest().getWeatherStatus() != null) {
+            String weather = convertWeatherKorean(requestDto.getOotdRequest().getWeatherStatus());
             Tag weatherTag = Tag.builder()
-                    .name(requestDto.getOotdRequest().getWeatherStatus())
+                    .name(weather)
                     .post(post)
                     .build();
             tagRepository.save(weatherTag);
@@ -250,5 +251,17 @@ public class OotdService {
             collect.add(tag);
         }
         return collect;
+    }
+
+    private String convertWeatherKorean(String weatherEng){
+        if (weatherEng == null) return "null";
+        return switch (weatherEng.toLowerCase()) {
+            case "rain" -> "비";
+            case "snow" -> "눈";
+            case "mostly_cloudy" -> "구름많음";
+            case "cloudy" -> "흐림";
+            case "sunny" -> "맑음";
+            default -> "null";
+        };
     }
 }
