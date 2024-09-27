@@ -114,7 +114,7 @@ public class RecommendService {
                                     .queryParam("dataType", dataType)
                                     .queryParam("MobileApp", "AppTest")
                                     .queryParam("MobileOS", "ETC")
-                                    .queryParam("returnType", "Json")
+                                    .queryParam("_type", "Json")
                                     .queryParam("numOfRows", "10")
                                     .queryParam("keyword", spot)
 
