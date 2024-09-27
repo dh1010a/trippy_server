@@ -37,9 +37,16 @@ out/
 .vscode/
 
 /resources/
-*.yml
 docker-compose.yml
 deploy.sh
 fcm-private-key.json
 firebase-snippet.html
 *.json
+
+application.yml
+application-dev.yml
+application-prod.yml
+application-jwt.yml
+application-oauth.yml
+application-openApi.yml
+application-tmp.yml

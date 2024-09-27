@@ -243,6 +243,9 @@ public class OotdService {
 
 
         for (String tagName : requestDto.getPostRequest().getTags()) {
+            if (tagRepository.existsByNameAndPostId(tagName, post.getId())) {
+                continue;
+            }
             Tag tag = Tag.builder()
                     .name(tagName)
                     .post(post)

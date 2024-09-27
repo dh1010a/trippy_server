@@ -21,5 +21,7 @@ public interface TagRepository extends JpaRepository<Tag,Long> {
     Page<Post> findPostsByTag(@Param("name") String name, Pageable pageable);
   //  List<Tag> findAllByPost(Post post);
 
+    boolean existsByNameAndPostId(String name, Long postId);
+
 
 }
