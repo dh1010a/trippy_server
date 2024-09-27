@@ -59,7 +59,7 @@ public class OotdController {
         if(size==null) size = 0;
         if(orderType == null ) orderType = OrderType.LATEST;
         String memberId = getLoginMemberId();
-        log.info("모든 OOTD 게시물 조회 요청 : memberId = {}");
+        log.info("모든 OOTD 게시물 조회 요청 : memberId = {}, orderType = {}", memberId, orderType);
         return ApiResponse.onSuccess(ootdService.getAllPost(page, size,memberId,orderType));
     }
 
