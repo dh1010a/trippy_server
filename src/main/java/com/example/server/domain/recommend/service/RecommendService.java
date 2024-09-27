@@ -14,6 +14,7 @@ import com.example.server.domain.post.service.PostService;
 import com.example.server.domain.recommend.dto.RecommendRequestDto;
 import com.example.server.domain.recommend.dto.RecommendResponseDto;
 import com.example.server.domain.recommend.dto.RecommendResponseDto.PlaceImageDto;
+import com.example.server.domain.recommend.dto.RecommendResponseDto.PlaceImageResponseDto;
 import com.example.server.domain.search.service.SearchRedisService;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
@@ -24,13 +25,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URLEncoder;
@@ -61,6 +61,15 @@ public class RecommendService {
 
     private static final String kakaoSearchUrl = "https://dapi.kakao.com/v2/search/image";
 
+    @Value("${openApi_img.img_serviceKey}")
+    private String serviceKey;
+
+    @Value("${openApi_img.img_endPoint}")
+    private String endPoint;
+
+    @Value("${openApi_img.img_dataType}")
+    private String dataType;
+
     public List<String> getRecommendSearch(String memberId){
         Set<String> mergedSet = new HashSet<>();
         Member member = postService.getMemberById(memberId);
@@ -88,46 +97,53 @@ public class RecommendService {
         List<RecommendResponseDto.RecommendPlaceResponseDto> result = new ArrayList<>();
         for (String spot : recommendSpot) {
             try {
-                ByteBuffer buffer = StandardCharsets.UTF_8.encode(spot);
-                String encodedSpot = StandardCharsets.UTF_8.decode(buffer).toString();
+                String encodedSpot = URLEncoder.encode(spot, StandardCharsets.UTF_8);
 
-                String url = kakaoSearchUrl + "?query=" + encodedSpot;
+                DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(endPoint);
+                factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
 
-                HttpHeaders headers = new HttpHeaders();
-                headers.set("Authorization", "KakaoAK " + kakaoClientId);
-
-                HttpEntity<String> requestEntity = new HttpEntity<>(headers);
-                ResponseEntity<String> responseEntity = restTemplate.exchange(
-                        url, HttpMethod.GET, requestEntity, String.class);
-                String responseBody = responseEntity.getBody();
-
-                ObjectMapper objectMapper = new ObjectMapper();
-                JsonNode jsonNode = objectMapper.readTree(responseBody);
-
-                List<PlaceImageDto> imgList = new ArrayList<>();
-                int cnt = 0;
-                for (JsonNode node : jsonNode.get("documents")) {
-                    if (cnt++ >= 5) {
-                        break;
-                    }
-                    PlaceImageDto placeImageDto = PlaceImageDto.builder()
-                            .imgUrl(node.get("image_url").asText())
-                            .thumbnailUrl(node.get("thumbnail_url").asText())
-                            .width(node.get("width").asInt())
-                            .height(node.get("height").asInt())
-                            .displaySiteName(node.get("display_sitename").asText())
-                            .docUrl(node.get("doc_url").asText())
-                            .build();
-                    imgList.add(placeImageDto);
-                }
-                RecommendResponseDto.RecommendPlaceResponseDto dto = RecommendResponseDto.RecommendPlaceResponseDto.builder()
-                        .title(spot)
-                        .hubTatsNm(spot)
-                        .imgUrl(imgList)
-                        .content("추천 관광지")
-                        .imgCnt(imgList.size())
+                WebClient webClient = WebClient.builder()
+                        .uriBuilderFactory(factory)
+                        .baseUrl(endPoint)
+                        .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .build();
-                result.add(dto);
+                String response = webClient.get()
+                        .uri(uriBuilder -> {
+                            return uriBuilder.path("/PhotoGalleryService1")
+                                    .queryParam("serviceKey", serviceKey)
+                                    .queryParam("dataType", dataType)
+                                    .queryParam("MobileApp", "AppTest")
+                                    .queryParam("MobileOS", "ETC")
+                                    .queryParam("returnType", "Json")
+                                    .queryParam("numOfRows", "10")
+                                    .queryParam("keyword", spot)
+
+//                            .queryParam("cond[country_nm::EQ]", "가나")
+                                    .build(true);
+                        })
+                        .retrieve()
+                        .bodyToMono(String.class)
+                        .block();
+                PlaceImageResponseDto dto = null;
+                try {
+                    ObjectMapper mapper = new ObjectMapper();
+                    dto = mapper.readValue(response, PlaceImageResponseDto.class);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                if (dto != null) {
+                    List<PlaceImageDto> imgUrl = dto.getItem();
+                    if (imgUrl.size() > 0) {
+                        RecommendResponseDto.RecommendPlaceResponseDto recommendPlaceResponseDto = RecommendResponseDto.RecommendPlaceResponseDto.builder()
+                                .title(spot)
+                                .hubTatsNm(spot)
+                                .imgUrl(dto.getItem())
+                                .content(spot + " 관광 추천")
+                                .imgCnt(dto.getNumOfRows())
+                                .build();
+                        result.add(recommendPlaceResponseDto);
+                    }
+                }
 
             } catch (Exception e) {
                 e.printStackTrace();

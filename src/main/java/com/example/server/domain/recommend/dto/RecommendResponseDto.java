@@ -1,5 +1,7 @@
 package com.example.server.domain.recommend.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 
@@ -19,16 +21,22 @@ public class RecommendResponseDto {
     }
 
     @Data
-    @Builder
-    public static class PlaceImageDto {
-        private String imgUrl;
-        private String thumbnailUrl;
-        private int width;
-        private int height;
-        // 출처
-        private String displaySiteName;
-        // 출처 url
-        private String docUrl;
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PlaceImageResponseDto {
+        @JsonProperty("item")
+        private List<PlaceImageDto> item;
 
+        @JsonProperty("numOfRows")
+        private int numOfRows;
+    }
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PlaceImageDto {
+        @JsonProperty("galTitle")
+        private String galTitle;
+
+        @JsonProperty("galWebImageUrl")
+        private String galWebImageUrl;
     }
 }

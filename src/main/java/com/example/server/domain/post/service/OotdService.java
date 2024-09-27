@@ -59,6 +59,7 @@ public class OotdService {
         PostRequestDto.CommonPostRequestDto postRequestDto = requestDto.getPostRequest();
         Member member = postService.getMemberById(postRequestDto.getMemberId());
         Post post = postService.savePost(postRequestDto);
+        postRepository.save(post);
 
         if (postRequestDto.getImages() != null) {
             List<Image> images = postService.saveImages(postRequestDto, post);
