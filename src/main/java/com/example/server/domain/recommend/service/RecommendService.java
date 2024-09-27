@@ -13,6 +13,8 @@ import com.example.server.domain.post.repository.PostRepository;
 import com.example.server.domain.post.service.PostService;
 import com.example.server.domain.recommend.dto.RecommendRequestDto;
 import com.example.server.domain.recommend.dto.RecommendResponseDto;
+import com.example.server.domain.recommend.dto.RecommendResponseDto.OpenImageResponseDto;
+import com.example.server.domain.recommend.dto.RecommendResponseDto.OpenResponseDto;
 import com.example.server.domain.recommend.dto.RecommendResponseDto.PlaceImageDto;
 import com.example.server.domain.recommend.dto.RecommendResponseDto.PlaceImageResponseDto;
 import com.example.server.domain.search.service.SearchRedisService;
@@ -89,16 +91,12 @@ public class RecommendService {
         if(post.getPostType().equals(PostType.OOTD)) {
             String address = post.getOotd().getDetailLocation();
             area = extractCityOrCountyName(address);
-            System.out.println(area);
-
         } else  area = post.getTicket().getDestination();
 
         List<String> recommendSpot = getRecommendSpotFromFlask(area);
         List<RecommendResponseDto.RecommendPlaceResponseDto> result = new ArrayList<>();
         for (String spot : recommendSpot) {
             try {
-                String encodedSpot = URLEncoder.encode(spot, StandardCharsets.UTF_8);
-
                 DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(endPoint);
                 factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
 
@@ -111,12 +109,11 @@ public class RecommendService {
                         .uri(uriBuilder -> {
                             return uriBuilder.path("/galleryDetailList1")
                                     .queryParam("serviceKey", serviceKey)
-                                    .queryParam("dataType", dataType)
                                     .queryParam("MobileApp", "AppTest")
                                     .queryParam("MobileOS", "ETC")
                                     .queryParam("_type", "Json")
                                     .queryParam("numOfRows", "10")
-                                    .queryParam("title", spot)
+                                    .queryParam("title", URLEncoder.encode(spot, StandardCharsets.UTF_8))
 
 //                            .queryParam("cond[country_nm::EQ]", "가나")
                                     .build(true);
@@ -124,25 +121,33 @@ public class RecommendService {
                         .retrieve()
                         .bodyToMono(String.class)
                         .block();
-                PlaceImageResponseDto dto = null;
+                OpenResponseDto dto = null;
                 try {
                     ObjectMapper mapper = new ObjectMapper();
-                    dto = mapper.readValue(response, PlaceImageResponseDto.class);
+                    dto = mapper.readValue(response, OpenResponseDto.class);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
                 if (dto != null) {
-                    List<PlaceImageDto> imgUrl = dto.getItem();
-                    if (imgUrl.size() > 0) {
-                        RecommendResponseDto.RecommendPlaceResponseDto recommendPlaceResponseDto = RecommendResponseDto.RecommendPlaceResponseDto.builder()
-                                .title(spot)
-                                .hubTatsNm(spot)
-                                .imgUrl(dto.getItem())
-                                .content(spot + " 관광 추천")
-                                .imgCnt(dto.getNumOfRows())
-                                .build();
-                        result.add(recommendPlaceResponseDto);
-                    }
+                    List<PlaceImageDto> placeImageDtoList = dto.getResponse().getBody().getItems().getItem();
+                    RecommendResponseDto.RecommendPlaceResponseDto recommendPlaceResponseDto = RecommendResponseDto.RecommendPlaceResponseDto.builder()
+                            .title(spot)
+                            .hubTatsNm(spot)
+                            .imgList(placeImageDtoList)
+                            .content(spot + "의 이미지입니다.")
+                            .imgCnt(placeImageDtoList.size())
+                            .build();
+                    result.add(recommendPlaceResponseDto);
+                } else {
+                    RecommendResponseDto.RecommendPlaceResponseDto recommendPlaceResponseDto = RecommendResponseDto.RecommendPlaceResponseDto.builder()
+                            .title(spot)
+                            .hubTatsNm(spot)
+                            .imgList(null)
+                            .content(spot + "의 이미지입니다.")
+                            .imgCnt(0)
+                            .build();
+                    result.add(recommendPlaceResponseDto);
                 }
 
             } catch (Exception e) {
