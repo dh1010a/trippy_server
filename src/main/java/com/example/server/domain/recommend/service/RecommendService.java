@@ -20,6 +20,7 @@ import com.example.server.domain.recommend.dto.RecommendResponseDto.PlaceImageRe
 import com.example.server.domain.search.service.SearchRedisService;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
@@ -124,6 +125,7 @@ public class RecommendService {
                 OpenResponseDto dto = null;
                 try {
                     ObjectMapper mapper = new ObjectMapper();
+                    mapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
                     dto = mapper.readValue(response, OpenResponseDto.class);
                 } catch (Exception e) {
                     e.printStackTrace();
