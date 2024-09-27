@@ -116,7 +116,7 @@ public class RecommendService {
                                     .queryParam("MobileOS", "ETC")
                                     .queryParam("_type", "Json")
                                     .queryParam("numOfRows", "10")
-                                    .queryParam("keyword", spot)
+                                    .queryParam("title", spot)
 
 //                            .queryParam("cond[country_nm::EQ]", "가나")
                                     .build(true);
