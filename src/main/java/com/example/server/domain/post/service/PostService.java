@@ -63,6 +63,9 @@ public class PostService {
         Member member = getMemberById(requestDto.getPostRequest().getMemberId());
         Post post = savePost(requestDto.getPostRequest());
 
+        Ticket ticket = saveTicket(requestDto.getTicketRequest());
+        savePostAndTicket(post, ticket);
+
         if (requestDto.getPostRequest().getImages() != null) {
             List<Image> images = saveImages(requestDto.getPostRequest(), post);
             post.updateImages(images);
@@ -72,9 +75,7 @@ public class PostService {
             List<Tag> tags = saveTags(requestDto, post);
             post.updateTags(tags);
         }
-
-        Ticket ticket = saveTicket(requestDto.getTicketRequest());
-        savePostAndTicket(post, ticket);
+        postRepository.save(post);
 
         return PostDtoConverter.convertToGetResponseDto(post, member);
     }

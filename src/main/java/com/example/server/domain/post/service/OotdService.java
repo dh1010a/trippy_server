@@ -221,7 +221,7 @@ public class OotdService {
         }
 
         String city = requestDto.getOotdRequest().getArea();
-        if (city != null && !city.isEmpty()) {
+        if (city != null && !city.equals("")) {
             Tag cityTag = Tag.builder()
                     .name(city)
                     .post(post)
