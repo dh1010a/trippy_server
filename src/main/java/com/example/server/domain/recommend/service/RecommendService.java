@@ -109,7 +109,7 @@ public class RecommendService {
                         .build();
                 String response = webClient.get()
                         .uri(uriBuilder -> {
-                            return uriBuilder.path("/galleryList1")
+                            return uriBuilder.path("/galleryDetailList1")
                                     .queryParam("serviceKey", serviceKey)
                                     .queryParam("dataType", dataType)
                                     .queryParam("MobileApp", "AppTest")
