@@ -29,6 +29,8 @@ public class Post extends BaseTimeEntity {
 
     private String title;
 
+    @Lob
+    @Column(length = 100000)
     private String body;
 
     @Enumerated(EnumType.STRING)
