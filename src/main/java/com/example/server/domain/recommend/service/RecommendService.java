@@ -131,7 +131,7 @@ public class RecommendService {
                     e.printStackTrace();
                 }
 
-                if (dto != null) {
+                if (dto != null && dto.getResponse().getBody().getItems() != null) {
                     List<PlaceImageDto> placeImageDtoList = dto.getResponse().getBody().getItems().getItem();
                     RecommendResponseDto.RecommendPlaceResponseDto recommendPlaceResponseDto = RecommendResponseDto.RecommendPlaceResponseDto.builder()
                             .title(spot)
