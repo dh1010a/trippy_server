@@ -59,7 +59,10 @@ public class OotdService {
         PostRequestDto.CommonPostRequestDto postRequestDto = requestDto.getPostRequest();
         Member member = postService.getMemberById(postRequestDto.getMemberId());
         Post post = postService.savePost(postRequestDto);
-        postRepository.save(post);
+
+
+        Ootd ootd = saveOotd(requestDto.getOotdRequest());
+        savePostAndOotd(post, ootd);
 
         if (postRequestDto.getImages() != null) {
             List<Image> images = postService.saveImages(postRequestDto, post);
@@ -70,9 +73,7 @@ public class OotdService {
             List<Tag> tags = saveTags(requestDto, post);
             post.updateTags(tags);
         }
-
-        Ootd ootd = saveOotd(requestDto.getOotdRequest());
-        savePostAndOotd(post, ootd);
+        postRepository.save(post);
 
         return PostDtoConverter.convertToOotdResponseDto(post, member);
     }
