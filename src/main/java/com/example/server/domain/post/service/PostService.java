@@ -209,11 +209,11 @@ public class PostService {
         updateTagsAndImages(post, requestDto.getTags(), requestDto.getImages());
         post.updatePost(requestDto);
 
-        if (post.getPostType().equals(PostType.POST)) {
-            recreateDefaultPostTags(post);
-        } else {
+        if (post.getPostType().equals(PostType.OOTD)) {
             recreateDefaultOotdTags(post);
+            return PostDtoConverter.convertToOotdResponseDto(post, member);
         }
+        recreateDefaultPostTags(post);
         return PostDtoConverter.convertToGetResponseDto(post, member);
     }
 
