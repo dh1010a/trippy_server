@@ -160,6 +160,8 @@ public class MemberService {
                     .member(member)
                     .build();
             imageRepository.save(image);
+        } else {
+            checkBlogImageExistsAndDelete(member);
         }
 
         member.updateNickName(requestDto.getNickName());
