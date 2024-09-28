@@ -342,17 +342,19 @@ public class PostService {
     }
 
     private void recreateDefaultPostTags(Post post) {
-        if (!tagRepository.existsByNameAndPostId(post.getTicket().getDestination(), post.getId())) {
+        String destination = post.getTicket().getDestination();
+        if (destination != null && !destination.isEmpty() && !tagRepository.existsByNameAndPostId(destination, post.getId())) {
             Tag countryTag = Tag.builder()
-                    .name(post.getTicket().getDestination())
+                    .name(destination)
                     .post(post)
                     .build();
             tagRepository.save(countryTag);
         }
 
-        if (!tagRepository.existsByNameAndPostId(countryService.getCountryByLocation(post.getTicket().getDestination()).getCountryNm(), post.getId())) {
+        String countryNm = countryService.getCountryByLocation(post.getTicket().getDestination()).getCountryNm();
+        if (countryNm != null && !countryNm.isEmpty() && !tagRepository.existsByNameAndPostId(countryNm, post.getId())) {
             Tag cityTag = Tag.builder()
-                    .name(countryService.getCountryByLocation(post.getTicket().getDestination()).getCountryNm())
+                    .name(countryNm)
                     .post(post)
                     .build();
             tagRepository.save(cityTag);
@@ -361,7 +363,7 @@ public class PostService {
 
     private void recreateDefaultOotdTags(Post post) {
         String country = countryService.getCountryByLocation(post.getLocation()).getCountryNm();
-        if (!tagRepository.existsByNameAndPostId(country, post.getId())) {
+        if (country != null &&  !tagRepository.existsByNameAndPostId(country, post.getId())) {
             Tag countryTag = Tag.builder()
                     .name(country)
                     .post(post)
@@ -369,7 +371,7 @@ public class PostService {
             tagRepository.save(countryTag);
         }
         String city = post.getOotd().getArea();
-        if (!tagRepository.existsByNameAndPostId(city, post.getId())) {
+        if (city != null && !tagRepository.existsByNameAndPostId(city, post.getId())) {
             Tag cityTag = Tag.builder()
                     .name(city)
                     .post(post)
@@ -378,7 +380,7 @@ public class PostService {
         }
 
         String weather = convertWeatherKorean(post.getOotd().getWeatherStatus());
-        if (!tagRepository.existsByNameAndPostId(weather, post.getId())) {
+        if (!weather.equals("null") && !tagRepository.existsByNameAndPostId(weather, post.getId())) {
             Tag weatherTag = Tag.builder()
                     .name(weather)
                     .post(post)
