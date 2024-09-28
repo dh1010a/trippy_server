@@ -107,6 +107,7 @@ public class PostDtoConverter {
                 .build();
     }
 
+
     public static  List<PostResponseDto.GetPostResponseDto> convertToPostListResponseDto(List<Post> posts, Member member) {
         List<PostResponseDto.GetPostResponseDto> postDtos = posts.stream()
                 .map(post -> convertToGetResponseDto(post,member))

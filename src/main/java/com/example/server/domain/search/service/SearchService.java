@@ -137,9 +137,9 @@ public class SearchService {
             }
         }
         if (postType == PostType.POST) {
-            return PostDtoConverter.convertToPostListResponseDto(posts, member);
+            return PostDtoConverter.convertToMultiplePostResponseDto(posts, member);
         } else {
-            return PostDtoConverter.convertToOOTDListResponseDto(posts, member);
+            return PostDtoConverter.convertToMultipleOotdResponseDto(posts, member);
         }
     }
 
