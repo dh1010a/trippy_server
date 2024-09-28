@@ -133,7 +133,8 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     // 제목 + 내용 검색
     @Query("SELECT p FROM Post p " +
             "LEFT JOIN p.member m " +
-            "WHERE (p.title LIKE %:keyword% OR p.body LIKE %:keyword%) " +
+            "LEFT JOIN p.tag t " +
+            "WHERE (p.title LIKE %:keyword% OR p.body LIKE %:keyword% OR t.name LIKE %:keyword%) " +
             "AND p.postType = :postType " +
             "AND ( " +
             "      (m.ticketScope = 'PUBLIC' AND :postType = 'POST') OR " +
@@ -145,7 +146,7 @@ public interface PostRepository extends JpaRepository<Post,Long> {
             "      (m.ticketScope <> 'PRIVATE' AND :postType = 'POST') OR " +
             "      (m.ootdScope <> 'PRIVATE' AND :postType = 'OOTD')" +
             ")")
-    Page<Post> findPostBodyAndTitle(@Param("keyword") String keyword,
+    Page<Post> findPostBodyAndTitleAndTitle(@Param("keyword") String keyword,
                                     @Param("postType") PostType postType,
                                     @Param("followingList") List<Long> followingList,
                                     Pageable pageable);

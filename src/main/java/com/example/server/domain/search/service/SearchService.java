@@ -63,7 +63,7 @@ public class SearchService {
         List<Long> followingList = memberFollowRepository.findFollowingList(member==null ? 0 : member.getIdx());
         Pageable pageable = postService.getPageable(saveSearchRequest.getPage(), saveSearchRequest.getSize(), saveSearchRequest.getOrderType());
 
-        List<Post> posts = postRepository.findPostBodyAndTitle(saveSearchRequest.getKeyword(), PostType.OOTD, followingList, pageable).getContent();
+        List<Post> posts = postRepository.findPostBodyAndTitleAndTitle(saveSearchRequest.getKeyword(), PostType.OOTD, followingList, pageable).getContent();
         return PostDtoConverter.convertToMultipleOotdResponseDto(posts, member);
     }
 
