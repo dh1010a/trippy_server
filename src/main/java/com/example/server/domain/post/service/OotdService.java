@@ -235,7 +235,8 @@ public class OotdService {
         }
 
         // 날씨 태그 추가
-        if (requestDto.getOotdRequest().getWeatherStatus() != null) {
+        if (requestDto.getOotdRequest().getWeatherStatus() != null &&
+                !requestDto.getOotdRequest().getWeatherStatus().isEmpty()) {
             String weather = convertWeatherKorean(requestDto.getOotdRequest().getWeatherStatus());
             if (!weather.equals("null")) {
                 Tag weatherTag = Tag.builder()
