@@ -361,9 +361,9 @@ public class PostService {
         }
     }
 
-    private void recreateDefaultOotdTags(Post post) {
+    public void recreateDefaultOotdTags(Post post) {
         String country = countryService.getCountryByLocation(post.getLocation()).getCountryNm();
-        if (country != null &&  !tagRepository.existsByNameAndPostId(country, post.getId())) {
+        if (country != null && !country.isEmpty() && !tagRepository.existsByNameAndPostId(country, post.getId())) {
             Tag countryTag = Tag.builder()
                     .name(country)
                     .post(post)
@@ -371,7 +371,7 @@ public class PostService {
             tagRepository.save(countryTag);
         }
         String city = post.getOotd().getArea();
-        if (city != null && !tagRepository.existsByNameAndPostId(city, post.getId())) {
+        if (city != null && !city.isEmpty() && !tagRepository.existsByNameAndPostId(city, post.getId())) {
             Tag cityTag = Tag.builder()
                     .name(city)
                     .post(post)

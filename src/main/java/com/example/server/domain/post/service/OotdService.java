@@ -146,6 +146,8 @@ public class OotdService {
         }
 
         ootd.updateOotd(requestDto);
+        postService.recreateDefaultOotdTags(ootd.getPost());
+        ootdRepository.save(ootd);
         return convertToOotdBasicResponseDto(ootd);
     }
 
@@ -213,7 +215,7 @@ public class OotdService {
         List<Tag> collect = new ArrayList<>();
         // 국가와 도시 태그 추가
         String country = countryService.getCountryByLocation(requestDto.getPostRequest().getLocation()).getCountryNm();
-        if (country != null) {
+        if (country != null && !country.isEmpty()) {
             Tag countryTag = Tag.builder()
                     .name(country)
                     .post(post)
@@ -223,7 +225,7 @@ public class OotdService {
         }
 
         String city = requestDto.getOotdRequest().getArea();
-        if (city != null && !city.equals("")) {
+        if (city != null && !city.isEmpty()) {
             Tag cityTag = Tag.builder()
                     .name(city)
                     .post(post)
@@ -235,12 +237,15 @@ public class OotdService {
         // 날씨 태그 추가
         if (requestDto.getOotdRequest().getWeatherStatus() != null) {
             String weather = convertWeatherKorean(requestDto.getOotdRequest().getWeatherStatus());
-            Tag weatherTag = Tag.builder()
-                    .name(weather)
-                    .post(post)
-                    .build();
-            tagRepository.save(weatherTag);
-            collect.add(weatherTag);
+            if (!weather.equals("null")) {
+                Tag weatherTag = Tag.builder()
+                        .name(weather)
+                        .post(post)
+                        .build();
+                tagRepository.save(weatherTag);
+                collect.add(weatherTag);
+            }
+
         }
 
 
