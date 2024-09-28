@@ -75,7 +75,11 @@ public class PostService {
             List<Tag> tags = saveTags(requestDto, post);
             post.updateTags(tags);
         }
-        recreateDefaultPostTags(post);
+        if (post.getPostType().equals(PostType.OOTD)) {
+            recreateDefaultOotdTags(post);
+        } else {
+            recreateDefaultPostTags(post);
+        }
         postRepository.save(post);
 
         return PostDtoConverter.convertToGetResponseDto(post, member);
@@ -283,7 +287,7 @@ public class PostService {
 
     private List<Tag> saveTags(PostRequestDto.UploadPostRequestDto requestDto, Post post) {
         List<Tag> collect = new ArrayList<>();
-        // 국가와 도시 태그 추가
+//         국가와 도시 태그 추가
 //        Tag countryTag = Tag.builder()
 //                .name(requestDto.getTicketRequest().getDestination())
 //                .post(post)
