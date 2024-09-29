@@ -95,7 +95,7 @@ public class MemberService {
     }
 
     public Member createDefaultOAuth2Member(CustomUserDetails oAuth2User) {
-        String randomNickName = oAuth2User.getMemberName().substring(1, 3) + UUID.randomUUID().toString().substring(0, 9);
+        String randomNickName = oAuth2User.getMemberName() + UUID.randomUUID().toString().substring(0, 9);
 //        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         Member member = Member.builder()
                 .memberId(oAuth2User.getMemberId())
