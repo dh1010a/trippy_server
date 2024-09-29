@@ -146,7 +146,7 @@ public interface PostRepository extends JpaRepository<Post,Long> {
             "      (m.ticketScope <> 'PRIVATE' AND :postType = 'POST') OR " +
             "      (m.ootdScope <> 'PRIVATE' AND :postType = 'OOTD')" +
             ")")
-    Page<Post> findPostBodyAndTitleAndTitle(@Param("keyword") String keyword,
+    Page<Post> findPostBodyAndTitleAndTag(@Param("keyword") String keyword,
                                     @Param("postType") PostType postType,
                                     @Param("followingList") List<Long> followingList,
                                     Pageable pageable);
