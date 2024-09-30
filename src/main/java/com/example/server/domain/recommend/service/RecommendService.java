@@ -211,6 +211,9 @@ public class RecommendService {
         List<Post> posts = new ArrayList<>();
         // RecommendRequest 객체 생성
         for (int x: postIds){
+            if (!postRepository.existsById((long)x)) {
+                continue;
+            }
             Post post = postService.getPostById((long)x);
             if (!isValidAccessToPost(post, member, postType)) {
                 continue;
@@ -226,6 +229,9 @@ public class RecommendService {
         List<Post> ootds = new ArrayList<>();
         // RecommendRequest 객체 생성
         for (int x: ootdIds){
+            if (!postRepository.existsById((long)x)) {
+                continue;
+            }
             Post post = postService.getPostById((long)x);
             if (!isValidAccessToPost(post, member, postType)) {
                 continue;
