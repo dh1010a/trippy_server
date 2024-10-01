@@ -65,7 +65,7 @@ public class KakaoLoadStrategy extends SocialLoadStrategy{
                     RESPONSE_TYPE);
 
         } catch (Exception e) {
-            log.error(ErrorStatus.KAKAO_SOCIAL_UNLINK_FAIL.getMessage(), e.getMessage());
+            log.error(ErrorStatus.KAKAO_SOCIAL_UNLINK_FAIL.getMessage() + e.getMessage());
             throw new ErrorHandler(ErrorStatus.KAKAO_SOCIAL_UNLINK_FAIL);
         }
     }
