@@ -22,9 +22,6 @@ import java.util.Map;
 @Transactional
 public class KakaoLoadStrategy extends SocialLoadStrategy{
 
-    @Value("${social.admin.key.kakao}")
-    private String adminKey;
-
 
 
     protected OAuth2UserInfo sendRequestToSocialSite(HttpEntity request){
@@ -43,7 +40,7 @@ public class KakaoLoadStrategy extends SocialLoadStrategy{
     }
 
     @Override
-    public void unlink(String memberId) {
+    public void unlink(String memberId, String adminKey) {
         try {
             // Headers 설정
             HttpHeaders headers = new HttpHeaders();

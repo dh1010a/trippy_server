@@ -34,6 +34,7 @@ import com.example.server.global.auth.security.domain.CustomUserDetails;
 import com.example.server.global.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -62,6 +63,9 @@ public class MemberService {
     private static final String DEFAULT_BLOG_SUFFIX = ".blog";
     private static final String ACCESS_TOKEN_KEY = "accessToken";
     private static final String ANONYMOUS = "anonymous";
+
+    @Value("${social.admin.key.kakao}")
+    private String kakaoAdminKey;
 
     public MemberTaskResultResponseDto signUp(CreateMemberRequestDto requestDto) {
         String randomNickName = requestDto.getEmail() + UUID.randomUUID().toString().substring(0, 9);
@@ -492,7 +496,7 @@ public class MemberService {
                 break;
             case KAKAO:
                 SocialLoadStrategy kakao = new KakaoLoadStrategy();
-                kakao.unlink(memberId);
+                kakao.unlink(memberId, kakaoAdminKey);
                 break;
             case NAVER:
 //                SocialLoadStrategy naver = new NaverLoadStrategy();
