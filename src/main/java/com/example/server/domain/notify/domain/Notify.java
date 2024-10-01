@@ -40,6 +40,7 @@ public class Notify extends BaseTimeEntity {
 
     private Long postId;
 
+    @Enumerated(EnumType.STRING)
     private PostType postType;
 
     private String postTitle;

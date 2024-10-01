@@ -17,6 +17,7 @@ public class NotifyRequestDto {
         String senderMemberId;
         Long postId;
         String postTitle;
+        String postType;
         NotificationType notificationType;
     }
 
