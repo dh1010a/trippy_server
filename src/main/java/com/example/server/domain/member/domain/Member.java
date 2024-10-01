@@ -15,6 +15,7 @@ import com.example.server.domain.image.domain.Image;
 //import com.example.server.domain.follow.domain.MemberFollow;
 import com.example.server.domain.member.model.*;
 import com.example.server.domain.notify.domain.Notify;
+import com.example.server.domain.post.domain.Like;
 import com.example.server.domain.post.domain.Post;
 import com.example.server.global.auth.oauth2.model.SocialType;
 import com.example.server.global.common.BaseTimeEntity;
@@ -63,9 +64,9 @@ public class Member extends BaseTimeEntity {
     @JsonIgnore
     private List<BookMark> bookMarks;
 
-//    @OneToMany(mappedBy = "member")
-//    @JsonIgnore
-//    private List<Like> likes;
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval=true)
+    @JsonIgnore
+    private List<Like> likes;
 //
 //    @OneToMany(mappedBy = "member")
 //    @JsonIgnore

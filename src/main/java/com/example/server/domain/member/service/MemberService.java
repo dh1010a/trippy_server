@@ -480,9 +480,9 @@ public class MemberService {
     public MemberTaskSuccessResponseDto deleteMember(String memberId, String accessToken, String device) {
         Member member = memberRepository.getMemberById(memberId);
 
-        if (member.getSocialType() != SocialType.LOCAL  && accessToken == null) {
-            throw new ErrorHandler(ErrorStatus.MEMBER_SOCIAL_TOKEN_NOT_PROVIDED);
-        }
+//        if (member.getSocialType() != SocialType.LOCAL  && accessToken == null) {
+//            throw new ErrorHandler(ErrorStatus.MEMBER_SOCIAL_TOKEN_NOT_PROVIDED);
+//        }
 
         // 댓글 삭제
         member.getComments().forEach(comment -> commentService.deleteCommentForUnregister(memberId, comment.getId()));
@@ -505,6 +505,11 @@ public class MemberService {
 //                naver.unlink(accessToken);
 //                break;
 //        }
+
+        // 팔로잉 수 감소
+        memberRepository.decrementFollowingCountByMemberId(member.getIdx());
+        memberRepository.decrementFollowerCountByMemberId(member.getIdx());
+
 
         // 액세스 토큰 모두 삭제
         String redisKey = ACCESS_TOKEN_KEY + memberId;

@@ -7,6 +7,7 @@ import com.example.server.global.auth.oauth2.model.SocialType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -42,4 +43,14 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("SELECT m FROM Member m WHERE m.blogName LIKE %:keyword%")
     Page<Member> findByBlogNameContaining(@Param("keyword") String keyword, Pageable pageable);
+
+    // 팔로잉 수 감소
+    @Modifying
+    @Query("UPDATE Member m SET m.followingCnt = m.followingCnt - 1 WHERE m.idx IN (SELECT mf.member.idx FROM MemberFollow mf WHERE mf.followingMemberIdx = :memberId)")
+    void decrementFollowingCountByMemberId(@Param("memberId") Long memberId);
+
+    // 팔로워 수 감소
+    @Modifying
+    @Query("UPDATE Member m SET m.followerCnt = m.followerCnt - 1 WHERE m.idx IN (SELECT mf.followingMemberIdx FROM MemberFollow mf WHERE mf.member.idx = :memberId)")
+    void decrementFollowerCountByMemberId(@Param("memberId") Long memberId);
 }

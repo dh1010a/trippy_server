@@ -76,6 +76,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 						}
 						return Optional.empty();
 					})
+//					.flatMap(jwtService::extractMemberId)
 					.flatMap(memberRepository::findByMemberId)
 					.ifPresent(this::saveAuthentication);
 			filterChain.doFilter(request, response);
