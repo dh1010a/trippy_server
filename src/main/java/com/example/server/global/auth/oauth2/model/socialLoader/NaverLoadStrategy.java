@@ -44,7 +44,7 @@ public class NaverLoadStrategy extends SocialLoadStrategy{
     }
 
     @Override
-    public void unlink(String accessToken) {
+    public void unlink(String memberId, String accessToken) {
         try {
             HttpHeaders headers = new HttpHeaders();
 

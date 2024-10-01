@@ -60,6 +60,10 @@ public class OotdService {
         Member member = postService.getMemberById(postRequestDto.getMemberId());
         Post post = postService.savePost(postRequestDto);
 
+
+        Ootd ootd = saveOotd(requestDto.getOotdRequest());
+        savePostAndOotd(post, ootd);
+
         if (postRequestDto.getImages() != null) {
             List<Image> images = postService.saveImages(postRequestDto, post);
             post.updateImages(images);
@@ -69,9 +73,7 @@ public class OotdService {
             List<Tag> tags = saveTags(requestDto, post);
             post.updateTags(tags);
         }
-
-        Ootd ootd = saveOotd(requestDto.getOotdRequest());
-        savePostAndOotd(post, ootd);
+        postRepository.save(post);
 
         return PostDtoConverter.convertToOotdResponseDto(post, member);
     }
@@ -144,6 +146,8 @@ public class OotdService {
         }
 
         ootd.updateOotd(requestDto);
+        postService.recreateDefaultOotdTags(ootd.getPost());
+        ootdRepository.save(ootd);
         return convertToOotdBasicResponseDto(ootd);
     }
 
@@ -205,11 +209,13 @@ public class OotdService {
                 .build();
     }
 
+
+
     private List<Tag> saveTags(PostRequestDto.UploadOOTDPostRequestDto requestDto, Post post) {
         List<Tag> collect = new ArrayList<>();
         // 국가와 도시 태그 추가
         String country = countryService.getCountryByLocation(requestDto.getPostRequest().getLocation()).getCountryNm();
-        if (country != null) {
+        if (country != null && !country.isEmpty()) {
             Tag countryTag = Tag.builder()
                     .name(country)
                     .post(post)
@@ -219,7 +225,7 @@ public class OotdService {
         }
 
         String city = requestDto.getOotdRequest().getArea();
-        if (city != null) {
+        if (city != null && !city.isEmpty()) {
             Tag cityTag = Tag.builder()
                     .name(city)
                     .post(post)
@@ -232,16 +238,22 @@ public class OotdService {
         if (requestDto.getOotdRequest().getWeatherStatus() != null &&
                 !requestDto.getOotdRequest().getWeatherStatus().isEmpty()) {
             String weather = convertWeatherKorean(requestDto.getOotdRequest().getWeatherStatus());
-            Tag weatherTag = Tag.builder()
-                    .name(weather)
-                    .post(post)
-                    .build();
-            tagRepository.save(weatherTag);
-            collect.add(weatherTag);
+            if (!weather.equals("null")) {
+                Tag weatherTag = Tag.builder()
+                        .name(weather)
+                        .post(post)
+                        .build();
+                tagRepository.save(weatherTag);
+                collect.add(weatherTag);
+            }
+
         }
 
 
         for (String tagName : requestDto.getPostRequest().getTags()) {
+            if (tagRepository.existsByNameAndPostId(tagName, post.getId())) {
+                continue;
+            }
             Tag tag = Tag.builder()
                     .name(tagName)
                     .post(post)

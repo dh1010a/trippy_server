@@ -34,9 +34,11 @@ import com.example.server.global.auth.security.domain.CustomUserDetails;
 import com.example.server.global.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -62,6 +64,9 @@ public class MemberService {
     private static final String DEFAULT_BLOG_SUFFIX = ".blog";
     private static final String ACCESS_TOKEN_KEY = "accessToken";
     private static final String ANONYMOUS = "anonymous";
+
+    @Value("${social.admin.key.kakao}")
+    private String kakaoAdminKey;
 
     public MemberTaskResultResponseDto signUp(CreateMemberRequestDto requestDto) {
         String randomNickName = requestDto.getEmail() + UUID.randomUUID().toString().substring(0, 9);
@@ -95,7 +100,7 @@ public class MemberService {
     }
 
     public Member createDefaultOAuth2Member(CustomUserDetails oAuth2User) {
-        String randomNickName = oAuth2User.getMemberName().substring(1, 3) + UUID.randomUUID().toString().substring(0, 9);
+        String randomNickName = oAuth2User.getMemberName() + UUID.randomUUID().toString().substring(0, 9);
 //        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         Member member = Member.builder()
                 .memberId(oAuth2User.getMemberId())
@@ -160,6 +165,8 @@ public class MemberService {
                     .member(member)
                     .build();
             imageRepository.save(image);
+        } else {
+            checkBlogImageExistsAndDelete(member);
         }
 
         member.updateNickName(requestDto.getNickName());
@@ -464,17 +471,18 @@ public class MemberService {
 
     //== 알림을 보내는 기능 ==//
     public void publishFollowEvent(Member member, Member receiver) {
-        eventPublisher.publishEvent(NotifyDtoConverter.convertToNotifyPublishRequestDto(member, receiver, NotificationType.FOLLOW));
+        eventPublisher.publishEvent(NotifyDtoConverter.convertToNotifyPublishRequestDto(member, receiver, NotificationType.FOLLOW, null));
 
     }
 
     // DELETE /api/member?memberId={memberId}
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public MemberTaskSuccessResponseDto deleteMember(String memberId, String accessToken, String device) {
         Member member = memberRepository.getMemberById(memberId);
 
-        if (member.getSocialType() != SocialType.LOCAL  && accessToken == null) {
-            throw new ErrorHandler(ErrorStatus.MEMBER_SOCIAL_TOKEN_NOT_PROVIDED);
-        }
+//        if (member.getSocialType() != SocialType.LOCAL  && accessToken == null) {
+//            throw new ErrorHandler(ErrorStatus.MEMBER_SOCIAL_TOKEN_NOT_PROVIDED);
+//        }
 
         // 댓글 삭제
         member.getComments().forEach(comment -> commentService.deleteCommentForUnregister(memberId, comment.getId()));
@@ -483,23 +491,28 @@ public class MemberService {
         memberFollowRepository.deleteAll(memberFollowRepository.findByFollowingMemberIdx(member.getIdx()));
 
         // 소셜 연결 해제
-        switch (member.getSocialType()) {
-            case GOOGLE:
-                SocialLoadStrategy google = new GoogleLoadStrategy();
-                google.unlink(accessToken);
-                break;
-            case KAKAO:
-                SocialLoadStrategy kakao = new KakaoLoadStrategy();
-                kakao.unlink(accessToken);
-                break;
-            case NAVER:
-                SocialLoadStrategy naver = new NaverLoadStrategy();
-                naver.unlink(accessToken);
-                break;
-        }
+//        switch (member.getSocialType()) {
+//            case GOOGLE:
+//                SocialLoadStrategy google = new GoogleLoadStrategy();
+//                google.unlink(accessToken);
+//                break;
+//            case KAKAO:
+//                SocialLoadStrategy kakao = new KakaoLoadStrategy();
+//                kakao.unlink(memberId, kakaoAdminKey);
+//                break;
+//            case NAVER:
+//                SocialLoadStrategy naver = new NaverLoadStrategy();
+//                naver.unlink(accessToken);
+//                break;
+//        }
+
+        // 팔로잉 수 감소
+        memberRepository.decrementFollowingCountByMemberId(member.getIdx());
+        memberRepository.decrementFollowerCountByMemberId(member.getIdx());
+
 
         // 액세스 토큰 모두 삭제
-        String redisKey = device + ACCESS_TOKEN_KEY + memberId;
+        String redisKey = ACCESS_TOKEN_KEY + memberId;
         List<String> tokens = redisUtil.getAllData(redisKey);
         if (!tokens.isEmpty()) {
             redisUtil.deleteData(redisKey);

@@ -2,6 +2,7 @@ package com.example.server.domain.notify.domain;
 
 import com.example.server.domain.member.domain.Member;
 import com.example.server.domain.notify.model.NotificationType;
+import com.example.server.domain.post.model.PostType;
 import com.example.server.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -38,6 +39,9 @@ public class Notify extends BaseTimeEntity {
     private String senderMemberId;
 
     private Long postId;
+
+    @Enumerated(EnumType.STRING)
+    private PostType postType;
 
     private String postTitle;
 

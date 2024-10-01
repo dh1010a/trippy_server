@@ -43,5 +43,5 @@ public abstract class SocialLoadStrategy {
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
     }
 
-    public abstract void unlink(String accessToken);
+    public abstract void unlink(String memberId, String accessToken);
 }

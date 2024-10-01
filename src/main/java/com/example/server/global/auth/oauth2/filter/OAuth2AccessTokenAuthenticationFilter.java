@@ -77,6 +77,7 @@ public class OAuth2AccessTokenAuthenticationFilter extends AbstractAuthenticatio
             response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.onFailure(ErrorStatus.SOCIAL_UNAUTHORIZED.getCode(),
                     socialType.getSocialName() + " " + ErrorStatus.SOCIAL_UNAUTHORIZED.getMessage(), e.getMessage())));
             log.info("{} Authentication failed: " + e.getClass().toString() + " : " + e.getMessage(), socialType.getSocialName());
+            log.info("{}", e.getStackTrace());
             return null;
         }
     }
@@ -84,6 +85,7 @@ public class OAuth2AccessTokenAuthenticationFilter extends AbstractAuthenticatio
 
     private SocialType extractSocialType(HttpServletRequest request, HttpServletResponse response) {
         log.info(request.getRequestURI().substring(DEFAULT_OAUTH2_LOGIN_REQUEST_URL_PREFIX.length()));
+
         return Arrays.stream(SocialType.values())
                 .filter(socialType ->
                         socialType.getSocialName()

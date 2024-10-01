@@ -63,6 +63,9 @@ public class PostService {
         Member member = getMemberById(requestDto.getPostRequest().getMemberId());
         Post post = savePost(requestDto.getPostRequest());
 
+        Ticket ticket = saveTicket(requestDto.getTicketRequest());
+        savePostAndTicket(post, ticket);
+
         if (requestDto.getPostRequest().getImages() != null) {
             List<Image> images = saveImages(requestDto.getPostRequest(), post);
             post.updateImages(images);
@@ -72,9 +75,12 @@ public class PostService {
             List<Tag> tags = saveTags(requestDto, post);
             post.updateTags(tags);
         }
-
-        Ticket ticket = saveTicket(requestDto.getTicketRequest());
-        savePostAndTicket(post, ticket);
+        if (post.getPostType().equals(PostType.OOTD)) {
+            recreateDefaultOotdTags(post);
+        } else {
+            recreateDefaultPostTags(post);
+        }
+        postRepository.save(post);
 
         return PostDtoConverter.convertToGetResponseDto(post, member);
     }
@@ -204,9 +210,10 @@ public class PostService {
         post.updatePost(requestDto);
 
         if (post.getPostType().equals(PostType.OOTD)) {
+            recreateDefaultOotdTags(post);
             return PostDtoConverter.convertToOotdResponseDto(post, member);
         }
-
+        recreateDefaultPostTags(post);
         return PostDtoConverter.convertToGetResponseDto(post, member);
     }
 
@@ -280,22 +287,25 @@ public class PostService {
 
     private List<Tag> saveTags(PostRequestDto.UploadPostRequestDto requestDto, Post post) {
         List<Tag> collect = new ArrayList<>();
-        // 국가와 도시 태그 추가
-        Tag countryTag = Tag.builder()
-                .name(requestDto.getTicketRequest().getDestination())
-                .post(post)
-                .build();
-        tagRepository.save(countryTag);
-        collect.add(countryTag);
-        Tag cityTag = Tag.builder()
-                .name(countryService.getCountryByLocation(requestDto.getTicketRequest().getDestination()).getCountryNm())
-                .post(post)
-                .build();
-        tagRepository.save(cityTag);
-        collect.add(cityTag);
+//         국가와 도시 태그 추가
+//        Tag countryTag = Tag.builder()
+//                .name(requestDto.getTicketRequest().getDestination())
+//                .post(post)
+//                .build();
+//        tagRepository.save(countryTag);
+//        collect.add(countryTag);
+//        Tag cityTag = Tag.builder()
+//                .name(countryService.getCountryByLocation(requestDto.getTicketRequest().getDestination()).getCountryNm())
+//                .post(post)
+//                .build();
+//        tagRepository.save(cityTag);
+//        collect.add(cityTag);
 
 
         for (String tagName : requestDto.getPostRequest().getTags()) {
+            if (tagRepository.existsByNameAndPostId(tagName, post.getId())) {
+                continue;
+            }
             Tag tag = Tag.builder()
                     .name(tagName)
                     .post(post)
@@ -329,6 +339,55 @@ public class PostService {
         ticketRepository.save(ticket);
         post.updateTicket(ticket);
         postRepository.save(post);
+    }
+
+    private void recreateDefaultPostTags(Post post) {
+        String destination = post.getTicket().getDestination();
+        if (destination != null && !destination.isEmpty() && !tagRepository.existsByNameAndPostId(destination, post.getId())) {
+            Tag countryTag = Tag.builder()
+                    .name(destination)
+                    .post(post)
+                    .build();
+            tagRepository.save(countryTag);
+        }
+
+        String countryNm = countryService.getCountryByLocation(post.getTicket().getDestination()).getCountryNm();
+        if (countryNm != null && !countryNm.isEmpty() && !tagRepository.existsByNameAndPostId(countryNm, post.getId())) {
+            Tag cityTag = Tag.builder()
+                    .name(countryNm)
+                    .post(post)
+                    .build();
+            tagRepository.save(cityTag);
+        }
+    }
+
+    public void recreateDefaultOotdTags(Post post) {
+        String country = countryService.getCountryByLocation(post.getLocation()).getCountryNm();
+        if (country != null && !country.isEmpty() && !tagRepository.existsByNameAndPostId(country, post.getId())) {
+            Tag countryTag = Tag.builder()
+                    .name(country)
+                    .post(post)
+                    .build();
+            tagRepository.save(countryTag);
+        }
+        String city = post.getOotd().getArea();
+        if (city != null && !city.isEmpty() && !tagRepository.existsByNameAndPostId(city, post.getId())) {
+            Tag cityTag = Tag.builder()
+                    .name(city)
+                    .post(post)
+                    .build();
+            tagRepository.save(cityTag);
+        }
+
+        String weather = convertWeatherKorean(post.getOotd().getWeatherStatus());
+        if (!weather.equals("null") && !tagRepository.existsByNameAndPostId(weather, post.getId())) {
+            Tag weatherTag = Tag.builder()
+                    .name(weather)
+                    .post(post)
+                    .build();
+            tagRepository.save(weatherTag);
+        }
+
     }
 
     private void updateTagsAndImages(Post post, List<String> newTagNames, List<ImageDto> newImagesDto) {
@@ -419,5 +478,17 @@ public class PostService {
         if (!post.getMember().getMemberId().equals(memberId)) {
             throw new ErrorHandler(ErrorStatus.NO_PERMISSION__FOR_POST);
         }
+    }
+
+    private String convertWeatherKorean(String weatherEng){
+        if (weatherEng == null) return "null";
+        return switch (weatherEng.toLowerCase()) {
+            case "rain" -> "비";
+            case "snow" -> "눈";
+            case "mostly_cloudy" -> "구름많음";
+            case "cloudy" -> "흐림";
+            case "sunny" -> "맑음";
+            default -> "null";
+        };
     }
 }
