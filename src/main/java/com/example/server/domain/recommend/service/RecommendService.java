@@ -306,7 +306,7 @@ public class RecommendService {
             );
 
             String responseBody = responseEntity.getBody();
-            System.out.println("Flask 서버 응답: " + responseBody);
+            //System.out.println("Flask 서버 응답: " + responseBody);
 
             return parsePostIds(responseBody);
 
@@ -383,7 +383,7 @@ public class RecommendService {
 
             // 응답 로그 출력
             String responseBody = responseEntity.getBody();
-            System.out.println("Flask 서버 응답: " + responseBody);
+            //System.out.println("Flask 서버 응답: " + responseBody);
 
             // 키워드 문자열을 배열로 변환
             return parseKeywords(responseBody);
