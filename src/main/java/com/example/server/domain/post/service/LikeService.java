@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -53,7 +54,7 @@ public class LikeService {
             likeRepository.save(like);
             Integer likeCount = getLikeCount(postId);
             if (!member.getMemberId().equals(post.getMember().getMemberId())) {
-                publishLikeEvent(member, post.getMember());
+                publishLikeEvent(member, post.getMember(), post);
             }
             return convertToLikeBasicDto(like,likeCount);
         }
@@ -126,8 +127,8 @@ public class LikeService {
     }
 
     //== 알림을 보내는 기능 ==//
-    public void publishLikeEvent(Member member, Member receiver) {
-        eventPublisher.publishEvent(NotifyDtoConverter.convertToNotifyPublishRequestDto(member, receiver, NotificationType.LIKE));
+    public void publishLikeEvent(Member member, Member receiver, Post post) {
+        eventPublisher.publishEvent(NotifyDtoConverter.convertToNotifyPublishRequestDto(member, receiver, NotificationType.LIKE, post));
     }
 
 }

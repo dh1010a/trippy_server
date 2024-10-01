@@ -72,6 +72,7 @@ public class NotifyService {
                     .senderMemberId(notifyPublishRequestDto.getSenderMemberId())
                     .postId(notifyPublishRequestDto.getPostId())
                     .postTitle(notifyPublishRequestDto.getPostTitle())
+                    .postType(notifyPublishRequestDto.getPostType())
                     .isRead(false)
                     .notificationType(notificationType)
                     .build();
@@ -84,6 +85,7 @@ public class NotifyService {
                     .content(notifyPublishRequestDto.getContent())
                     .postId(notifyPublishRequestDto.getPostId())
                     .postTitle(notifyPublishRequestDto.getPostTitle())
+                    .postType(notifyPublishRequestDto.getPostType())
                     .isRead(false)
                     .notificationType(notificationType)
                     .build();
@@ -96,6 +98,7 @@ public class NotifyService {
                     .content(notifyPublishRequestDto.getContent())
                     .postId(notifyPublishRequestDto.getPostId())
                     .postTitle(notifyPublishRequestDto.getPostTitle())
+                    .postType(notifyPublishRequestDto.getPostType())
                     .isRead(false)
                     .notificationType(notificationType)
                     .build();

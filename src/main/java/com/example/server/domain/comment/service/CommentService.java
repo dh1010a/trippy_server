@@ -18,6 +18,7 @@ import com.example.server.domain.post.domain.Tag;
 import com.example.server.domain.post.dto.PostDtoConverter;
 import com.example.server.domain.post.dto.PostRequestDto;
 import com.example.server.domain.post.dto.PostResponseDto;
+import com.example.server.domain.post.model.PostType;
 import com.example.server.domain.post.repository.PostRepository;
 import com.example.server.global.apiPayload.code.status.ErrorStatus;
 import com.example.server.global.apiPayload.exception.handler.ErrorHandler;
@@ -270,9 +271,9 @@ public class CommentService {
 //            content = content.substring(0, 30) + "...";
 //        }
         if(parentComment != null && !member.getMemberId().equals(parentComment.getMember().getMemberId())){
-            publishCommentEvent(member, mentionMember, NotificationType.REPLY, content);
+            publishCommentEvent(member, mentionMember, NotificationType.REPLY, content, post);
         } else if (parentComment == null && !member.getMemberId().equals(post.getMember().getMemberId())) {
-            publishCommentEvent(member, post.getMember(), NotificationType.COMMENT, content);
+            publishCommentEvent(member, post.getMember(), NotificationType.COMMENT, content, post);
         }
        return comment;
     }
@@ -308,8 +309,8 @@ public class CommentService {
     }
 
     //== 알림을 보내는 기능 ==//
-    public void publishCommentEvent(Member member, Member receiver, NotificationType type, String content) {
-        eventPublisher.publishEvent(NotifyDtoConverter.convertToNotifyPublishRequestDto(member, receiver, type, content));
+    public void publishCommentEvent(Member member, Member receiver, NotificationType type, String content, Post post) {
+        eventPublisher.publishEvent(NotifyDtoConverter.convertToNotifyPublishRequestDto(member, receiver, type, content, post));
     }
 
 }

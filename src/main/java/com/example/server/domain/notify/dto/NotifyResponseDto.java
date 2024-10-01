@@ -17,6 +17,7 @@ public class NotifyResponseDto {
         String senderNickName;
         String senderMemberId;
         Long postId;
+        String postType;
         String postTitle;
         boolean isRead;
         String notificationType;
