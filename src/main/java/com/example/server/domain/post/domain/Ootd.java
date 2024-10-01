@@ -3,6 +3,8 @@ package com.example.server.domain.post.domain;
 import com.example.server.domain.post.dto.OotdReqResDto;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
 
@@ -33,6 +35,7 @@ public class Ootd {
     private LocalDate date;
 
     @OneToOne(mappedBy = "ootd", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Post post;
 
     public void updateOotd(OotdReqResDto.UpdateOOTDRequestDto updateOOTDRequestDto){

@@ -3,6 +3,8 @@ package com.example.server.domain.follow.domain;
 import com.example.server.domain.member.domain.Member;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
@@ -18,6 +20,7 @@ public class MemberFollow {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_idx")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Member member;
 
     private Long followingMemberIdx;
