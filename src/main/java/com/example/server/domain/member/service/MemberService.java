@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -475,6 +476,7 @@ public class MemberService {
     }
 
     // DELETE /api/member?memberId={memberId}
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public MemberTaskSuccessResponseDto deleteMember(String memberId, String accessToken, String device) {
         Member member = memberRepository.getMemberById(memberId);
 
