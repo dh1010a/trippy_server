@@ -106,3 +106,22 @@ DELIMITER $$
                 DELIMITER ;
 
 
+-- 트리거 : 회원 탈퇴시 팔로잉/팔로우 수 업데이트
+DELIMITER $$
+
+                CREATE TRIGGER decrement_follower_following_count
+                    BEFORE DELETE ON member
+                    FOR EACH ROW
+                BEGIN
+                    -- 팔로잉 수를 감소시킴 (본인을 팔로우한 사용자들의 followingCnt 감소)
+                    UPDATE member
+                    SET following_cnt = following_cnt - 1
+                    WHERE member_idx IN (SELECT following_member_idx FROM member_follow WHERE member_idx = OLD.member_idx);
+
+                    -- 팔로워 수를 감소시킴 (본인이 팔로우하던 사용자들의 followerCnt 감소)
+                    UPDATE member
+                    SET follower_cnt = follower_cnt - 1
+                    WHERE member_idx IN (SELECT member_idx FROM member_follow WHERE following_member_idx = OLD.member_idx);
+                END $$
+
+DELIMITER ;
