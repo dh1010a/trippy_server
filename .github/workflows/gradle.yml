@@ -29,11 +29,11 @@ jobs:
         distribution: 'temurin'
 
     # GitHub Secrets로부터 logback.xml 파일 생성
-    - name: Create logback.xml
-      run: |
-          cd ./src/main/resources
-          echo "${{ secrets.LOGBACK_CONFIG }}" > logback.xml
-      shell: bash
+    # - name: Create logback.xml
+    #  run: |
+    #      cd ./src/main/resources
+    #      echo "${{ secrets.LOGBACK_CONFIG }}" > logback.xml
+    #  shell: bash
     
       # Github secrets로부터 데이터를 받아서, 워크 플로우에 파일을 생성
     - name: Make application.yaml
