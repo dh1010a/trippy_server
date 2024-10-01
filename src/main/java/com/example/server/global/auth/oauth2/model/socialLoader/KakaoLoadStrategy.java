@@ -22,7 +22,7 @@ import java.util.Map;
 @Transactional
 public class KakaoLoadStrategy extends SocialLoadStrategy{
 
-    @Value("${spring.security.oauth2.client.registration.kakao.adminKey}")
+    @Value("${social.admin.key.kakao}")
     private String adminKey;
 
 
@@ -49,6 +49,7 @@ public class KakaoLoadStrategy extends SocialLoadStrategy{
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);  // Content-Type 설정
             headers.set("Authorization", "KakaoAK " + adminKey);  // Authorization 헤더 추가
+            log.info("Kakao adminKey : " + adminKey);
 
             // 파라미터 설정
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
