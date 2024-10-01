@@ -8,8 +8,10 @@ import com.example.server.global.auth.oauth2.model.info.KakaoOAuth2UserInfo;
 import com.example.server.global.auth.oauth2.model.info.OAuth2UserInfo;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -19,6 +21,9 @@ import java.util.Map;
 @Slf4j
 @Transactional
 public class KakaoLoadStrategy extends SocialLoadStrategy{
+
+    @Value("${spring.security.oauth2.client.registration.kakao.adminKey}")
+    private String adminKey;
 
 
 
@@ -38,16 +43,22 @@ public class KakaoLoadStrategy extends SocialLoadStrategy{
     }
 
     @Override
-    public void unlink(String accessToken) {
+    public void unlink(String memberId) {
         try {
+            // Headers 설정
             HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);  // Content-Type 설정
+            headers.set("Authorization", "KakaoAK " + adminKey);  // Authorization 헤더 추가
 
-            setHeaders(accessToken, headers);
-
+            // 파라미터 설정
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            params.add("target_id_type", "user_id");
+            params.add("target_id", memberId);  // 실제 user_id 값을 설정
 
+            // 요청 생성
             HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 
+            // 요청 보내기
             restTemplate.exchange(SocialType.KAKAO.getUnlinkUrl(),
                     SocialType.KAKAO.getUnlinkMethod(),
                     request,

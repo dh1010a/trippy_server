@@ -487,21 +487,21 @@ public class MemberService {
         // 소셜 연결 해제
         switch (member.getSocialType()) {
             case GOOGLE:
-                SocialLoadStrategy google = new GoogleLoadStrategy();
-                google.unlink(accessToken);
+//                SocialLoadStrategy google = new GoogleLoadStrategy();
+//                google.unlink(accessToken);
                 break;
             case KAKAO:
                 SocialLoadStrategy kakao = new KakaoLoadStrategy();
-                kakao.unlink(accessToken);
+                kakao.unlink(memberId);
                 break;
             case NAVER:
-                SocialLoadStrategy naver = new NaverLoadStrategy();
-                naver.unlink(accessToken);
+//                SocialLoadStrategy naver = new NaverLoadStrategy();
+//                naver.unlink(accessToken);
                 break;
         }
 
         // 액세스 토큰 모두 삭제
-        String redisKey = device + ACCESS_TOKEN_KEY + memberId;
+        String redisKey = ACCESS_TOKEN_KEY + memberId;
         List<String> tokens = redisUtil.getAllData(redisKey);
         if (!tokens.isEmpty()) {
             redisUtil.deleteData(redisKey);
