@@ -489,20 +489,20 @@ public class MemberService {
         memberFollowRepository.deleteAll(memberFollowRepository.findByFollowingMemberIdx(member.getIdx()));
 
         // 소셜 연결 해제
-        switch (member.getSocialType()) {
-            case GOOGLE:
+//        switch (member.getSocialType()) {
+//            case GOOGLE:
 //                SocialLoadStrategy google = new GoogleLoadStrategy();
 //                google.unlink(accessToken);
-                break;
-            case KAKAO:
-                SocialLoadStrategy kakao = new KakaoLoadStrategy();
-                kakao.unlink(memberId, kakaoAdminKey);
-                break;
-            case NAVER:
+//                break;
+//            case KAKAO:
+//                SocialLoadStrategy kakao = new KakaoLoadStrategy();
+//                kakao.unlink(memberId, kakaoAdminKey);
+//                break;
+//            case NAVER:
 //                SocialLoadStrategy naver = new NaverLoadStrategy();
 //                naver.unlink(accessToken);
-                break;
-        }
+//                break;
+//        }
 
         // 액세스 토큰 모두 삭제
         String redisKey = ACCESS_TOKEN_KEY + memberId;
