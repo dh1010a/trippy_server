@@ -78,6 +78,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/search/**").permitAll()
                         .requestMatchers("/api/member/profile", "/api/post/by-member", "/api/ootd/by-member", "/api/post/count/by-member").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/actuator/prometheus").permitAll() // 로그
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
