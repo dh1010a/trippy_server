@@ -35,14 +35,6 @@ jobs:
         #      echo "${{ secrets.LOGBACK_CONFIG }}" > logback.xml
         #  shell: bash
 
-        # GitHub Secrets로부터 prometheus.yaml 파일 생성
-      - name: Make prometheus.yaml
-        run: |
-          cd ./src/main/resources
-          touch ./prometheus.yaml
-          echo "${{ secrets.PROMETHEUS }}" > ./prometheus.yaml
-        shell: bash
-
         # Github secrets로부터 데이터를 받아서, 워크 플로우에 파일을 생성
       - name: Make application.yaml
         run: |
