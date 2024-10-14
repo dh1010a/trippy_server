@@ -43,6 +43,13 @@ jobs:
           echo "${{ secrets.PROPERTIES }}" > ./application.yaml
       shell: bash
 
+    - name: Make prometheus.yaml
+      run: |
+          cd ./src/main/resources
+          touch ./prometheus.yaml
+          echo "${{ secrets.PROMETHEUS }}" > ./prometheus.yaml
+      shell: bash
+
     - name: Make application-openApi.yaml
       run: |
         cd ./src/main/resources
