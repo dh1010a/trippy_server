@@ -55,7 +55,7 @@
 
 | [백도현<br>(BE)](https://github.com/dh1010a) | [유아영<br>(BE)](https://github.com/DevYoung00) |
 | :---: | :---: |
-| <img src="https://github.com/user-attachments/assets/fe5cdfa3-8556-42c5-a851-a4e830c13137" width="140px" alt="백도현"/> | <img src="" width="140px" alt="유아영"/> |
+| <img src="https://github.com/user-attachments/assets/fe5cdfa3-8556-42c5-a851-a4e830c13137" width="140px" alt="백도현"/> | <img src="https://avatars.githubusercontent.com/u/93467085?v=4" width="140px" alt="유아영"/> |
 
 
 ### 📓 Document
