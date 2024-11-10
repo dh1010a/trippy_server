@@ -1,8 +1,6 @@
 package com.example.server.domain.notify.domain;
 
 import com.example.server.domain.notify.dto.NotifyDto;
-import com.example.server.domain.notify.service.FCMNotifyService;
-import com.example.server.domain.notify.service.FCMTokenService;
 import com.example.server.domain.notify.service.NotifyService;
 import com.example.server.domain.notify.service.SseNotifyService;
 import com.google.firebase.messaging.Message;
@@ -27,8 +25,8 @@ public class NotifyListener {
 
     private final SseNotifyService sseNotifyService;
     private final NotifyService notifyService;
-    private final FCMNotifyService fcmNotifyService;
-    private final FCMTokenService fcmTokenService;
+//    private final FCMNotifyService fcmNotifyService;
+//    private final FCMTokenService fcmTokenService;
 
     @TransactionalEventListener
     @Async
@@ -36,9 +34,9 @@ public class NotifyListener {
         return CompletableFuture.runAsync(() -> {
                     try {
                         sseNotifyService.sendNotify(requestDto.getReceiver(), requestDto);
-                        if (fcmTokenService.getFCMToken(requestDto.getReceiver().getMemberId()) != null) {
-                            sendFCMNotificationAsync(requestDto.getReceiver().getMemberId(), fcmNotifyService.createFCMMessage(requestDto.getReceiver(), requestDto));
-                        }
+//                        if (fcmTokenService.getFCMToken(requestDto.getReceiver().getMemberId()) != null) {
+//                            sendFCMNotificationAsync(requestDto.getReceiver().getMemberId(), fcmNotifyService.createFCMMessage(requestDto.getReceiver(), requestDto));
+//                        }
                     } catch (Exception e) {
                         log.error("Error while sending SSE notification for receiver: {}", requestDto.getReceiver().getMemberId(), e);
                     }
@@ -61,22 +59,22 @@ public class NotifyListener {
 //    }
 
 
-    private void sendFCMNotification(String memberId, Message message) {
-        try {
-            fcmNotifyService.sendFCMNotification(memberId, message);
-        } catch (Exception e) {
-            log.error("Failed to send FCM Notification. MemberId: [{}], Message: [{}]", memberId, message);
-        }
-    }
+//    private void sendFCMNotification(String memberId, Message message) {
+//        try {
+//            fcmNotifyService.sendFCMNotification(memberId, message);
+//        } catch (Exception e) {
+//            log.error("Failed to send FCM Notification. MemberId: [{}], Message: [{}]", memberId, message);
+//        }
+//    }
 
-    private void sendFCMNotificationAsync(String memberId, Message message) {
-        try {
-            Future<Void> future = CompletableFuture.runAsync(() -> fcmNotifyService.sendFCMNotification(memberId, message));
-            future.get(10, TimeUnit.SECONDS); // 10초 내에 완료되지 않으면 타임아웃 발생
-        } catch (TimeoutException e) {
-            log.error("FCM notification for memberId {} timed out", memberId, e);
-        } catch (Exception e) {
-            log.error("Error while sending FCM notification for memberId {}", memberId, e);
-        }
-    }
+//    private void sendFCMNotificationAsync(String memberId, Message message) {
+//        try {
+//            Future<Void> future = CompletableFuture.runAsync(() -> fcmNotifyService.sendFCMNotification(memberId, message));
+//            future.get(10, TimeUnit.SECONDS); // 10초 내에 완료되지 않으면 타임아웃 발생
+//        } catch (TimeoutException e) {
+//            log.error("FCM notification for memberId {} timed out", memberId, e);
+//        } catch (Exception e) {
+//            log.error("Error while sending FCM notification for memberId {}", memberId, e);
+//        }
+//    }
 }
