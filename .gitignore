@@ -50,3 +50,5 @@ application-jwt.yml
 application-oauth.yml
 application-openApi.yml
 application-tmp.yml
+
+nginx.conf
